@@ -38,7 +38,7 @@ class DashboardController extends Controller
             'totalDisetujui' => DB::table('peminjaman')->where('idMahasiswa', $userId)->where('status', 'disetujui')->count(),
             'totalRiwayat' => DB::table('peminjaman')->where('idMahasiswa', $userId)->count(),
         ];
-        
+
         $peminjamanTerkini = DB::table('peminjaman as p')
             ->leftJoin('ruangan as r', 'p.idRuangan', '=', 'r.id')
             ->leftJoin('unit as u', 'p.idUnit', '=', 'u.id')
@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->orderByDesc('p.created_at')
             ->limit(5)
             ->get();
-            
+
         return view('mahasiswa.dashboard', [
             'stats' => $stats,
             'peminjamanTerkini' => $peminjamanTerkini
@@ -59,21 +59,42 @@ class DashboardController extends Controller
      */
     private function dosenDashboard()
     {
-        // Bisa dikembangkan nanti sesuai kebutuhan
         return view('dosen.dashboard');
     }
 
     /**
-     * Dashboard Admin/Staff
+     * Dashboard Admin / Staff
      */
     private function adminDashboard()
     {
-        // Data statistik untuk admin
-        $jumlahPeminjaman = Peminjaman::count();
-        $menunggu = Peminjaman::where('status', 'Menunggu')->count();
-        $disetujui = Peminjaman::where('status', 'Disetujui')->count();
-        $ditolak = Peminjaman::where('status', 'Ditolak')->count();
+        // Statistik peminjaman
+        $jumlahPeminjaman = DB::table('peminjaman')->count();
+        $menunggu = DB::table('peminjaman')->where('status', 'pending')->count();
+        $disetujui = DB::table('peminjaman')->where('status', 'disetujui')->count();
+        $ditolak = DB::table('peminjaman')->where('status', 'ditolak')->count();
 
-        return view('admin.dashboard', compact('jumlahPeminjaman', 'menunggu', 'disetujui', 'ditolak'));
+        // Daftar peminjaman terbaru (pakai kolom 'name' dari tabel users)
+        $peminjamanTerbaru = DB::table('peminjaman as p')
+            ->leftJoin('users as m', 'p.idMahasiswa', '=', 'm.id')
+            ->leftJoin('ruangan as r', 'p.idRuangan', '=', 'r.id')
+            ->select(
+                'p.id',
+                'm.name as namaMahasiswa',
+                'r.namaRuangan',
+                'p.keperluan',
+                'p.status',
+                'p.tanggalPinjam'
+            )
+            ->orderByDesc('p.created_at')
+            ->limit(10)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'jumlahPeminjaman',
+            'menunggu',
+            'disetujui',
+            'ditolak',
+            'peminjamanTerbaru'
+        ));
     }
 }
