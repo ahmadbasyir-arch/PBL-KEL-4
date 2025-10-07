@@ -1,12 +1,8 @@
-{{-- Beritahu file ini untuk memakai template 'layouts.app' --}}
 @extends('layouts.app')
 
-{{-- Atur judul halaman ini --}}
 @section('title', 'Dashboard Mahasiswa')
 
-{{-- Isi bagian 'content' di dalam template induk --}}
 @section('content')
-    {{-- [TAMBAHKAN INI] Untuk menampilkan pesan sukses --}}
     @if (session('success'))
         <div class="success-message">
             {{ session('success') }}
@@ -17,7 +13,6 @@
         <h1>Selamat Datang, {{ Auth::user()->namaLengkap }}!</h1>
     </div>
 
-    {{-- ... sisa kode dashboard Anda ... --}}
     <div class="dashboard-cards">
     <div class="card">
         <div class="card-icon bg-primary">
