@@ -12,21 +12,31 @@ class AdminPeminjamanController extends Controller
      */
     public function index()
     {
-        $peminjaman = Peminjaman::latest()->get();
+        $peminjaman = Peminjaman::with(['user', 'ruangan', 'unit'])
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('admin.peminjaman.index', compact('peminjaman'));
     }
 
     /**
-     * Mengubah status peminjaman (disetujui / ditolak)
+     * Mengubah status peminjaman (disetujui / ditolak / selesai)
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:disetujui,ditolak',
-        ]);
-
         $peminjaman = Peminjaman::findOrFail($id);
-        $peminjaman->status = strtolower($request->status);
+
+        // Tentukan aksi berdasarkan URL
+        if ($request->is('admin/peminjaman/*/approve')) {
+            $peminjaman->status = 'disetujui';
+        } elseif ($request->is('admin/peminjaman/*/reject')) {
+            $peminjaman->status = 'ditolak';
+        } elseif ($request->is('admin/peminjaman/*/complete')) {
+            $peminjaman->status = 'selesai';
+        } else {
+            $peminjaman->status = 'pending';
+        }
+
         $peminjaman->save();
 
         return redirect()->back()->with('success', 'Status peminjaman berhasil diperbarui.');
