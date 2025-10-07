@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ... (fungsi showLoginForm dan showRegisterForm tidak perlu diubah) ...
-    public function showLoginForm() { return view('auth.login'); }
-    public function showRegisterForm() { return view('auth.register'); }
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
 
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
 
-    // [PERBAIKAN] Memproses data registrasi & LOGIN OTOMATIS
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -26,7 +30,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        // Buat user baru
         $user = User::create([
             'namaLengkap' => $validated['namaLengkap'],
             'username' => $validated['username'],
@@ -36,15 +39,11 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Login user yang baru dibuat secara otomatis
         Auth::login($user);
 
-        // Arahkan langsung ke dashboard
         return redirect()->route('dashboard');
     }
 
-
-    // [PERBAIKAN] Memproses data login dengan redirect yang benar
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -53,12 +52,13 @@ class AuthController extends Controller
         ]);
 
         $loginInput = $request->input('username');
-        $loginType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : (is_numeric($loginInput) ? 'nim' : 'username');
+        $loginType = filter_var($loginInput, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : (is_numeric($loginInput) ? 'nim' : 'username');
 
         if (Auth::attempt([$loginType => $loginInput, 'password' => $credentials['password']])) {
             $request->session()->regenerate();
-            
-            // Arahkan ke route 'dashboard' yang akan kita definisikan
+
             return redirect()->intended(route('dashboard'));
         }
 
@@ -67,11 +67,12 @@ class AuthController extends Controller
         ]);
     }
 
-    // ... (fungsi logout tidak perlu diubah) ...
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 }
