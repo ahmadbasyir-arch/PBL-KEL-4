@@ -14,8 +14,8 @@
             <img src="{{ asset('assets/images/Gedung Nadiem Makarim 1.jpg') }}" alt="Gedung Kuliah" class="login-background-img">
             <div class="welcome-text">
                 <h1>BUAT AKUN BARU</h1>
-                <p>Sistem Informasi Peminjaman Sarana & Prasarana</p>
-                <h2>TEKNOLOGI INFORMASI</h2>
+                <p>Sistem Informasi Peminjaman Sarana dan Prasarana Berbasis Web untuk Prodi TI</p>
+                <h2>POLITEKNIK NEGERI TANAH LAUT</h2>
             </div>
         </div>
         <div class="login-right">
