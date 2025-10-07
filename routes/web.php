@@ -11,6 +11,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/', function () {
         return redirect()->route('login');
     });
+
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -25,22 +26,27 @@ Route::middleware('auth')->group(function () {
     // Dashboard umum
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Rute peminjaman sarpras (Mahasiswa)
-    Route::get('/peminjaman', [PeminjamanController::class, 'create'])->name('peminjaman.create');
-    Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+    // --- Role: Mahasiswa ---
+    Route::middleware('role:mahasiswa')->group(function () {
+        Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])->name('mahasiswa.dashboard');
+        Route::get('/peminjaman', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+        Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+    });
 
     // --- Role: Admin ---
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
-        // Admin bisa mengelola status peminjaman
-        Route::put('/admin/peminjaman/{id}', [AdminPeminjamanController::class, 'updateStatus'])
-            ->name('admin.peminjaman.update');
-    });
+        // ✅ Admin bisa menyetujui dan menolak peminjaman
+        Route::post('/admin/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])
+            ->name('admin.peminjaman.approve');
 
-    // --- Role: Mahasiswa ---
-    Route::middleware('role:mahasiswa')->group(function () {
-        Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])->name('mahasiswa.dashboard');
+        Route::post('/admin/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])
+            ->name('admin.peminjaman.reject');
+
+        // ✅ Admin bisa melihat daftar semua peminjaman
+        Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
+            ->name('admin.peminjaman.index');
     });
 
     // --- Role: Dosen ---

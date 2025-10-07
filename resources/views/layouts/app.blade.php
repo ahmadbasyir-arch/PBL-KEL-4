@@ -10,7 +10,7 @@
     <div class="container">
         
         {{-- ==== SIDEBAR ==== --}}
-        <div class="sidebar sidebar-mahasiswa">
+        <div class="sidebar">
             <div class="sidebar-header"><h2>Sarpras TI</h2></div>
             <div class="sidebar-user">
                 <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
@@ -19,28 +19,45 @@
                     <p>{{ ucfirst(Auth::user()->role) }}</p>
                 </div>
             </div>
-            <ul class="sidebar-menu">
-                <li class="{{ Route::is('dashboard') ? 'active' : '' }}"><a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
-                
-                <li class="has-submenu {{ Route::is('peminjaman.create') ? 'active open' : '' }}">
-                    <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
-                    <ul class="submenu" style="display: block;">
-                        <li><a href="{{ route('peminjaman.create', ['jenis' => 'ruangan']) }}"> Ruangan</a></li>
-                        <li><a href="{{ route('peminjaman.create', ['jenis' => 'unit']) }}"> Unit</a></li>
-                    </ul>
-                </li>
-                
-                <li><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
 
-                {{-- [PERBAIKAN] Tombol Logout di sidebar DIHAPUS dari sini --}}
+            {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
+            <ul class="sidebar-menu">
+                <li class="{{ Route::is('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+
+                {{-- === Jika role Mahasiswa === --}}
+                @if(Auth::user()->role === 'mahasiswa')
+                    <li class="has-submenu {{ Route::is('peminjaman.create') ? 'active open' : '' }}">
+                        <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="{{ route('peminjaman.create', ['jenis' => 'ruangan']) }}"> Ruangan</a></li>
+                            <li><a href="{{ route('peminjaman.create', ['jenis' => 'unit']) }}"> Unit</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
+
+                {{-- === Jika role Admin / Staff === --}}
+                @elseif(in_array(Auth::user()->role, ['admin', 'staff']))
+                    <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-chart-line"></i> Kelola Peminjaman</a></li>
+                    <li><a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Data Pengguna</a></li>
+                    <li><a href="#"><i class="fas fa-cogs"></i> Pengaturan</a></li>
+
+                {{-- === Jika role Dosen === --}}
+                @elseif(Auth::user()->role === 'dosen')
+                    <li><a href="#"><i class="fas fa-clipboard-list"></i> Daftar Peminjaman</a></li>
+                    <li><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
+                @endif
             </ul>
         </div>
-        
+
+        {{-- ==== MAIN CONTENT ==== --}}
         <div class="main-content">
             {{-- ==== HEADER ==== --}}
             <div class="header header-dark">
                 <div class="header-left">
-                     <div class="logos">
+                    <div class="logos">
                         <img src="{{ asset('assets/images/Politeknik Negeri Tanah Laut.jpg') }}" alt="Logo Politala">
                         <img src="{{ asset('assets/images/Teknologi Informasi.jpg') }}" alt="Logo TI">
                     </div>
@@ -67,7 +84,7 @@
                         {{ $inisialNama }}
                     </div>
                     
-                    {{-- [PERBAIKAN] Dropdown profil dengan tombol KELUAR ditambahkan di sini --}}
+                    {{-- Dropdown Profil & Logout --}}
                     <div class="profile-dropdown" id="profileDropdown">
                         <a href="#"><i class="fas fa-user"></i> Lihat Profil</a>
                         <a href="#"><i class="fas fa-history"></i> Aktivitas Saya</a>
@@ -88,7 +105,7 @@
         </div>
     </div>
     
-    {{-- Script untuk mengaktifkan dropdown header --}}
+    {{-- ==== SCRIPT ==== --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const profileAvatar = document.getElementById('profileAvatar');
