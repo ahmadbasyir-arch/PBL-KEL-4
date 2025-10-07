@@ -44,4 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:staff')->group(function () {
         Route::get('/staff/dashboard', [DashboardController::class, 'staff'])->name('staff.dashboard');
     });
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+    });
 });

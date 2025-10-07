@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    // ===============================
+    // TAMPILAN LOGIN & REGISTER
+    // ===============================
     public function showLoginForm()
     {
         return view('auth.login');
@@ -19,6 +22,9 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
+    // ===============================
+    // REGISTER USER BARU
+    // ===============================
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -30,6 +36,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
+        // Simpan user baru
         $user = User::create([
             'namaLengkap' => $validated['namaLengkap'],
             'username' => $validated['username'],
@@ -39,11 +46,16 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        // Login otomatis setelah registrasi
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        // Arahkan sesuai peran (role)
+        return $this->redirectByRole($user);
     }
 
+    // ===============================
+    // LOGIN USER
+    // ===============================
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -59,7 +71,8 @@ class AuthController extends Controller
         if (Auth::attempt([$loginType => $loginInput, 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'));
+            $user = Auth::user();
+            return $this->redirectByRole($user);
         }
 
         return back()->withErrors([
@@ -67,12 +80,33 @@ class AuthController extends Controller
         ]);
     }
 
+    // ===============================
+    // LOGOUT USER
+    // ===============================
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect('/');
+    }
+
+    // ===============================
+    // REDIRECT BERDASARKAN ROLE
+    // ===============================
+    private function redirectByRole($user)
+    {
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'mahasiswa':
+                return redirect()->route('mahasiswa.dashboard');
+            case 'dosen':
+                return redirect()->route('dosen.dashboard');
+            case 'staff':
+                return redirect()->route('staff.dashboard');
+            default:
+                return redirect()->route('dashboard');
+        }
     }
 }
