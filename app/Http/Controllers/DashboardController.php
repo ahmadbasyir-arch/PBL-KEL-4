@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Peminjaman;
 
 class DashboardController extends Controller
 {
@@ -25,7 +26,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Menyiapkan data dan menampilkan view untuk dashboard Mahasiswa.
+     * Dashboard Mahasiswa
      */
     private function mahasiswaDashboard()
     {
@@ -54,22 +55,25 @@ class DashboardController extends Controller
     }
 
     /**
-     * Menyiapkan data dan menampilkan view untuk dashboard Dosen.
-     * (Untuk saat ini kita buat placeholder)
+     * Dashboard Dosen
      */
     private function dosenDashboard()
     {
-        // Logika untuk mengambil data dashboard dosen bisa ditambahkan di sini
+        // Bisa dikembangkan nanti sesuai kebutuhan
         return view('dosen.dashboard');
     }
 
     /**
-     * Menyiapkan data dan menampilkan view untuk dashboard Admin.
-     * (Untuk saat ini kita buat placeholder)
+     * Dashboard Admin/Staff
      */
     private function adminDashboard()
     {
-        // Logika untuk mengambil data dashboard admin bisa ditambahkan di sini
-        return view('admin.dashboard');
+        // Data statistik untuk admin
+        $jumlahPeminjaman = Peminjaman::count();
+        $menunggu = Peminjaman::where('status', 'Menunggu')->count();
+        $disetujui = Peminjaman::where('status', 'Disetujui')->count();
+        $ditolak = Peminjaman::where('status', 'Ditolak')->count();
+
+        return view('admin.dashboard', compact('jumlahPeminjaman', 'menunggu', 'disetujui', 'ditolak'));
     }
 }
