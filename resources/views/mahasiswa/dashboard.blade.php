@@ -61,7 +61,7 @@
                     <th>Ruangan/Unit</th>
                     <th>Keperluan</th>
                     <th>Tanggal Pinjam</th>
-                    <th>Status</th>
+                    <th>Status / Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,9 +80,24 @@
                         <td>{{ $p->keperluan }}</td>
                         <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
                         <td>
-                            <span class="status-badge status-{{ $p->status }}">
-                                {{ ucfirst($p->status) }}
-                            </span>
+                            {{-- ✅ Status dan tombol aksi --}}
+                            @if ($p->status == 'disetujui')
+                                <form action="{{ route('mahasiswa.selesai', $p->id) }}" method="POST" style="display:inline;"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan peminjaman ini?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm" style="border-radius: 6px; padding: 5px 10px;">
+                                        <i class="fas fa-check"></i> Selesai
+                                    </button>
+                                </form>
+                            @elseif ($p->status == 'selesai')
+                                <span class="status-badge status-selesai">
+                                    <i class="fas fa-check-circle"></i> Selesai
+                                </span>
+                            @else
+                                <span class="status-badge status-{{ $p->status }}">
+                                    {{ ucfirst($p->status) }}
+                                </span>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -93,4 +108,43 @@
             </tbody>
         </table>
     </div>
+
+    {{-- ✅ Styling tambahan agar tombol & badge terlihat modern --}}
+    <style>
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-disetujui {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-ditolak {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-selesai {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
 @endsection
