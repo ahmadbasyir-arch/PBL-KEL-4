@@ -61,6 +61,14 @@
                 </div>
                 
                 <button type="submit" class="btn-login">Masuk</button>
+
+                {{-- ✅ Tambahkan tombol login Google --}}
+                <div class="text-center mt-3">
+                    <a href="{{ route('auth.google') }}" class="btn-google-login">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" width="20" alt="Google Logo">
+                        <span>Masuk dengan Google</span>
+                    </a>
+                </div>
             </form>
 
             <div class="login-footer">
@@ -69,17 +77,37 @@
         </div>
     </div>
 
+    <style>
+        .btn-google-login {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            color: #333;
+            padding: 10px 0;
+            margin-top: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-google-login:hover {
+            background-color: #f5f5f5;
+            border-color: #999;
+        }
+    </style>
+
     <script>
         // Fungsi untuk toggle tampilan password (lihat/sembunyikan)
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
 
         togglePassword.addEventListener('click', function () {
-            // ubah tipe input dari password <-> text
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
-
-            // ganti ikon mata
             this.classList.toggle('fa-eye');
             this.classList.toggle('fa-eye-slash');
         });
