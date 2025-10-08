@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\AdminPeminjamanController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,10 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // ✅ Tambahkan tombol dan proses Login via Google
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 });
 
 /*
@@ -99,7 +104,11 @@ Route::middleware('auth')->group(function () {
     });
 
     // === VALIDASI SELESAI (Admin memvalidasi ajukan selesai) ===
-Route::post('/admin/peminjaman/{id}/validate', [App\Http\Controllers\AdminPeminjamanController::class, 'validateSelesai'])
-    ->name('admin.peminjaman.validate');
+    Route::post('/admin/peminjaman/{id}/validate', [App\Http\Controllers\AdminPeminjamanController::class, 'validateSelesai'])
+        ->name('admin.peminjaman.validate');
+
+    // === LOGIN DENGAN GOOGLE ===
+    Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 });
