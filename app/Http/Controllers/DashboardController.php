@@ -35,7 +35,6 @@ class DashboardController extends Controller
         $totalRuangan = Ruangan::count();
         $totalUser = User::count();
 
-        // Ambil 10 peminjaman terbaru beserta relasi
         $peminjamanTerkini = Peminjaman::with(['user', 'ruangan', 'unit'])
             ->orderByDesc('created_at')
             ->limit(10)
@@ -50,11 +49,6 @@ class DashboardController extends Controller
             'totalUser',
             'peminjamanTerkini'
         ));
-    }
-
-    public function staff()
-    {
-        return $this->admin();
     }
 
     public function mahasiswa()
@@ -78,11 +72,5 @@ class DashboardController extends Controller
             ->get();
 
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
-    }
-
-    public function dosen()
-    {
-        $user = Auth::user();
-        return view('dosen.dashboard', compact('user'));
     }
 }
