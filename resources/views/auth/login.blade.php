@@ -51,16 +51,18 @@
                     <label for="username">Email/NIM/Username*</label>
                     <input type="text" id="username" name="username" placeholder="Masukkan email/NIM/Username" required value="{{ old('username') }}">
                 </div>
+
                 <div class="form-group">
                     <label for="password">Password*</label>
                     <div class="password-input-group">
                         <input type="password" id="password" name="password" placeholder="Masukkan password" required>
-                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                        <i class="fas fa-eye toggle-password" id="togglePassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
                 
                 <button type="submit" class="btn-login">Masuk</button>
             </form>
+
             <div class="login-footer">
                 <p>Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></p>
             </div>
@@ -68,7 +70,19 @@
     </div>
 
     <script>
-        // Script Anda bisa diletakkan di sini atau di file JS terpisah
+        // Fungsi untuk toggle tampilan password (lihat/sembunyikan)
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+            // ubah tipe input dari password <-> text
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            // ganti ikon mata
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
     </script>
 </body>
 </html>
