@@ -26,12 +26,16 @@ class DashboardController extends Controller
         }
     }
 
+    /** =======================
+     * DASHBOARD ADMIN
+     * ======================= */
     public function admin()
     {
         $totalPeminjaman = Peminjaman::count();
         $totalPending = Peminjaman::where('status', 'pending')->count();
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
+        $totalMenungguValidasi = Peminjaman::where('status', 'menunggu_validasi')->count();
         $totalRuangan = Ruangan::count();
         $totalUser = User::count();
 
@@ -45,19 +49,23 @@ class DashboardController extends Controller
             'totalPending',
             'totalDisetujui',
             'totalDitolak',
+            'totalMenungguValidasi',
             'totalRuangan',
             'totalUser',
             'peminjamanTerkini'
         ));
     }
 
+    /** =======================
+     * DASHBOARD MAHASISWA
+     * ======================= */
     public function mahasiswa()
     {
         $userId = Auth::id();
 
         $stats = [
             'totalAktif' => Peminjaman::where('idMahasiswa', $userId)
-                ->whereIn('status', ['pending', 'disetujui'])->count(),
+                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])->count(),
             'totalPending' => Peminjaman::where('idMahasiswa', $userId)
                 ->where('status', 'pending')->count(),
             'totalDisetujui' => Peminjaman::where('idMahasiswa', $userId)
@@ -74,35 +82,26 @@ class DashboardController extends Controller
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
-    /**
-     * Mahasiswa menandai peminjaman sebagai selesai.
-     */
+    /** =======================
+     * SELESAIKAN PEMINJAMAN (Mahasiswa)
+     * ======================= */
     public function selesaikanPeminjaman($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // pastikan hanya mahasiswa pemilik peminjaman yang bisa menyelesaikan
+        // Pastikan hanya mahasiswa pemilik peminjaman yang bisa menyelesaikan
         if ($peminjaman->idMahasiswa != Auth::id()) {
             return redirect()->back()->with('error', 'Anda tidak berhak menyelesaikan peminjaman ini.');
         }
 
-        // hanya bisa menyelesaikan jika status disetujui
+        // Hanya bisa mengajukan selesai jika status disetujui
         if ($peminjaman->status === 'disetujui') {
-            $peminjaman->status = 'selesai';
+            $peminjaman->status = 'menunggu_validasi';
             $peminjaman->save();
 
-            // update ketersediaan ruangan/unit
-            if ($peminjaman->ruangan_id && $peminjaman->ruangan) {
-                $peminjaman->ruangan->update(['status' => 'tersedia']);
-            }
-
-            if ($peminjaman->unit_id && $peminjaman->unit) {
-                $peminjaman->unit->update(['status' => 'tersedia']);
-            }
-
-            return redirect()->back()->with('success', 'Peminjaman telah diselesaikan.');
+            return redirect()->back()->with('success', 'Pengajuan selesai telah dikirim dan menunggu validasi admin.');
         }
 
-        return redirect()->back()->with('error', 'Peminjaman ini tidak dapat diselesaikan.');
+        return redirect()->back()->with('error', 'Peminjaman ini tidak dapat diajukan untuk selesai.');
     }
 }

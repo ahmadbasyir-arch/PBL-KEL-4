@@ -96,6 +96,21 @@
                                 @csrf
                                 <button type="submit" class="btn-reject">Tolak</button>
                             </form>
+
+                        @elseif ($p->status === 'disetujui')
+                            <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan peminjaman ini?')">
+                                @csrf
+                                <button type="submit" class="btn-complete">Selesaikan</button>
+                            </form>
+
+                        @elseif ($p->status === 'menunggu_validasi')
+                            <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Apakah Anda ingin memvalidasi peminjaman ini sebagai selesai?')">
+                                @csrf
+                                <button type="submit" class="btn-validate">Validasi Selesai</button>
+                            </form>
+
                         @else
                             <em>Tidak ada aksi</em>
                         @endif
@@ -136,6 +151,30 @@
 }
 .btn-reject:hover { background-color: #c82333; }
 
+.btn-complete {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-complete:hover { background-color: #0056b3; }
+
+.btn-validate {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-validate:hover { background-color: #138496; }
+
 .status-badge.status-pending {
     background-color: #ffc107;
     color: #000;
@@ -152,6 +191,20 @@
 }
 .status-badge.status-ditolak {
     background-color: #dc3545;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-menunggu_validasi {
+    background-color: #17a2b8;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-selesai {
+    background-color: #6c757d;
     color: #fff;
     padding: 4px 8px;
     border-radius: 5px;
