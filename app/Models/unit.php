@@ -15,4 +15,9 @@ class Unit extends Model
     protected $fillable = [
         'namaUnit',
     ];
+
+    public function peminjaman()
+    {
+        return $this->hasMany(Peminjaman::class, 'idUnit');
+    }
 }
