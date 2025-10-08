@@ -62,4 +62,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])
     ->name('admin.peminjaman.complete');
 
+    Route::post('/mahasiswa/peminjaman/{id}/selesai', [DashboardController::class, 'selesaikanPeminjaman'])
+    ->name('mahasiswa.selesai');
 });

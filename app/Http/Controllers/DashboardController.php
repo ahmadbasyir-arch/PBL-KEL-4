@@ -73,4 +73,36 @@ class DashboardController extends Controller
 
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
+
+    /**
+     * Mahasiswa menandai peminjaman sebagai selesai.
+     */
+    public function selesaikanPeminjaman($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        // pastikan hanya mahasiswa pemilik peminjaman yang bisa menyelesaikan
+        if ($peminjaman->idMahasiswa != Auth::id()) {
+            return redirect()->back()->with('error', 'Anda tidak berhak menyelesaikan peminjaman ini.');
+        }
+
+        // hanya bisa menyelesaikan jika status disetujui
+        if ($peminjaman->status === 'disetujui') {
+            $peminjaman->status = 'selesai';
+            $peminjaman->save();
+
+            // update ketersediaan ruangan/unit
+            if ($peminjaman->ruangan_id && $peminjaman->ruangan) {
+                $peminjaman->ruangan->update(['status' => 'tersedia']);
+            }
+
+            if ($peminjaman->unit_id && $peminjaman->unit) {
+                $peminjaman->unit->update(['status' => 'tersedia']);
+            }
+
+            return redirect()->back()->with('success', 'Peminjaman telah diselesaikan.');
+        }
+
+        return redirect()->back()->with('error', 'Peminjaman ini tidak dapat diselesaikan.');
+    }
 }
