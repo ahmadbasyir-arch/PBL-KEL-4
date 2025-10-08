@@ -83,16 +83,23 @@
                             {{-- ✅ Status dan tombol aksi --}}
                             @if ($p->status == 'disetujui')
                                 <form action="{{ route('mahasiswa.selesai', $p->id) }}" method="POST" style="display:inline;"
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan peminjaman ini?')">
+                                    onsubmit="return confirm('Apakah Anda yakin ingin mengajukan penyelesaian peminjaman ini? Setelah ini akan divalidasi oleh admin.')">
                                     @csrf
                                     <button type="submit" class="btn btn-success btn-sm" style="border-radius: 6px; padding: 5px 10px;">
-                                        <i class="fas fa-check"></i> Selesai
+                                        <i class="fas fa-check"></i> Ajukan Selesai
                                     </button>
                                 </form>
+
+                            @elseif ($p->status == 'menunggu_validasi')
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-hourglass-half"></i> Menunggu Validasi Admin
+                                </span>
+
                             @elseif ($p->status == 'selesai')
                                 <span class="status-badge status-selesai">
                                     <i class="fas fa-check-circle"></i> Selesai
                                 </span>
+
                             @else
                                 <span class="status-badge status-{{ $p->status }}">
                                     {{ ucfirst($p->status) }}

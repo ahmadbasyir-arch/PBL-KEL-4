@@ -26,19 +26,60 @@ class AdminPeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // Tentukan aksi berdasarkan URL
+        // Pastikan hanya status tertentu yang bisa diubah oleh admin
+        $validStatuses = ['approve', 'reject', 'complete'];
+
+        // Cek apakah URL cocok dengan salah satu aksi
         if ($request->is('admin/peminjaman/*/approve')) {
+            // ✅ Jika disetujui
             $peminjaman->status = 'disetujui';
+
+            // Jika peminjaman ruangan/unit, ubah status ketersediaannya
+            if ($peminjaman->ruangan) {
+                $peminjaman->ruangan->update(['status' => 'dipinjam']);
+            }
+            if ($peminjaman->unit) {
+                $peminjaman->unit->update(['status' => 'dipinjam']);
+            }
+
+            $pesan = 'Peminjaman telah disetujui.';
         } elseif ($request->is('admin/peminjaman/*/reject')) {
+            // ❌ Jika ditolak
             $peminjaman->status = 'ditolak';
+
+            // Jika sebelumnya ruangan/unit sempat dipesan, pastikan dikembalikan jadi tersedia
+            if ($peminjaman->ruangan) {
+                $peminjaman->ruangan->update(['status' => 'tersedia']);
+            }
+            if ($peminjaman->unit) {
+                $peminjaman->unit->update(['status' => 'tersedia']);
+            }
+
+            $pesan = 'Peminjaman telah ditolak.';
         } elseif ($request->is('admin/peminjaman/*/complete')) {
-            $peminjaman->status = 'selesai';
+            // ✅ Jika sudah selesai digunakan
+            if ($peminjaman->status === 'disetujui') {
+                $peminjaman->status = 'selesai';
+
+                // Update ketersediaan ruangan/unit setelah selesai
+                if ($peminjaman->ruangan) {
+                    $peminjaman->ruangan->update(['status' => 'tersedia']);
+                }
+                if ($peminjaman->unit) {
+                    $peminjaman->unit->update(['status' => 'tersedia']);
+                }
+
+                $pesan = 'Peminjaman telah diselesaikan.';
+            } else {
+                return redirect()->back()->with('error', 'Hanya peminjaman yang disetujui yang dapat diselesaikan.');
+            }
         } else {
             $peminjaman->status = 'pending';
+            $pesan = 'Status peminjaman dikembalikan ke pending.';
         }
 
         $peminjaman->save();
 
-        return redirect()->back()->with('success', 'Status peminjaman berhasil diperbarui.');
+        return redirect()->back()->with('success', $pesan);
     }
 }
