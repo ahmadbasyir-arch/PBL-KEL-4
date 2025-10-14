@@ -20,7 +20,7 @@ class DashboardController extends Controller
         if ($user->role == 'admin' || $user->role == 'staff') {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role == 'dosen') {
-            return redirect()->route('dosen.dashboard');
+            return redirect()->route('dosen.dashboard'); // Arahkan ke rute dosen
         }
         return redirect()->route('mahasiswa.dashboard');
     }
@@ -30,16 +30,14 @@ class DashboardController extends Controller
      */
     public function admin()
     {
-        // [PERBAIKAN] Menghitung semua statistik yang dibutuhkan oleh view
         $totalPeminjaman = Peminjaman::count();
         $totalPending = Peminjaman::where('status', 'pending')->count();
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
 
-        // Ambil data peminjaman terbaru (semua status) untuk ditampilkan di tabel
         $peminjamanTerkini = Peminjaman::with('user', 'ruangan', 'unit')
             ->orderByDesc('created_at')
-            ->limit(10) // Tampilkan 10 data terbaru
+            ->limit(10)
             ->get();
 
         return view('admin.dashboard', compact(
@@ -74,7 +72,32 @@ class DashboardController extends Controller
     }
 
     /**
-     * Mahasiswa mengajukan penyelesaian peminjaman.
+     * [INI PERBAIKANNYA]
+     * Menyiapkan data dan menampilkan dashboard untuk DOSEN.
+     * Isinya kita buat sama persis dengan mahasiswa.
+     */
+    public function dosen()
+    {
+        $userId = Auth::id(); // Mengambil ID dosen yang sedang login
+        $stats = [
+            'totalAktif'   => Peminjaman::where('idMahasiswa', $userId)->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])->count(),
+            'totalPending' => Peminjaman::where('idMahasiswa', $userId)->where('status', 'pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa', $userId)->where('status', 'disetujui')->count(),
+            'totalRiwayat' => Peminjaman::where('idMahasiswa', $userId)->count(),
+        ];
+        
+        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
+            ->where('idMahasiswa', $userId)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+            
+        // Menggunakan view yang sama dengan mahasiswa agar tampilannya identik
+        return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
+    }
+
+    /**
+     * Mahasiswa/Dosen mengajukan penyelesaian peminjaman.
      */
     public function selesaikanPeminjaman($id)
     {
