@@ -11,7 +11,7 @@
 
 <div class="section-header">
     <h1>Dashboard Admin</h1>
-    <p>Halo, {{ Auth::user()->namaLengkap }} 👋 — berikut ringkasan kegiatan peminjaman.</p>
+    <p>Halo, {{ Auth::user()->name }} 👋 — berikut ringkasan kegiatan peminjaman.</p>
 </div>
 
 {{-- ==== Statistik ==== --}}
@@ -56,6 +56,7 @@
             <tr>
                 <th>No</th>
                 <th>Nama Mahasiswa</th>
+                <th>Nama Akun</th>
                 <th>Dipinjam</th>
                 <th>Keperluan</th>
                 <th>Status</th>
@@ -67,7 +68,8 @@
             @forelse ($peminjamanTerkini as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->user->namaLengkap ?? '-' }}</td>
+                    <td>{{ $p->user->name ?? '-' }}</td>
+                    <td>{{ $p->user->email ?? '-' }}</td>
                     <td>
                         @if($p->ruangan)
                             {{ $p->ruangan->namaRuangan }}
@@ -80,72 +82,133 @@
                     <td>{{ $p->keperluan ?? '-' }}</td>
                     <td>
                         <span class="status-badge status-{{ $p->status }}">
-                            {{ ucfirst(str_replace('_', ' ', $p->status)) }}
+                            {{ ucfirst($p->status) }}
                         </span>
                     </td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMM YYYY') }}</td>
-                    <td>
-                        {{-- [PERBAIKAN] Membungkus semua form dalam satu div --}}
-                        <div class="action-buttons">
-                            @if ($p->status === 'pending')
-                                <form action="{{ route('admin.peminjaman.approve', $p->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-approve" title="Setujui"><i class="fas fa-check"></i></button>
-                                </form>
-                                <form action="{{ route('admin.peminjaman.reject', $p->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-reject" title="Tolak"><i class="fas fa-times"></i></button>
-                                </form>
+                    <td class="action-links">
+                        @if ($p->status === 'pending')
+                            <form action="{{ route('admin.peminjaman.approve', $p->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" class="btn-approve">Setujui</button>
+                            </form>
+                            <form action="{{ route('admin.peminjaman.reject', $p->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" class="btn-reject">Tolak</button>
+                            </form>
 
-                            @elseif ($p->status === 'disetujui')
-                                <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" onsubmit="return confirm('Selesaikan peminjaman ini?')">
-                                    @csrf
-                                    <button type="submit" class="btn-complete" title="Selesaikan">Selesaikan</button>
-                                </form>
+                        @elseif ($p->status === 'disetujui')
+                            <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan peminjaman ini?')">
+                                @csrf
+                                <button type="submit" class="btn-complete">Selesaikan</button>
+                            </form>
 
-                            @elseif ($p->status === 'menunggu_validasi')
-                                <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" onsubmit="return confirm('Validasi peminjaman ini sebagai selesai?')">
-                                    @csrf
-                                    <button type="submit" class="btn-validate" title="Validasi Selesai">Validasi</button>
-                                </form>
+                        @elseif ($p->status === 'menunggu_validasi')
+                            <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Apakah Anda ingin memvalidasi peminjaman ini sebagai selesai?')">
+                                @csrf
+                                <button type="submit" class="btn-validate">Validasi Selesai</button>
+                            </form>
 
-                            @else
-                                <em>-</em>
-                            @endif
-                        </div>
+                        @else
+                            <em>Tidak ada aksi</em>
+                        @endif
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="text-align:center;">Tidak ada data peminjaman terbaru.</td>
+                    <td colspan="8" style="text-align:center;">Tidak ada data peminjaman terbaru.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 </div>
 
-{{-- [PERBAIKAN] Tambahan CSS untuk menata tombol --}}
+{{-- ==== Tambahan CSS ==== --}}
 <style>
-    .action-buttons {
-        display: flex;
-        gap: 5px; /* Memberi jarak antar tombol */
-    }
-    .action-buttons form {
-        display: inline-block;
-    }
-    .btn-approve, .btn-reject, .btn-complete, .btn-validate {
-        border: none;
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: 0.2s;
-        color: white;
-        font-size: 0.8em;
-    }
-    .btn-approve { background-color: #28a745; } .btn-approve:hover { background-color: #218838; }
-    .btn-reject { background-color: #dc3545; } .btn-reject:hover { background-color: #c82333; }
-    .btn-complete { background-color: #007bff; } .btn-complete:hover { background-color: #0056b3; }
-    .btn-validate { background-color: #17a2b8; } .btn-validate:hover { background-color: #138496; }
+.btn-approve {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-approve:hover { background-color: #218838; }
+
+.btn-reject {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-reject:hover { background-color: #c82333; }
+
+.btn-complete {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-complete:hover { background-color: #0056b3; }
+
+.btn-validate {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.btn-validate:hover { background-color: #138496; }
+
+.status-badge.status-pending {
+    background-color: #ffc107;
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-disetujui {
+    background-color: #28a745;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-ditolak {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-menunggu_validasi {
+    background-color: #17a2b8;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.status-badge.status-selesai {
+    background-color: #6c757d;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
 </style>
 @endsection
