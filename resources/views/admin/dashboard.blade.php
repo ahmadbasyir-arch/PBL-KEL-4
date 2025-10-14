@@ -11,7 +11,8 @@
 
 <div class="section-header">
     <h1>Dashboard Admin</h1>
-    <p>Halo, {{ Auth::user()->name }} 👋 — berikut ringkasan kegiatan peminjaman.</p>
+    {{-- [PERBAIKAN] Menggunakan namaLengkap, bukan name --}}
+    <p>Halo, {{ Auth::user()->namaLengkap }} 👋 — berikut ringkasan kegiatan peminjaman.</p>
 </div>
 
 {{-- ==== Statistik ==== --}}
@@ -68,7 +69,8 @@
             @forelse ($peminjamanTerkini as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->user->name ?? '-' }}</td>
+                    {{-- [PERBAIKAN] Menggunakan namaLengkap, bukan name --}}
+                    <td>{{ $p->user->namaLengkap ?? '-' }}</td>
                     <td>{{ $p->user->email ?? '-' }}</td>
                     <td>
                         @if($p->ruangan)
@@ -82,7 +84,7 @@
                     <td>{{ $p->keperluan ?? '-' }}</td>
                     <td>
                         <span class="status-badge status-{{ $p->status }}">
-                            {{ ucfirst($p->status) }}
+                            {{ ucfirst(str_replace('_', ' ', $p->status)) }}
                         </span>
                     </td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMM YYYY') }}</td>
@@ -96,21 +98,16 @@
                                 @csrf
                                 <button type="submit" class="btn-reject">Tolak</button>
                             </form>
-
                         @elseif ($p->status === 'disetujui')
-                            <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" style="display:inline;"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan peminjaman ini?')">
+                            <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Selesaikan peminjaman ini?')">
                                 @csrf
                                 <button type="submit" class="btn-complete">Selesaikan</button>
                             </form>
-
                         @elseif ($p->status === 'menunggu_validasi')
-                            <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" style="display:inline;"
-                                  onsubmit="return confirm('Apakah Anda ingin memvalidasi peminjaman ini sebagai selesai?')">
+                            <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Validasi peminjaman ini sebagai selesai?')">
                                 @csrf
                                 <button type="submit" class="btn-validate">Validasi Selesai</button>
                             </form>
-
                         @else
                             <em>Tidak ada aksi</em>
                         @endif
@@ -124,6 +121,20 @@
         </tbody>
     </table>
 </div>
+
+{{-- ==== Tambahan CSS ==== --}}
+<style>
+.btn-approve, .btn-reject, .btn-complete, .btn-validate { border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; }
+.btn-approve { background-color: #28a745; } .btn-approve:hover { background-color: #218838; }
+.btn-reject { background-color: #dc3545; } .btn-reject:hover { background-color: #c82333; }
+.btn-complete { background-color: #007bff; } .btn-complete:hover { background-color: #0056b3; }
+.btn-validate { background-color: #17a2b8; } .btn-validate:hover { background-color: #138496; }
+.status-badge { padding: 4px 8px; border-radius: 5px; font-weight: 600; color: #fff; }
+.status-badge.status-pending { background-color: #ffc107; color: #000; }
+.status-badge.status-disetujui { background-color: #28a745; }
+.status-badge.status-ditolak { background-color: #dc3545; }
+.status-badge.status-menunggu_validasi { background-color: #17a2b8; }
+.status-badge.status-selesai { background-color: #6c757d; }
 
 {{-- ==== Tambahan CSS ==== --}}
 <style>
