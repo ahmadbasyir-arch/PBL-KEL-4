@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ===============================
+    // ==============================
     // TAMPILAN LOGIN & REGISTER
-    // ===============================
+    // ==============================
     public function showLoginForm()
     {
         return view('auth.login');
