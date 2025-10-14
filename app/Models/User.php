@@ -10,7 +10,7 @@ class User extends Authenticatable
     use Notifiable;
 
     // ✅ Pastikan tabel yang digunakan benar
-    protected $table = 'mahasiswa';
+    protected $table = 'users';
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,6 +20,7 @@ class User extends Authenticatable
         'nim',
         'role',
         'password',
+        'google_id',
     ];
 
     protected $hidden = [

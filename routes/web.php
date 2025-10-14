@@ -23,7 +23,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    // ✅ Login via Google (benar)
+    // ✅ Login via Google
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
@@ -35,6 +35,9 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
+    Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('simpan.profil'); // ✅ Tambahan baru
+    Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
     // Dashboard umum
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
