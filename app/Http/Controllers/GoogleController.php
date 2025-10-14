@@ -17,11 +17,13 @@ class GoogleController extends Controller
 
     public function handleGoogleCallback()
     {
+        // Hapus stateless() kalau environment-mu mendukung session
         $googleUser = Socialite::driver('google')->user();
 
         $user = User::updateOrCreate(
             ['email' => $googleUser->getEmail()],
             [
+                'namaLengkap' => $googleUser->getName() ?? 'Pengguna Google',
                 'name' => $googleUser->getName(),
                 'username' => Str::slug($googleUser->getName(), '_'),
                 'google_id' => $googleUser->getId(),

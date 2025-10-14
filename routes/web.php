@@ -23,9 +23,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    // ✅ Tambahkan tombol dan proses Login via Google
-    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+    // ✅ Login via Google (benar)
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
 /*
@@ -81,6 +81,10 @@ Route::middleware('auth')->group(function () {
         // ✅ Admin bisa melihat semua daftar peminjaman
         Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
             ->name('admin.peminjaman.index');
+
+        // === VALIDASI SELESAI (Admin memvalidasi ajukan selesai) ===
+        Route::post('/admin/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])
+            ->name('admin.peminjaman.validate');
     });
 
     /*
@@ -102,13 +106,4 @@ Route::middleware('auth')->group(function () {
         Route::get('/staff/dashboard', [DashboardController::class, 'staff'])
             ->name('staff.dashboard');
     });
-
-    // === VALIDASI SELESAI (Admin memvalidasi ajukan selesai) ===
-    Route::post('/admin/peminjaman/{id}/validate', [App\Http\Controllers\AdminPeminjamanController::class, 'validateSelesai'])
-        ->name('admin.peminjaman.validate');
-
-    // === LOGIN DENGAN GOOGLE ===
-    Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
-
 });

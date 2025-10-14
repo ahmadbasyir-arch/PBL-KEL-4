@@ -62,9 +62,9 @@
                 
                 <button type="submit" class="btn-login">Masuk</button>
 
-                {{-- ✅ Tambahkan tombol login Google --}}
+                {{-- ✅ Tombol login Google (diperbaiki route-nya) --}}
                 <div class="text-center mt-3">
-                    <a href="{{ route('auth.google') }}" class="btn-google-login">
+                    <a href="{{ route('google.login') }}" class="btn-google-login">
                         <img src="https://developers.google.com/identity/images/g-logo.png" width="20" alt="Google Logo">
                         <span>Masuk dengan Google</span>
                     </a>
