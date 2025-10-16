@@ -10,8 +10,8 @@
             @csrf
 
             <div class="form-group">
-                <label for="namaLengkap">Nama Lengkap</label>
-                <input type="text" id="namaLengkap" name="namaLengkap" value="{{ old('namaLengkap', $user->namaLengkap ?? '') }}" required>
+                <label for="name">Nama Lengkap</label>
+                <input type="text" id="name" name="name" value="{{ old('name', $user->name ?? '') }}" required>
             </div>
 
             <div class="form-group">

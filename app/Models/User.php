@@ -9,12 +9,11 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    // ✅ Pastikan tabel yang digunakan benar
     protected $table = 'users';
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'namaLengkap',
+        'name',
         'username',
         'email',
         'nim',

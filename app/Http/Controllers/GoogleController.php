@@ -40,14 +40,15 @@ class GoogleController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // 🆕 Jika belum ada, buat user baru
+        // 🆕 Jika belum ada, buat user baru (gunakan kolom standar Laravel: name)
+        $username = $this->generateUniqueUsername($googleUser->getName());
+
         $user = User::create([
-            'namaLengkap' => $googleUser->getName(),
-            'name' => $googleUser->getName(), // untuk kolom "name" jika masih ada di tabel
-            'username' => $this->generateUniqueUsername($googleUser->getName()),
-            'email' => $googleUser->getEmail(),
-            'google_id' => $googleUser->getId(),
-            'password' => bcrypt(Str::random(16)),
+            'name'       => $googleUser->getName(), // ✅ kolom standar Laravel
+            'username'   => $username,
+            'email'      => $googleUser->getEmail(),
+            'google_id'  => $googleUser->getId(),
+            'password'   => bcrypt(Str::random(16)),
         ]);
 
         Auth::login($user);
@@ -91,20 +92,20 @@ class GoogleController extends Controller
     public function storeCompleteProfile(Request $request)
     {
         $request->validate([
-            'namaLengkap' => 'required|string|max:255',
-            'nim' => 'required|string|max:50|unique:mahasiswa,nim',
-            'role' => 'required|in:mahasiswa,dosen',
-            'password' => 'required|string|min:6|confirmed',
+            'name'      => 'required|string|max:255', // ✅ ganti dari namaLengkap → name
+            'nim'       => 'required|string|max:50|unique:mahasiswa,nim',
+            'role'      => 'required|in:mahasiswa,dosen',
+            'password'  => 'required|string|min:6|confirmed',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $user->update([
-            'namaLengkap' => $request->namaLengkap,
-            'nim' => $request->nim,
-            'role' => $request->role,
-            'password' => bcrypt($request->password),
+            'name'      => $request->name, // ✅ kolom standar Laravel
+            'nim'       => $request->nim,
+            'role'      => $request->role,
+            'password'  => bcrypt($request->password),
         ]);
 
         return redirect('/dashboard')->with('success', 'Profil berhasil dilengkapi!');
