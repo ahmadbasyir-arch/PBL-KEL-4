@@ -10,13 +10,33 @@
     <div class="container">
         
         {{-- ==== SIDEBAR ==== --}}
+        @if (!request()->is('lengkapi-profil'))
         <div class="sidebar">
             <div class="sidebar-header"><h2>Sarpras TI</h2></div>
+
+            {{-- ==== DATA USER ==== --}}
+@php
+    $user = Auth::user();
+    $nama = $user->name ?? $user->username ?? 'Pengguna';
+    $words = explode(' ', $nama);
+    $inisialNama = '';
+    foreach (array_slice($words, 0, 2) as $word) {
+        $inisialNama .= strtoupper(substr($word, 0, 1));
+    }
+@endphp
+
+
             <div class="sidebar-user">
-                <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
+                <div class="user-avatar">
+                    @if (!empty($user->foto_profil))
+                        <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil" class="avatar-img">
+                    @else
+                        <div class="avatar-placeholder">{{ $inisialNama }}</div>
+                    @endif
+                </div>
                 <div class="user-info">
-                    <h3>{{ Auth::user()->namaLengkap }}</h3>
-                    <p>{{ ucfirst(Auth::user()->role) }}</p>
+                    <h3>{{ $nama }}</h3>
+                    <p>{{ ucfirst($user->role) }}</p>
                 </div>
             </div>
 
@@ -27,7 +47,7 @@
                 </li>
 
                 {{-- === Jika role Mahasiswa === --}}
-                @if(Auth::user()->role === 'mahasiswa')
+                @if($user->role === 'mahasiswa')
                     <li class="has-submenu {{ Route::is('peminjaman.create') ? 'active open' : '' }}">
                         <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
                         <ul class="submenu" style="display: block;">
@@ -38,23 +58,25 @@
                     <li><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
 
                 {{-- === Jika role Admin / Staff === --}}
-                @elseif(in_array(Auth::user()->role, ['admin', 'staff']))
+                @elseif(in_array($user->role, ['admin', 'staff']))
                     <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-chart-line"></i> Kelola Peminjaman</a></li>
                     <li><a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a></li>
                     <li><a href="#"><i class="fas fa-users"></i> Data Pengguna</a></li>
                     <li><a href="#"><i class="fas fa-cogs"></i> Pengaturan</a></li>
 
                 {{-- === Jika role Dosen === --}}
-                @elseif(Auth::user()->role === 'dosen')
+                @elseif($user->role === 'dosen')
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> Daftar Peminjaman</a></li>
                     <li><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
                 @endif
             </ul>
         </div>
+        @endif
 
         {{-- ==== MAIN CONTENT ==== --}}
         <div class="main-content">
             {{-- ==== HEADER ==== --}}
+            @if (!request()->is('lengkapi-profil'))
             <div class="header header-dark">
                 <div class="header-left">
                     <div class="logos">
@@ -71,19 +93,16 @@
                     <div class="notification-bell icon-link" id="notificationBell">
                         <i class="fas fa-bell"></i>
                     </div>
-                    
-                    @php
-                        $nama = Auth::user()->namaLengkap;
-                        $words = explode(' ', $nama);
-                        $inisialNama = '';
-                        foreach (array_slice($words, 0, 2) as $word) {
-                            $inisialNama .= strtoupper(substr($word, 0, 1));
-                        }
-                    @endphp
+
+                    {{-- === FOTO PROFIL DI HEADER === --}}
                     <div class="profile-avatar" id="profileAvatar">
-                        {{ $inisialNama }}
+                        @if (!empty($user->foto_profil))
+                            <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil" class="avatar-img">
+                        @else
+                            <div class="avatar-placeholder">{{ $inisialNama }}</div>
+                        @endif
                     </div>
-                    
+
                     {{-- Dropdown Profil & Logout --}}
                     <div class="profile-dropdown" id="profileDropdown">
                         <a href="#"><i class="fas fa-user"></i> Lihat Profil</a>
@@ -98,6 +117,7 @@
                     </div>
                 </div>
             </div>
+            @endif
             
             <div class="dashboard-content-area">
                 @yield('content')
@@ -124,5 +144,27 @@
             });
         });
     </script>
+
+    {{-- ==== CSS TAMBAHAN UNTUK AVATAR ==== --}}
+    <style>
+        .avatar-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+    </style>
 </body>
 </html>

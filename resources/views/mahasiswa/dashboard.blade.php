@@ -10,7 +10,7 @@
     @endif
 
     <div class="section-header">
-        <h1>Selamat Datang, {{ Auth::user()->namaLengkap }}!</h1>
+        <h1>Selamat Datang, {{ Auth::user()->name }}!</h1>
     </div>
 
     <div class="dashboard-cards">
