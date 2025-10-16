@@ -3,68 +3,67 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Ruangan;
+use App\Models\Unit;
+use App\Models\Peminjaman;
 
 class PeminjamanController extends Controller
 {
     /**
-     * Menampilkan formulir untuk membuat peminjaman baru.
+     * Menampilkan formulir peminjaman baru.
      */
     public function create(Request $request)
     {
+        // Ambil parameter jenis (default = ruangan)
         $jenis = $request->query('jenis', 'ruangan');
-        $listData = [];
 
-        if ($jenis == 'ruangan') {
-            $listData = DB::table('ruangan')->orderBy('namaRuangan', 'asc')->get();
-        } elseif ($jenis == 'unit') {
-            $listData = DB::table('unit')->orderBy('namaUnit', 'asc')->get();
+        // Default listData kosong (gunakan collection, bukan array biasa)
+        $listData = collect();
+
+        // 🔹 Ambil data dari model
+        if ($jenis === 'ruangan') {
+            $listData = Ruangan::orderBy('namaRuangan', 'asc')->get(['id', 'namaRuangan']);
+        } elseif ($jenis === 'unit') {
+            $listData = Unit::orderBy('namaUnit', 'asc')->get(['id', 'namaUnit']);
         }
 
-        return view('mahasiswa.peminjaman_form', [
-            'jenis' => $jenis,
-            'listData' => $listData
-        ]);
+        // Kirim data ke view
+        return view('mahasiswa.peminjaman_form', compact('jenis', 'listData'));
     }
 
     /**
-     * [PERBAIKAN UTAMA] Menyimpan data peminjaman baru ke dalam database.
+     * Menyimpan data peminjaman baru.
      */
     public function store(Request $request)
     {
-        // 1. Validasi semua data yang masuk dari formulir
         $validated = $request->validate([
-            'jenis_item' => 'required|in:ruangan,unit',
+            'jenis_item'   => 'required|in:ruangan,unit',
             'tanggalPinjam' => 'required|date|after_or_equal:today',
-            'jamMulai' => 'required',
-            'jamSelesai' => 'required|after:jamMulai',
-            'keperluan' => 'required|string|max:255',
-            'items' => 'required|array', // Memastikan 'items' dipilih
-            'items.*.id' => 'required|integer', // Memastikan setiap item yang dipilih valid
+            'jamMulai'      => 'required',
+            'jamSelesai'    => 'required|after:jamMulai',
+            'keperluan'     => 'required|string|max:255',
+            'items'         => 'required|array',
+            'items.*.id'    => 'required|integer|exists:ruangan,id',
         ]);
 
-        // 2. Ambil ID pengguna yang sedang login
         $userId = Auth::id();
 
-        // 3. Looping untuk setiap item (ruangan/unit) yang dipilih
         foreach ($validated['items'] as $item) {
-            // 4. Masukkan data ke tabel 'peminjaman'
-            DB::table('peminjaman')->insert([
-                'idMahasiswa' => $userId,
-                'idRuangan' => ($validated['jenis_item'] == 'ruangan') ? $item['id'] : null,
-                'idUnit' => ($validated['jenis_item'] == 'unit') ? $item['id'] : null,
-                'tanggalPinjam' => $validated['tanggalPinjam'],
-                'jamMulai' => $validated['jamMulai'],
-                'jamSelesai' => $validated['jamSelesai'],
-                'keperluan' => $validated['keperluan'],
-                'status' => 'pending', // Status awal saat pengajuan adalah 'pending'
-                'created_at' => now(),
-                'updated_at' => now(),
+            Peminjaman::create([
+                'idMahasiswa'  => $userId,
+                'idRuangan'    => $validated['jenis_item'] === 'ruangan' ? $item['id'] : null,
+                'idUnit'       => $validated['jenis_item'] === 'unit' ? $item['id'] : null,
+                'tanggalPinjam'=> $validated['tanggalPinjam'],
+                'jamMulai'     => $validated['jamMulai'],
+                'jamSelesai'   => $validated['jamSelesai'],
+                'keperluan'    => $validated['keperluan'],
+                'status'       => 'pending',
             ]);
         }
 
-        // 5. Arahkan kembali ke dashboard dengan pesan sukses
-        return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Pengajuan peminjaman berhasil dikirim!');
     }
 }

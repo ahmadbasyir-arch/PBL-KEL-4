@@ -11,11 +11,13 @@ class Unit extends Model
 
     protected $table = 'unit';
     protected $primaryKey = 'id';
+    public $timestamps = false;
 
     protected $fillable = [
         'namaUnit',
     ];
 
+    // Relasi ke peminjaman
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class, 'idUnit');

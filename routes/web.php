@@ -35,8 +35,9 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // ✅ Form melengkapi profil untuk login via Google
     Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
-    Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('simpan.profil'); // ✅ Tambahan baru
     Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
     // Dashboard umum
@@ -51,13 +52,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])
             ->name('mahasiswa.dashboard');
 
-        Route::get('/peminjaman', [PeminjamanController::class, 'create'])
+        // ✅ Rute peminjaman (GET untuk form, POST untuk simpan)
+        Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])
             ->name('peminjaman.create');
-
-        Route::post('/peminjaman', [PeminjamanController::class, 'store'])
+        Route::post('/peminjaman/store', [PeminjamanController::class, 'store'])
             ->name('peminjaman.store');
 
-        // ✅ Mahasiswa menandai “selesai”, tapi status menunggu validasi admin
+        // ✅ Mahasiswa menandai "selesai" (menunggu validasi admin)
         Route::post('/mahasiswa/peminjaman/{id}/selesai', [DashboardController::class, 'selesaikanPeminjaman'])
             ->name('mahasiswa.selesai');
     });
@@ -74,10 +75,8 @@ Route::middleware('auth')->group(function () {
         // ✅ Admin bisa menyetujui, menolak, atau menandai selesai
         Route::post('/admin/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])
             ->name('admin.peminjaman.approve');
-
         Route::post('/admin/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])
             ->name('admin.peminjaman.reject');
-
         Route::post('/admin/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])
             ->name('admin.peminjaman.complete');
 
@@ -85,7 +84,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
             ->name('admin.peminjaman.index');
 
-        // === VALIDASI SELESAI (Admin memvalidasi ajukan selesai) ===
+        // ✅ Admin memvalidasi pengajuan selesai
         Route::post('/admin/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])
             ->name('admin.peminjaman.validate');
     });

@@ -11,22 +11,23 @@
     @csrf
     <input type="hidden" name="jenis_item" value="{{ $jenis }}">
 
-    {{-- Bagian Pilih Item di paling atas --}}
+    {{-- Pilihan Item Dinamis --}}
     <div class="form-group-dynamic">
         <label>Nama {{ ucfirst($jenis) }}</label>
-        <div id="item-container">
-            {{-- Dropdown item akan ditambahkan oleh JavaScript di sini --}}
-        </div>
-        {{-- Tombol dengan kelas 'btn-success' agar berwarna hijau --}}
-        <button type="button" id="addItem" class="btn-tambah-item"><i class="fas fa-plus"></i> Tambah {{ ucfirst($jenis) }}</button>
+        <div id="item-container"></div>
+
+        {{-- Tombol tambah item --}}
+        <button type="button" id="addItem" class="btn-tambah-item">
+            <i class="fas fa-plus"></i> Tambah {{ ucfirst($jenis) }}
+        </button>
     </div>
 
-    {{-- Bagian detail peminjaman di bawahnya --}}
+    {{-- Detail Peminjaman --}}
     <div class="form-group">
         <label for="tanggalPinjam">Tanggal Peminjaman</label>
         <input type="date" id="tanggalPinjam" name="tanggalPinjam" class="form-control" required>
     </div>
-    
+
     <div class="form-row">
         <div class="form-group" style="flex: 1; margin-right: 10px;">
             <label for="jamMulai">Jam Mulai</label>
@@ -37,31 +38,53 @@
             <input type="time" id="jamSelesai" name="jamSelesai" class="form-control" required>
         </div>
     </div>
-    
+
     <div class="form-group">
         <label for="keperluan">Keperluan</label>
         <textarea id="keperluan" name="keperluan" class="form-control" rows="4" required placeholder="Jelaskan keperluan Anda..."></textarea>
     </div>
 
+    {{-- Tombol Aksi --}}
     <div class="form-actions" style="margin-top: 20px;">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Kirim Pengajuan</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Kirim Pengajuan
+        </button>
         <a href="{{ route('dashboard') }}" class="btn btn-secondary">Batal</a>
     </div>
 </form>
 
-{{-- Menyimpan data dari Controller ke dalam variabel JavaScript --}}
+{{-- Data untuk JS; pastikan selalu array (fallback ke []) --}}
 <script>
-    const availableItems = @json($listData);
+    const availableItems = @json($listData ?? []);
+    console.log('availableItems =', availableItems);
 </script>
 
-{{-- Script untuk fungsionalitas CRUD dinamis --}}
+{{-- Script Dinamis Tambah/Hapus Item --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const itemContainer = document.getElementById('item-container');
         const addItemButton = document.getElementById('addItem');
         let itemCount = 0;
 
+        // Jika tidak ada item tersedia, tampilkan pesan dan disable tombol tambah
+        function showNoItemsMessage() {
+            itemContainer.innerHTML = '<div class="no-items" style="color:#666; padding:8px 0;">Tidak ada data {{ $jenis }} tersedia.</div>';
+            addItemButton.setAttribute('disabled', 'disabled');
+        }
+
+        function clearNoItemsMessage() {
+            if (itemContainer.querySelector('.no-items')) {
+                itemContainer.innerHTML = '';
+            }
+            addItemButton.removeAttribute('disabled');
+        }
+
         function createItemRow() {
+            // Jika tidak ada availableItems, jangan buat baris
+            if (!Array.isArray(availableItems) || availableItems.length === 0) {
+                return;
+            }
+
             itemCount++;
             const div = document.createElement('div');
             div.className = 'item-row';
@@ -72,7 +95,7 @@
 
             let optionsHtml = '<option value="">-- Pilih Item --</option>';
             availableItems.forEach(item => {
-                const itemName = item.namaRuangan || item.namaUnit;
+                const itemName = item.namaRuangan || item.namaUnit || item.name || '';
                 optionsHtml += `<option value="${item.id}">${itemName}</option>`;
             });
 
@@ -87,25 +110,36 @@
             itemContainer.appendChild(div);
         }
 
-        addItemButton.addEventListener('click', function() {
-            createItemRow();
-        });
+        addItemButton.addEventListener('click', createItemRow);
 
         itemContainer.addEventListener('click', function(e) {
             if (e.target.closest('.removeItem')) {
                 const button = e.target.closest('.removeItem');
                 const rowId = button.getAttribute('data-row-id');
                 const rowToRemove = document.getElementById(`item-row-${rowId}`);
-                if (rowToRemove) {
-                    rowToRemove.remove();
+                if (rowToRemove) rowToRemove.remove();
+
+                // Jika setelah remove semua baris, tambahkan message bila tidak ada availableItems
+                if (itemContainer.querySelectorAll('.item-row').length === 0 && (!availableItems || availableItems.length === 0)) {
+                    showNoItemsMessage();
                 }
             }
         });
-        
-        createItemRow();
 
-        var today = new Date().toISOString().split('T')[0];
-        document.getElementById('tanggalPinjam').setAttribute('min', today);
+        // Inisialisasi: jika availableItems kosong, tampilkan pesan. Jika ada, tampilkan 1 dropdown.
+        if (!Array.isArray(availableItems) || availableItems.length === 0) {
+            showNoItemsMessage();
+        } else {
+            clearNoItemsMessage();
+            createItemRow();
+        }
+
+        // Batasi tanggal minimal hari ini
+        const today = new Date().toISOString().split('T')[0];
+        const tanggalInput = document.getElementById('tanggalPinjam');
+        if (tanggalInput) {
+            tanggalInput.setAttribute('min', today);
+        }
     });
 </script>
 @endsection

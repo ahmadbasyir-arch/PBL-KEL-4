@@ -9,15 +9,14 @@ class Ruangan extends Model
 {
     use HasFactory;
 
-    protected $table = 'ruangan';
-    protected $primaryKey = 'id';
+    // 🔹 pastikan nama tabel sesuai di database
+    protected $table = 'ruangan'; 
 
     protected $fillable = [
         'namaRuangan',
+        'lokasi',
+        'kapasitas',
     ];
 
-    public function peminjaman()
-    {
-        return $this->hasMany(Peminjaman::class, 'idRuangan');
-    }
+    public $timestamps = false; // karena kolom created_at dan updated_at NULL
 }

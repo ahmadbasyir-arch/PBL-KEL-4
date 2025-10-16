@@ -11,30 +11,32 @@ class Peminjaman extends Model
 
     protected $table = 'peminjaman';
     protected $primaryKey = 'id';
+    public $timestamps = true;
 
     protected $fillable = [
         'idMahasiswa',
         'idRuangan',
         'idUnit',
         'tanggalPinjam',
-        'tanggalKembali',
+        'jamMulai',
+        'jamSelesai',
         'status',
         'keperluan',
     ];
 
-    // 🔹 Relasi ke tabel users (mahasiswa yang meminjam)
+    // Relasi ke tabel users (mahasiswa)
     public function user()
     {
         return $this->belongsTo(User::class, 'idMahasiswa');
     }
 
-    // 🔹 Relasi ke tabel ruangan
+    // Relasi ke tabel ruangan
     public function ruangan()
     {
         return $this->belongsTo(Ruangan::class, 'idRuangan');
     }
 
-    // 🔹 Relasi ke tabel unit
+    // Relasi ke tabel unit
     public function unit()
     {
         return $this->belongsTo(Unit::class, 'idUnit');
