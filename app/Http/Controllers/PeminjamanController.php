@@ -47,20 +47,22 @@ class PeminjamanController extends Controller
             'items.*.id'    => 'required|integer|exists:ruangan,id',
         ]);
 
-        $userId = Auth::id();
+$user = Auth::user();
+$idMahasiswa = $user->mahasiswa->id; // ambil ID dari relasi mahasiswa
 
-        foreach ($validated['items'] as $item) {
-            Peminjaman::create([
-                'idMahasiswa'  => $userId,
-                'idRuangan'    => $validated['jenis_item'] === 'ruangan' ? $item['id'] : null,
-                'idUnit'       => $validated['jenis_item'] === 'unit' ? $item['id'] : null,
-                'tanggalPinjam'=> $validated['tanggalPinjam'],
-                'jamMulai'     => $validated['jamMulai'],
-                'jamSelesai'   => $validated['jamSelesai'],
-                'keperluan'    => $validated['keperluan'],
-                'status'       => 'pending',
-            ]);
-        }
+foreach ($validated['items'] as $item) {
+    Peminjaman::create([
+        'idMahasiswa'  => $idMahasiswa,
+        'idRuangan'    => $validated['jenis_item'] === 'ruangan' ? $item['id'] : null,
+        'idUnit'       => $validated['jenis_item'] === 'unit' ? $item['id'] : null,
+        'tanggalPinjam'=> $validated['tanggalPinjam'],
+        'jamMulai'     => $validated['jamMulai'],
+        'jamSelesai'   => $validated['jamSelesai'],
+        'keperluan'    => $validated['keperluan'],
+        'status'       => 'pending',
+    ]);
+}
+
 
         return redirect()
             ->route('dashboard')

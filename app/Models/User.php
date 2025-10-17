@@ -34,6 +34,11 @@ protected $fillable = [
         'remember_token',
     ];
 
+public function mahasiswa()
+{
+    return $this->hasOne(Mahasiswa::class, 'user_id');
+}
+
     // 🔹 Tambahkan accessor untuk uniformitas tampilan di blade
     public function getNameAttribute()
     {
