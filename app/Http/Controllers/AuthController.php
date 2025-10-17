@@ -47,7 +47,7 @@ class AuthController extends Controller
         ]);
 
         // Login otomatis setelah registrasi
-        Auth::login($user);
+        Auth::login($user, true); // ✅ remember me aktif
 
         // Arahkan sesuai peran (role)
         return $this->redirectByRole($user);
@@ -58,26 +58,34 @@ class AuthController extends Controller
     // ===============================
     public function login(Request $request)
     {
+        // ✅ Ganti agar cocok dengan input form (email_or_nim)
         $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
+            'email_or_nim' => 'required|string',
+            'password' => 'required|string',
         ]);
 
-        $loginInput = $request->input('username');
-        $loginType = filter_var($loginInput, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : (is_numeric($loginInput) ? 'nim' : 'username');
+        $loginInput = $request->input('email_or_nim');
 
-        if (Auth::attempt([$loginType => $loginInput, 'password' => $credentials['password']])) {
+        // ✅ Deteksi tipe login: email / nim / username
+        if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+            $loginType = 'email';
+        } elseif (is_numeric($loginInput)) {
+            $loginType = 'nim';
+        } else {
+            $loginType = 'username';
+        }
+
+        // ✅ Login dengan "remember me" jika dicentang
+        if (Auth::attempt([$loginType => $loginInput, 'password' => $credentials['password']], $request->filled('remember'))) {
             $request->session()->regenerate();
-
             $user = Auth::user();
             return $this->redirectByRole($user);
         }
 
+        // ✅ Jika gagal
         return back()->withErrors([
-            'username' => 'Akun tidak ditemukan atau password salah.',
-        ]);
+            'email_or_nim' => 'Email, NIM, atau password salah.',
+        ])->withInput();
     }
 
     // ===============================

@@ -47,9 +47,10 @@
                     </div>
                 @endif
 
+                {{-- ✅ Input email atau NIM --}}
                 <div class="form-group">
-                    <label for="username">Email/NIM/Username*</label>
-                    <input type="text" id="username" name="username" placeholder="Masukkan email/NIM/Username" required value="{{ old('username') }}">
+                    <label for="email_or_nim">Email atau NIM*</label>
+                    <input type="text" id="email_or_nim" name="email_or_nim" placeholder="Masukkan email atau NIM" required value="{{ old('email_or_nim') }}">
                 </div>
 
                 <div class="form-group">
@@ -59,10 +60,18 @@
                         <i class="fas fa-eye toggle-password" id="togglePassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
-                
+
+                {{-- ✅ Checkbox "Ingat saya" rapi --}}
+                <div class="form-group remember-me">
+                    <label for="remember" class="checkbox-label">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>Ingat saya</span>
+                    </label>
+                </div>
+
                 <button type="submit" class="btn-login">Masuk</button>
 
-                {{-- ✅ Tombol login Google (diperbaiki route-nya) --}}
+                {{-- ✅ Tombol login Google --}}
                 <div class="text-center mt-3">
                     <a href="{{ route('google.login') }}" class="btn-google-login">
                         <img src="https://developers.google.com/identity/images/g-logo.png" width="20" alt="Google Logo">
@@ -98,10 +107,34 @@
             background-color: #f5f5f5;
             border-color: #999;
         }
+
+        /* ✅ Styling checkbox agar sejajar & rapi */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #007bff;
+            cursor: pointer;
+        }
     </style>
 
     <script>
-        // Fungsi untuk toggle tampilan password (lihat/sembunyikan)
+        // Fungsi toggle password
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
 
