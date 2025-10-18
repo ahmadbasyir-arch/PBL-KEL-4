@@ -39,10 +39,12 @@ class DashboardController extends Controller
 
     public function admin()
     {
+        // Statistik untuk dashboard admin
         $totalPeminjaman = Peminjaman::count();
         $totalPending = Peminjaman::where('status', 'pending')->count();
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
+        $totalRiwayat = Peminjaman::where('status', 'selesai')->count(); // ✅ Tambahan: total peminjaman selesai
 
         $peminjamanTerkini = Peminjaman::with(['user', 'ruangan', 'unit'])
             ->orderByDesc('created_at')
@@ -54,6 +56,7 @@ class DashboardController extends Controller
             'totalPending',
             'totalDisetujui',
             'totalDitolak',
+            'totalRiwayat',
             'peminjamanTerkini'
         ));
     }
