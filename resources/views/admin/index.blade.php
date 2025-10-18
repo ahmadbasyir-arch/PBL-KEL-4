@@ -33,7 +33,8 @@
                             <td><strong>{{ $item->namaRuangan }}</strong></td>
                             <td>{{ $item->kapasitas }} orang</td>
                             <td>
-                                <span class="status-badge status-{{ $item->status == 'tersedia' ? 'disetujui' : 'ditolak' }}">
+                                {{-- tampilkan status ruangan apa adanya (tersedia / dipinjam / dll) --}}
+                                <span class="status-badge status-{{ \Illuminate\Support\Str::slug($item->status) }}">
                                     {{ ucfirst($item->status) }}
                                 </span>
                             </td>

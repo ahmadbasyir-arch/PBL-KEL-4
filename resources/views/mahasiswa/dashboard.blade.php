@@ -69,20 +69,32 @@
                     <tr>
                         <td>#{{ $p->id }}</td>
                         <td>
-                            @if ($p->ruangan)
+                            @if (!empty($p->ruangan) && isset($p->ruangan->namaRuangan))
                                 <strong>{{ $p->ruangan->namaRuangan }}</strong>
-                            @elseif ($p->unit)
+                            @elseif (!empty($p->unit) && isset($p->unit->namaUnit))
                                 <strong>{{ $p->unit->namaUnit }}</strong>
                             @else
                                 -
                             @endif
                         </td>
+
                         <td>{{ $p->keperluan }}</td>
                         <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
                         <td>
                             {{-- ✅ Status dan tombol aksi --}}
-                            @if ($p->status == 'disetujui')
-                                <form action="{{ route('mahasiswa.selesai', $p->id) }}" method="POST" style="display:inline;"
+                            @php
+                                $isDigunakan = in_array($p->status, ['digunakan', 'disetujui']);
+                                $isMenyelesaikan = in_array($p->status, ['menyelesaikan', 'menunggu_validasi']);
+                            @endphp
+
+                            @if ($p->status == 'pending')
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-hourglass-half"></i> Menunggu Persetujuan
+                                </span>
+
+                            @elseif ($isDigunakan)
+                                {{-- ✅ Jika status 'digunakan' atau 'disetujui' -> tampilkan tombol Ajukan Selesai --}}
+                                <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}" method="POST" style="display:inline;"
                                     onsubmit="return confirm('Apakah Anda yakin ingin mengajukan penyelesaian peminjaman ini? Setelah ini akan divalidasi oleh admin.')">
                                     @csrf
                                     <button type="submit" class="btn btn-success btn-sm" style="border-radius: 6px; padding: 5px 10px;">
@@ -90,7 +102,7 @@
                                     </button>
                                 </form>
 
-                            @elseif ($p->status == 'menunggu_validasi')
+                            @elseif ($isMenyelesaikan)
                                 <span class="status-badge status-pending">
                                     <i class="fas fa-hourglass-half"></i> Menunggu Validasi Admin
                                 </span>
@@ -100,9 +112,14 @@
                                     <i class="fas fa-check-circle"></i> Selesai
                                 </span>
 
+                            @elseif ($p->status == 'ditolak')
+                                <span class="status-badge status-ditolak">
+                                    <i class="fas fa-times-circle"></i> Ditolak
+                                </span>
+
                             @else
                                 <span class="status-badge status-{{ $p->status }}">
-                                    {{ ucfirst($p->status) }}
+                                    {{ ucfirst(str_replace('_', ' ', $p->status)) }}
                                 </span>
                             @endif
                         </td>

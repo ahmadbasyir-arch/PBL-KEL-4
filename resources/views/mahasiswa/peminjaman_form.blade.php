@@ -56,8 +56,12 @@
 {{-- Data untuk JS; pastikan selalu array (fallback ke []) --}}
 <script>
     const availableItems = @json($listData ?? []);
-    console.log('availableItems =', availableItems);
+    if (!Array.isArray(availableItems)) {
+        console.warn('⚠️ availableItems bukan array, set default []');
+        availableItems = [];
+    }
 </script>
+
 
 {{-- Script Dinamis Tambah/Hapus Item --}}
 <script>

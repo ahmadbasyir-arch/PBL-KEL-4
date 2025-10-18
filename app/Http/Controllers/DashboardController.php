@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use App\Models\Ruangan;
 use App\Models\User;
 use App\Models\Unit;
+use Carbon\Carbon; // ✅ Tambahan penting untuk format tanggal
 
 class DashboardController extends Controller
 {
@@ -48,9 +49,8 @@ class DashboardController extends Controller
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
-
     /**
-     * Menyiapkan data dan menampilkan dashboard untuk ADMIN.
+     * Dashboard ADMIN.
      */
     public function admin()
     {
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
 
-        $peminjamanTerkini = Peminjaman::with('user', 'ruangan', 'unit')
+        $peminjamanTerkini = Peminjaman::with(['user', 'ruangan', 'unit'])
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
@@ -74,16 +74,13 @@ class DashboardController extends Controller
     }
 
     /**
-     * Menyiapkan data dan menampilkan dashboard untuk MAHASISWA.
+     * Dashboard MAHASISWA.
      */
     public function mahasiswa()
     {
         $user = Auth::user();
-
-        // ambil relasi mahasiswa (bukan Auth::id())
         $mahasiswa = $user->mahasiswa;
 
-        // Default nilai jika mahasiswa belum ada
         if (!$mahasiswa) {
             $stats = [
                 'totalAktif'   => 0,
@@ -114,16 +111,13 @@ class DashboardController extends Controller
     }
 
     /**
-     * [INI PERBAIKANNYA]
-     * Menyiapkan data dan menampilkan dashboard untuk DOSEN.
-     * Isinya kita buat sama persis dengan mahasiswa.
+     * Dashboard DOSEN — dibuat sama seperti mahasiswa.
      */
     public function dosen()
     {
         $user = Auth::user();
-
-        // Ambil relasi mahasiswa/dosen jika ada (gunakan relasi yang sama)
         $mahasiswa = $user->mahasiswa;
+
         if (!$mahasiswa) {
             $stats = [
                 'totalAktif'   => 0,
@@ -150,7 +144,6 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
             
-        // Menggunakan view yang sama dengan mahasiswa agar tampilannya identik
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
@@ -160,19 +153,18 @@ class DashboardController extends Controller
     public function selesaikanPeminjaman($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
-
-        // Pastikan pengecekan memakai idMahasiswa yang sesuai relasi
         $user = Auth::user();
         $mahasiswa = $user->mahasiswa;
         $mahasiswaId = $mahasiswa->id ?? null;
 
-        if ($peminjaman->idMahasiswa != $mahasiswaId || $peminjaman->status !== 'disetujui') {
+        // ✅ Pastikan hanya peminjam yang sah dan status disetujui yang bisa ajukan selesai
+        if ($peminjaman->idMahasiswa != $mahasiswaId || !in_array($peminjaman->status, ['disetujui', 'digunakan'])) {
             return redirect()->back()->with('error', 'Aksi tidak diizinkan.');
         }
 
         $peminjaman->status = 'menunggu_validasi';
         $peminjaman->save();
 
-        return redirect()->back()->with('success', 'Pengajuan selesai telah dikirim.');
+        return redirect()->back()->with('success', 'Pengajuan selesai telah dikirim ke admin.');
     }
 }

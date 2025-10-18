@@ -83,10 +83,9 @@
                             {{ ucfirst(str_replace('_', ' ', $p->status)) }}
                         </span>
                     </td>
-                    {{-- [PERBAIKAN] Mencegah tanggal terpotong --}}
                     <td style="white-space: nowrap;">{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMM YYYY') }}</td>
                     <td>
-                        {{-- [PERBAIKAN] Membungkus form dalam satu div --}}
+                        {{-- ✅ Perbaikan logika aksi agar tidak muncul tanda "-" --}}
                         <div class="action-buttons">
                             @if ($p->status === 'pending')
                                 <form action="{{ route('admin.peminjaman.approve', $p->id) }}" method="POST">
@@ -98,17 +97,32 @@
                                     <button type="submit" class="btn-reject">Tolak</button>
                                 </form>
 
-                            @elseif ($p->status === 'disetujui')
-                                <form action="{{ route('admin.peminjaman.complete', $p->id) }}" method="POST" onsubmit="return confirm('Selesaikan peminjaman ini?')">
-                                    @csrf
-                                    <button type="submit" class="btn-complete">Selesaikan</button>
-                                </form>
+                            @elseif ($p->status === 'disetujui' || $p->status === 'digunakan')
+                                {{-- 🔹 Saat admin sudah menyetujui --}}
+                                <span class="status-badge status-disetujui">
+                                    <i class="fas fa-play"></i> Sedang Digunakan
+                                </span>
 
-                            @elseif ($p->status === 'menunggu_validasi')
+                            @elseif ($p->status === 'menyelesaikan' || $p->status === 'menunggu_validasi')
+                                {{-- 🔹 Mahasiswa sudah mengajukan selesai --}}
                                 <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" onsubmit="return confirm('Validasi peminjaman ini sebagai selesai?')">
                                     @csrf
                                     <button type="submit" class="btn-validate">Validasi</button>
                                 </form>
+                                <form action="{{ route('admin.peminjaman.reject', $p->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn-reject">Tolak Selesai</button>
+                                </form>
+
+                            @elseif ($p->status === 'selesai')
+                                <span class="status-badge status-selesai">
+                                    <i class="fas fa-check-circle"></i> Selesai
+                                </span>
+
+                            @elseif ($p->status === 'ditolak')
+                                <span class="status-badge status-ditolak">
+                                    <i class="fas fa-times-circle"></i> Ditolak
+                                </span>
 
                             @else
                                 <em>-</em>
@@ -125,12 +139,11 @@
     </table>
 </div>
 
-{{-- [PERBAIKAN] CSS untuk menata tombol tanpa mengubah isinya --}}
 <style>
     .action-buttons {
         display: flex;
-        gap: 5px; /* Memberi jarak antar tombol */
-        white-space: nowrap; /* Mencegah tombol terpotong ke bawah */
+        gap: 5px;
+        white-space: nowrap;
     }
     .action-buttons form {
         display: inline-block;
@@ -148,5 +161,18 @@
     .btn-reject { background-color: #dc3545; } .btn-reject:hover { background-color: #c82333; }
     .btn-complete { background-color: #007bff; } .btn-complete:hover { background-color: #0056b3; }
     .btn-validate { background-color: #17a2b8; } .btn-validate:hover { background-color: #138496; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-disetujui, .status-digunakan { background: #d4edda; color: #155724; }
+    .status-ditolak { background: #f8d7da; color: #721c24; }
+    .status-selesai { background: #e2e3e5; color: #383d41; }
+    .status-menyelesaikan, .status-menunggu_validasi { background: #ffeeba; color: #856404; }
 </style>
 @endsection

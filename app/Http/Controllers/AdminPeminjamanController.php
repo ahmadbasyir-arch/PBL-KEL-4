@@ -20,48 +20,53 @@ class AdminPeminjamanController extends Controller
     }
 
     /**
-     * Mengubah status peminjaman (disetujui / ditolak / selesai)
+     * Mengubah status peminjaman (disetujui / ditolak / digunakan / selesai)
      */
     public function updateStatus(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // Pastikan hanya status tertentu yang bisa diubah oleh admin
-        $validStatuses = ['approve', 'reject', 'complete'];
-
-        // Cek apakah URL cocok dengan salah satu aksi
+        // --- Aksi SETUJU ---
         if ($request->is('admin/peminjaman/*/approve')) {
-            // ✅ Jika disetujui
-            $peminjaman->status = 'disetujui';
+            // Hanya bisa menyetujui jika status masih pending
+            if ($peminjaman->status === 'pending') {
+                $peminjaman->status = 'digunakan';
 
-            // Jika peminjaman ruangan/unit, ubah status ketersediaannya
-            if ($peminjaman->ruangan) {
-                $peminjaman->ruangan->update(['status' => 'dipinjam']);
-            }
-            if ($peminjaman->unit) {
-                $peminjaman->unit->update(['status' => 'dipinjam']);
+                if ($peminjaman->ruangan) {
+                    $peminjaman->ruangan->update(['status' => 'dipinjam']);
+                }
+                if ($peminjaman->unit) {
+                    $peminjaman->unit->update(['status' => 'dipinjam']);
+                }
+
+                $pesan = 'Peminjaman telah disetujui dan sedang digunakan.';
+            } else {
+                return redirect()->back()->with('error', 'Peminjaman ini tidak dapat disetujui lagi.');
             }
 
-            $pesan = 'Peminjaman telah disetujui.';
+        // --- Aksi TOLAK ---
         } elseif ($request->is('admin/peminjaman/*/reject')) {
-            // ❌ Jika ditolak
-            $peminjaman->status = 'ditolak';
+            if (in_array($peminjaman->status, ['pending', 'menyelesaikan'])) {
+                $peminjaman->status = 'ditolak';
 
-            // Jika sebelumnya ruangan/unit sempat dipesan, pastikan dikembalikan jadi tersedia
-            if ($peminjaman->ruangan) {
-                $peminjaman->ruangan->update(['status' => 'tersedia']);
-            }
-            if ($peminjaman->unit) {
-                $peminjaman->unit->update(['status' => 'tersedia']);
+                if ($peminjaman->ruangan) {
+                    $peminjaman->ruangan->update(['status' => 'tersedia']);
+                }
+                if ($peminjaman->unit) {
+                    $peminjaman->unit->update(['status' => 'tersedia']);
+                }
+
+                $pesan = 'Peminjaman telah ditolak.';
+            } else {
+                return redirect()->back()->with('error', 'Tidak dapat menolak peminjaman ini.');
             }
 
-            $pesan = 'Peminjaman telah ditolak.';
+        // --- Aksi SELESAI ---
         } elseif ($request->is('admin/peminjaman/*/complete')) {
-            // ✅ Jika sudah selesai digunakan
-            if ($peminjaman->status === 'disetujui') {
+            // Hanya bisa diselesaikan jika mahasiswa sudah mengajukan selesai
+            if ($peminjaman->status === 'menyelesaikan') {
                 $peminjaman->status = 'selesai';
 
-                // Update ketersediaan ruangan/unit setelah selesai
                 if ($peminjaman->ruangan) {
                     $peminjaman->ruangan->update(['status' => 'tersedia']);
                 }
@@ -71,11 +76,11 @@ class AdminPeminjamanController extends Controller
 
                 $pesan = 'Peminjaman telah diselesaikan.';
             } else {
-                return redirect()->back()->with('error', 'Hanya peminjaman yang disetujui yang dapat diselesaikan.');
+                return redirect()->back()->with('error', 'Mahasiswa belum mengajukan penyelesaian.');
             }
+
         } else {
-            $peminjaman->status = 'pending';
-            $pesan = 'Status peminjaman dikembalikan ke pending.';
+            $pesan = 'Tidak ada aksi valid.';
         }
 
         $peminjaman->save();
