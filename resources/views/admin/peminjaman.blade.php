@@ -31,7 +31,8 @@
             @forelse ($peminjaman as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->mahasiswa->namaLengkap ?? $p->mahasiswa->name ?? '-' }}</td>
+                    <!-- Perubahan kecil di bawah: prioritaskan user->name, lalu mahasiswa->name, lalu mahasiswa->namaLengkap -->
+                    <td>{{ $p->user->name ?? $p->mahasiswa->name ?? $p->mahasiswa->namaLengkap ?? '-' }}</td>
                     <td>
                         @if ($p->ruangan)
                             {{ $p->ruangan->namaRuangan }}
