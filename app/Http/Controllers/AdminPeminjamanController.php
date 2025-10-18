@@ -10,7 +10,7 @@ class AdminPeminjamanController extends Controller
 {
     public function index()
     {
-        $peminjaman = Peminjaman::with(['user', 'ruangan', 'unit'])
+        $peminjaman = Peminjaman::with(['mahasiswa', 'ruangan', 'unit'])
             ->orderByDesc('created_at')
             ->get();
 

@@ -37,15 +37,15 @@ class PeminjamanController extends Controller
         ]);
 
         $user = Auth::user();
-        $idMahasiswa = $user->mahasiswa->id ?? null;
+        $mahasiswa = $user->mahasiswa ?? null;
 
-        if (!$idMahasiswa) {
+        if (!$mahasiswa) {
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
         foreach ($validated['items'] as $item) {
             Peminjaman::create([
-                'idMahasiswa'   => $idMahasiswa,
+                'idMahasiswa'   => $mahasiswa->id,
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -59,9 +59,6 @@ class PeminjamanController extends Controller
         return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
     }
 
-    // ==================================================
-    // Admin: update status (setuju/tolak/complete)
-    // ==================================================
     public function updateStatus(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
@@ -78,14 +75,10 @@ class PeminjamanController extends Controller
         return redirect()->back()->with('success', 'Status peminjaman berhasil diperbarui.');
     }
 
-    // ==================================================
-    // Mahasiswa: ajukan selesai
-    // ==================================================
     public function ajukanSelesai($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // hanya boleh ajukan selesai jika statusnya disetujui / digunakan
         if (in_array(strtolower($peminjaman->status), ['disetujui', 'digunakan', 'sedang digunakan'])) {
             $peminjaman->status = 'menunggu_validasi';
             $peminjaman->save();

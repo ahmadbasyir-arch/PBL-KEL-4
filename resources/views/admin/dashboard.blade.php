@@ -67,7 +67,7 @@
             @forelse ($peminjamanTerkini as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->user->namaLengkap ?? '-' }}</td>
+                    <td>{{ $p->mahasiswa->namaLengkap ?? $p->mahasiswa->name ?? '-' }}</td>
                     <td>
                         @if($p->ruangan)
                             {{ $p->ruangan->namaRuangan }}

@@ -79,6 +79,10 @@ Route::middleware('auth')->group(function () {
         // ✅ Admin daftar semua peminjaman
         Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
             ->name('admin.peminjaman.index');
+            
+        Route::post('/admin/peminjaman/{id}/validasi', [AdminPeminjamanController::class, 'validasi'])
+            ->name('admin.peminjaman.validasi');
+
 
         // ✅ Admin validasi pengajuan selesai
         Route::post('/admin/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])

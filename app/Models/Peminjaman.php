@@ -25,9 +25,15 @@ class Peminjaman extends Model
     ];
 
     // Relasi ke tabel users (mahasiswa)
+    public function mahasiswa()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'idMahasiswa');
+    }
+
+    // 🔹 Alias relasi user, untuk konsistensi kode
     public function user()
     {
-        return $this->belongsTo(User::class, 'idMahasiswa');
+        return $this->belongsTo(\App\Models\User::class, 'idMahasiswa');
     }
 
     // Relasi ke tabel ruangan
@@ -41,9 +47,10 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Unit::class, 'idUnit');
     }
+
+    // Relasi ke tabel pengembalian
     public function pengembalian()
     {
-    return $this->hasOne(Pengembalian::class, 'idPeminjaman');
+        return $this->hasOne(Pengembalian::class, 'idPeminjaman');
     }
-
 }

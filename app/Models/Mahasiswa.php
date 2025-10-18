@@ -22,13 +22,12 @@ class Mahasiswa extends Model
 
     // 🔗 relasi ke tabel users
     public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
 
-    // 🔗 relasi ke peminjaman
-    public function peminjaman()
-    {
-        return $this->hasMany(Peminjaman::class, 'idMahasiswa');
-    }
+public function peminjaman()
+{
+    return $this->hasMany(Peminjaman::class, 'idMahasiswa');
+}
 }

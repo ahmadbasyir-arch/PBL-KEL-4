@@ -43,7 +43,7 @@
             {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
             <ul class="sidebar-menu">
                 <li class="{{ Route::is('dashboard') ? 'active' : '' }}">
-                    <a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
 
                 {{-- === Jika role Mahasiswa === --}}
@@ -59,7 +59,6 @@
 
                 {{-- === Jika role Admin / Staff === --}}
                 @elseif(in_array($user->role, ['admin', 'staff']))
-                    <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-chart-line"></i> Kelola Peminjaman</a></li>
                     <li><a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a></li>
                     <li><a href="#"><i class="fas fa-users"></i> Data Pengguna</a></li>
                     <li><a href="#"><i class="fas fa-cogs"></i> Pengaturan</a></li>
