@@ -87,4 +87,31 @@ class AdminPeminjamanController extends Controller
 
         return redirect()->back()->with('success', $pesan);
     }
+
+    /**
+     * ✅ Admin memvalidasi peminjaman yang diajukan selesai oleh mahasiswa.
+     */
+    public function validateSelesai($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        // Pastikan statusnya adalah "menunggu_validasi" sebelum bisa diselesaikan
+        if ($peminjaman->status !== 'menunggu_validasi') {
+            return redirect()->back()->with('error', 'Peminjaman ini belum diajukan penyelesaian oleh mahasiswa.');
+        }
+
+        $peminjaman->status = 'selesai';
+
+        // Setelah selesai, ubah status ruangan/unit kembali tersedia
+        if ($peminjaman->ruangan) {
+            $peminjaman->ruangan->update(['status' => 'tersedia']);
+        }
+        if ($peminjaman->unit) {
+            $peminjaman->unit->update(['status' => 'tersedia']);
+        }
+
+        $peminjaman->save();
+
+        return redirect()->back()->with('success', 'Peminjaman telah divalidasi dan dinyatakan selesai.');
+    }
 }
