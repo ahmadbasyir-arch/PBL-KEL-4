@@ -41,4 +41,9 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Unit::class, 'idUnit');
     }
+    public function pengembalian()
+    {
+    return $this->hasOne(Pengembalian::class, 'idPeminjaman');
+    }
+
 }
