@@ -8,50 +8,35 @@ use App\Models\Peminjaman;
 use App\Models\Ruangan;
 use App\Models\User;
 use App\Models\Unit;
-use Carbon\Carbon; // ✅ Tambahan penting untuk format tanggal
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    /**
-     * Mengarahkan pengguna ke dashboard yang sesuai dengan perannya.
-     */
     public function index()
     {
         $user = Auth::user();
-        $mahasiswa = $user->mahasiswa;
 
-        // Default nilai jika mahasiswa belum terdaftar
+        // Ambil peminjaman berdasarkan user yang sedang login
         $stats = [
-            'totalAktif' => 0,
-            'totalPending' => 0,
-            'totalDisetujui' => 0,
-            'totalRiwayat' => 0,
+            'totalAktif' => Peminjaman::where('idMahasiswa', $user->id)
+                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])
+                ->count(),
+            'totalPending' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'disetujui')->count(),
+            'totalRiwayat' => Peminjaman::where('idMahasiswa', $user->id)->count(),
         ];
-        $peminjamanTerkini = collect();
 
-        if ($mahasiswa) {
-            $mahasiswaId = $mahasiswa->id;
-
-            $stats = [
-                'totalAktif'   => Peminjaman::where('idMahasiswa', $mahasiswaId)->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])->count(),
-                'totalPending' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'pending')->count(),
-                'totalDisetujui' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'disetujui')->count(),
-                'totalRiwayat' => Peminjaman::where('idMahasiswa', $mahasiswaId)->count(),
-            ];
-    
-            $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
-                ->where('idMahasiswa', $mahasiswaId)
-                ->orderByDesc('created_at')
-                ->limit(5)
-                ->get();
-        }
+        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
+            ->where('idMahasiswa', $user->id)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
 
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
-    /**
-     * Dashboard ADMIN.
-     */
     public function admin()
     {
         $totalPeminjaman = Peminjaman::count();
@@ -73,92 +58,61 @@ class DashboardController extends Controller
         ));
     }
 
-    /**
-     * Dashboard MAHASISWA.
-     */
     public function mahasiswa()
     {
         $user = Auth::user();
-        $mahasiswa = $user->mahasiswa;
-
-        if (!$mahasiswa) {
-            $stats = [
-                'totalAktif'   => 0,
-                'totalPending' => 0,
-                'totalDisetujui' => 0,
-                'totalRiwayat' => 0,
-            ];
-            $peminjamanTerkini = collect();
-            return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
-        }
-
-        $mahasiswaId = $mahasiswa->id;
 
         $stats = [
-            'totalAktif'   => Peminjaman::where('idMahasiswa', $mahasiswaId)->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])->count(),
-            'totalPending' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'pending')->count(),
-            'totalDisetujui' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'disetujui')->count(),
-            'totalRiwayat' => Peminjaman::where('idMahasiswa', $mahasiswaId)->count(),
+            'totalAktif' => Peminjaman::where('idMahasiswa', $user->id)
+                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])
+                ->count(),
+            'totalPending' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'disetujui')->count(),
+            'totalRiwayat' => Peminjaman::where('idMahasiswa', $user->id)->count(),
         ];
-        
+
         $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
-            ->where('idMahasiswa', $mahasiswaId)
+            ->where('idMahasiswa', $user->id)
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
-            
+
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
-    /**
-     * Dashboard DOSEN — dibuat sama seperti mahasiswa.
-     */
     public function dosen()
     {
         $user = Auth::user();
-        $mahasiswa = $user->mahasiswa;
-
-        if (!$mahasiswa) {
-            $stats = [
-                'totalAktif'   => 0,
-                'totalPending' => 0,
-                'totalDisetujui' => 0,
-                'totalRiwayat' => 0,
-            ];
-            $peminjamanTerkini = collect();
-            return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
-        }
-
-        $mahasiswaId = $mahasiswa->id;
 
         $stats = [
-            'totalAktif'   => Peminjaman::where('idMahasiswa', $mahasiswaId)->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])->count(),
-            'totalPending' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'pending')->count(),
-            'totalDisetujui' => Peminjaman::where('idMahasiswa', $mahasiswaId)->where('status', 'disetujui')->count(),
-            'totalRiwayat' => Peminjaman::where('idMahasiswa', $mahasiswaId)->count(),
+            'totalAktif' => Peminjaman::where('idMahasiswa', $user->id)
+                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])
+                ->count(),
+            'totalPending' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa', $user->id)
+                ->where('status', 'disetujui')->count(),
+            'totalRiwayat' => Peminjaman::where('idMahasiswa', $user->id)->count(),
         ];
-        
+
         $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
-            ->where('idMahasiswa', $mahasiswaId)
+            ->where('idMahasiswa', $user->id)
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
-            
+
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
 
-    /**
-     * Mahasiswa/Dosen mengajukan penyelesaian peminjaman.
-     */
     public function selesaikanPeminjaman($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
         $user = Auth::user();
-        $mahasiswa = $user->mahasiswa;
-        $mahasiswaId = $mahasiswa->id ?? null;
 
         // ✅ Pastikan hanya peminjam yang sah dan status disetujui yang bisa ajukan selesai
-        if ($peminjaman->idMahasiswa != $mahasiswaId || !in_array($peminjaman->status, ['disetujui', 'digunakan'])) {
+        if ($peminjaman->idMahasiswa != $user->id || !in_array($peminjaman->status, ['disetujui', 'digunakan'])) {
             return redirect()->back()->with('error', 'Aksi tidak diizinkan.');
         }
 
