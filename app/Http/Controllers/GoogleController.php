@@ -36,7 +36,7 @@ class GoogleController extends Controller
             ->first();
 
         if ($existingUser) {
-            // 🧩 Pastikan google_id tersimpan untuk login berikutnya
+            // 🧩 Pastikan google_id tersimpan
             if (!$existingUser->google_id) {
                 $existingUser->google_id = $googleUser->getId();
                 $existingUser->save();
@@ -53,23 +53,22 @@ class GoogleController extends Controller
             return $this->redirectByRole($existingUser);
         }
 
-        // 🆕 Jika belum ada, buat user baru sementara
+        // 🆕 Jika belum ada, buat user baru
         $username = $this->generateUniqueUsername($googleUser->getName());
 
         $user = User::create([
-            'name'         => $googleUser->getName(),
+            'name'         => $googleUser->getName(), // langsung dari Google
             'username'     => $username,
             'email'        => $googleUser->getEmail(),
             'google_id'    => $googleUser->getId(),
             'avatar'       => $googleUser->getAvatar(),
             'password'     => Hash::make(Str::random(16)),
             'role'         => 'mahasiswa',
-            'is_completed' => 0, // belum lengkap
+            'is_completed' => 0,
         ]);
 
         Auth::login($user);
 
-        // Arahkan ke form lengkapi profil
         return redirect()->route('lengkapi.profil');
     }
 
@@ -105,24 +104,20 @@ class GoogleController extends Controller
     public function storeCompleteProfile(Request $request)
     {
         $request->validate([
-            'name'      => 'required|string|max:255',
-            'nim'       => 'required|string|max:50',
+            'nim'       => 'required|string|max:50|unique:users,nim,' . Auth::id(),
             'role'      => 'required|in:mahasiswa,dosen',
             'password'  => 'required|string|min:6|confirmed',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $user->is_completed = 1;
-        $user->save();
 
-
+        // Perbarui data tanpa mengubah nama dari Google
         $user->update([
-            'name'         => $request->name,
             'nim'          => $request->nim,
             'role'         => $request->role,
             'password'     => Hash::make($request->password),
-            'is_completed' => 1, // tandai sudah lengkap
+            'is_completed' => 1,
         ]);
 
         // 🔁 Arahkan ke dashboard sesuai role

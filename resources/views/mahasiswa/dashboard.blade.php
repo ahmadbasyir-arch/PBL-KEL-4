@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Mahasiswa')
+@section('title', (Auth::user()->role === 'dosen' ? 'Dashboard Dosen' : 'Dashboard Mahasiswa'))
 
 @section('content')
 @if (session('success'))
@@ -10,7 +10,7 @@
 @endif
 
 <div class="section-header">
-    <h1>Selamat Datang, {{ Auth::user()->name }}!</h1>
+    <h1>Selamat Datang, {{ ucwords(Auth::user()->name ?? Auth::user()->username ?? 'Pengguna') }}! <small style="font-weight:600; color:#666">({{ ucfirst(Auth::user()->role) }})</small></h1>
 </div>
 
 {{-- === Statistik Ringkasan === --}}
@@ -190,61 +190,61 @@
         margin-top: 4px;
     }
 
-/* === Kartu Statistik Modern (Warna Putih) === */
-.dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
+    /* === Kartu Statistik Modern (Warna Putih) === */
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
 
-.stat-card {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    border-radius: 16px;
-    background: #ffffff;
-    color: #333;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
+    .stat-card {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #333;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
 
-/* Ikon dengan warna khas masing-masing */
-.stat-card .card-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    margin-right: 15px;
-    color: #fff;
-}
+    /* Ikon dengan warna khas masing-masing */
+    .stat-card .card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 26px;
+        margin-right: 15px;
+        color: #fff;
+    }
 
-/* Warna ikon */
-.bg-primary .card-icon { background-color: #007bff; }
-.bg-warning .card-icon { background-color: #ffc107; }
-.bg-success .card-icon { background-color: #28a745; }
-.bg-danger .card-icon { background-color: #dc3545; }
-.bg-info .card-icon { background-color: #17a2b8; }
+    /* Warna ikon */
+    .bg-primary .card-icon { background-color: #007bff; }
+    .bg-warning .card-icon { background-color: #ffc107; }
+    .bg-success .card-icon { background-color: #28a745; }
+    .bg-danger .card-icon { background-color: #dc3545; }
+    .bg-info .card-icon { background-color: #17a2b8; }
 
-.stat-card h3 {
-    font-size: 1rem;
-    margin: 0;
-    font-weight: 600;
-}
+    .stat-card h3 {
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 600;
+    }
 
-.card-value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-top: 4px;
-}
+    .card-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-top: 4px;
+    }
 
 
     /* === Badge Status === */

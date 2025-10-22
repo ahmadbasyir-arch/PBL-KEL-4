@@ -29,14 +29,7 @@
 
         <form action="{{ route('lengkapi.profil.store') }}" method="POST" class="profil-form" enctype="multipart/form-data">
             @csrf
-
-            <div class="form-group">
-                <label for="namaLengkap">Nama Lengkap</label>
-                <input type="text" id="namaLengkap" name="name" 
-                    value="{{ old('name', $user->name ?? '') }}" 
-                    placeholder="Masukkan nama lengkap Anda" required>
-            </div>
-
+            
             <div class="form-group">
                 <label for="nim">NIM/NIP</label>
                 <input type="text" id="nim" name="nim" 

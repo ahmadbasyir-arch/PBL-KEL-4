@@ -16,12 +16,32 @@
 
             {{-- ==== DATA USER ==== --}}
 @php
-    $user = Auth::user();
-    $nama = $user->name ?? $user->username ?? 'Pengguna';
+    // Ambil user dari Auth; jika ada kemungkinan data Auth belum ter-sink ke model users,
+    // ambil ulang dari DB agar pasti menggunakan kolom `name`.
+    $authUser = Auth::user();
+    $user = null;
+    if ($authUser && isset($authUser->id)) {
+        $user = \App\Models\User::find($authUser->id) ?? $authUser;
+    } else {
+        $user = $authUser;
+    }
+
+    // Pastikan nama yang tampil adalah kolom `name`. Jika kosong, fallback ke username -> email -> 'Pengguna'
+    $nama = trim((string) ($user->name ?? ''));
+    if ($nama === '') {
+        $nama = $user->username ?? $user->email ?? 'Pengguna';
+    }
+
+    // Buat inisial dari nama untuk placeholder avatar
     $words = explode(' ', $nama);
     $inisialNama = '';
     foreach (array_slice($words, 0, 2) as $word) {
-        $inisialNama .= strtoupper(substr($word, 0, 1));
+        if ($word !== '') {
+            $inisialNama .= strtoupper(substr($word, 0, 1));
+        }
+    }
+    if ($inisialNama === '') {
+        $inisialNama = 'U';
     }
 @endphp
 
@@ -35,25 +55,25 @@
                     @endif
                 </div>
                 <div class="user-info">
-                    <h3>{{ $nama }}</h3>
-                    <p>{{ ucfirst($user->role) }}</p>
+                    <h3 title="{{ $nama }}">{{ $nama }}</h3>
+                    <p>{{ ucfirst($user->role ?? 'user') }}</p>
                 </div>
             </div>
 
             {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
             <ul class="sidebar-menu">
-                <li class="{{ Route::is('dashboard') || Route::is('admin.dashboard') || Route::is('dashboard.dosen') ? 'active' : '' }}">
+                <li class="{{ Route::is('dashboard') || Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') ? 'active' : '' }}">
                     <a href="{{
-                        Auth::user()->role === 'admin' ? route('admin.dashboard') :
-                        (Auth::user()->role === 'mahasiswa' ? route('dashboard') :
-                        (Auth::user()->role === 'dosen' ? route('dashboard.dosen') : '#'))
+                        ($user->role ?? null) === 'admin' ? route('admin.dashboard') :
+                        (($user->role ?? null) === 'mahasiswa' ? route('dashboard') :
+                        (($user->role ?? null) === 'dosen' ? route('mahasiswa.dashboard') : '#'))
                     }}">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
                 </li>
 
                 {{-- === Jika role Mahasiswa === --}}
-                @if($user->role === 'mahasiswa')
+                @if(($user->role ?? null) === 'mahasiswa')
                     <li class="has-submenu {{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'active open' : '' }}">
                         <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
                         <ul class="submenu" style="{{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'display:block;' : 'display:none;' }}">
@@ -64,13 +84,13 @@
                     <li class="{{ request()->is('riwayat*') ? 'active' : '' }}"><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
 
                 {{-- === Jika role Admin / Staff === --}}
-                @elseif(in_array($user->role, ['admin', 'staff']))
+                @elseif(in_array($user->role ?? '', ['admin', 'staff']))
                     <li class="{{ request()->is('ruangan*') ? 'active' : '' }}"><a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a></li>
                     <li class="{{ request()->is('users*') ? 'active' : '' }}"><a href="#"><i class="fas fa-users"></i> Data Pengguna</a></li>
                     <li class="{{ request()->is('settings*') ? 'active' : '' }}"><a href="#"><i class="fas fa-cogs"></i> Pengaturan</a></li>
 
                 {{-- === Jika role Dosen === --}}
-                @elseif($user->role === 'dosen')
+                @elseif(($user->role ?? null) === 'dosen')
                     <li class="{{ request()->is('dosen/peminjaman*') ? 'active' : '' }}"><a href="#"><i class="fas fa-clipboard-list"></i> Daftar Peminjaman</a></li>
                     <li class="{{ request()->is('riwayat*') ? 'active' : '' }}"><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
                 @endif

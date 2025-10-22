@@ -21,7 +21,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    // ✅ Login via Google
+    // Login via Google
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ✅ Lengkapi profil setelah login Google
+    // Lengkapi profil setelah login Google
     Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
     Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
@@ -43,32 +43,31 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Role: Mahasiswa
+    | Role: Mahasiswa & Dosen (digabung)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('role:mahasiswa')->group(function () {
+    Route::middleware('role:mahasiswa,dosen')->group(function () {
         Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])
             ->name('mahasiswa.dashboard');
 
-        // ✅ Form peminjaman (GET & POST)
+        // Form peminjaman (GET & POST)
         Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
         Route::post('/peminjaman/store', [PeminjamanController::class, 'store'])->name('peminjaman.store');
 
-        // ✅ Mahasiswa mengajukan selesai peminjaman
+        // Ajukan selesai
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
             ->name('peminjaman.ajukanSelesai');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Role: Admin
+    | Role: Admin & Staff (digabung)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,staff')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
             ->name('admin.dashboard');
 
-        // ✅ Admin update status
         Route::post('/admin/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])
             ->name('admin.peminjaman.approve');
         Route::post('/admin/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])
@@ -76,36 +75,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])
             ->name('admin.peminjaman.complete');
 
-        // ✅ Admin daftar semua peminjaman
         Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
             ->name('admin.peminjaman.index');
-            
+
         Route::post('/admin/peminjaman/{id}/validasi', [AdminPeminjamanController::class, 'validasi'])
             ->name('admin.peminjaman.validasi');
 
-
-        // ✅ Admin validasi pengajuan selesai
         Route::post('/admin/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])
             ->name('admin.peminjaman.validate');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Role: Dosen
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware('role:dosen')->group(function () {
-        Route::get('/dosen/dashboard', [DashboardController::class, 'dosen'])
-            ->name('dosen.dashboard');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Role: Staff
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware('role:staff')->group(function () {
-        Route::get('/staff/dashboard', [DashboardController::class, 'staff'])
-            ->name('staff.dashboard');
     });
 });
