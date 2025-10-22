@@ -67,7 +67,7 @@
         <thead>
             <tr>
                 <th style="width:48px">No</th>
-                <th>Nama Mahasiswa</th>
+                <th>Nama Peminjam</th>
                 <th>Dipinjam</th>
                 <th>Keperluan</th>
                 <th style="width:140px">Status</th>

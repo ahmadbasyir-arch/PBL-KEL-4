@@ -53,97 +53,82 @@
     </div>
 </form>
 
-{{-- Data untuk JS; pastikan selalu array (fallback ke []) --}}
+{{-- Data untuk JS --}}
 <script>
     const availableItems = @json($listData ?? []);
     if (!Array.isArray(availableItems)) {
         console.warn('⚠️ availableItems bukan array, set default []');
-        availableItems = [];
     }
 </script>
 
-
-{{-- Script Dinamis Tambah/Hapus Item --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const itemContainer = document.getElementById('item-container');
-        const addItemButton = document.getElementById('addItem');
-        let itemCount = 0;
+document.addEventListener('DOMContentLoaded', function() {
+    const itemContainer = document.getElementById('item-container');
+    const addItemButton = document.getElementById('addItem');
+    let itemCount = 0;
 
-        // Jika tidak ada item tersedia, tampilkan pesan dan disable tombol tambah
-        function showNoItemsMessage() {
-            itemContainer.innerHTML = '<div class="no-items" style="color:#666; padding:8px 0;">Tidak ada data {{ $jenis }} tersedia.</div>';
-            addItemButton.setAttribute('disabled', 'disabled');
+    function showNoItemsMessage() {
+        itemContainer.innerHTML = '<div class="no-items" style="color:#666; padding:8px 0;">Tidak ada data {{ $jenis }} tersedia.</div>';
+        addItemButton.setAttribute('disabled', 'disabled');
+    }
+
+    function clearNoItemsMessage() {
+        if (itemContainer.querySelector('.no-items')) {
+            itemContainer.innerHTML = '';
         }
+        addItemButton.removeAttribute('disabled');
+    }
 
-        function clearNoItemsMessage() {
-            if (itemContainer.querySelector('.no-items')) {
-                itemContainer.innerHTML = '';
-            }
-            addItemButton.removeAttribute('disabled');
-        }
+    function createItemRow() {
+        if (!Array.isArray(availableItems) || availableItems.length === 0) return;
+        itemCount++;
+        const div = document.createElement('div');
+        div.className = 'item-row';
+        div.id = `item-row-${itemCount}`;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.marginBottom = '10px';
 
-        function createItemRow() {
-            // Jika tidak ada availableItems, jangan buat baris
-            if (!Array.isArray(availableItems) || availableItems.length === 0) {
-                return;
-            }
-
-            itemCount++;
-            const div = document.createElement('div');
-            div.className = 'item-row';
-            div.id = `item-row-${itemCount}`;
-            div.style.display = 'flex';
-            div.style.alignItems = 'center';
-            div.style.marginBottom = '10px';
-
-            let optionsHtml = '<option value="">-- Pilih Item --</option>';
-            availableItems.forEach(item => {
-                const itemName = item.namaRuangan || item.namaUnit || item.name || '';
-                optionsHtml += `<option value="${item.id}">${itemName}</option>`;
-            });
-
-            div.innerHTML = `
-                <select name="items[][id]" class="form-control" required style="flex: 1;">
-                    ${optionsHtml}
-                </select>
-                <button type="button" class="btn btn-danger btn-sm removeItem" data-row-id="${itemCount}" style="margin-left: 10px;">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-            itemContainer.appendChild(div);
-        }
-
-        addItemButton.addEventListener('click', createItemRow);
-
-        itemContainer.addEventListener('click', function(e) {
-            if (e.target.closest('.removeItem')) {
-                const button = e.target.closest('.removeItem');
-                const rowId = button.getAttribute('data-row-id');
-                const rowToRemove = document.getElementById(`item-row-${rowId}`);
-                if (rowToRemove) rowToRemove.remove();
-
-                // Jika setelah remove semua baris, tambahkan message bila tidak ada availableItems
-                if (itemContainer.querySelectorAll('.item-row').length === 0 && (!availableItems || availableItems.length === 0)) {
-                    showNoItemsMessage();
-                }
-            }
+        let optionsHtml = '<option value="">-- Pilih Item --</option>';
+        availableItems.forEach(item => {
+            const itemName = item.namaRuangan || item.namaUnit || item.name || '';
+            optionsHtml += `<option value="${item.id}">${itemName}</option>`;
         });
 
-        // Inisialisasi: jika availableItems kosong, tampilkan pesan. Jika ada, tampilkan 1 dropdown.
-        if (!Array.isArray(availableItems) || availableItems.length === 0) {
-            showNoItemsMessage();
-        } else {
-            clearNoItemsMessage();
-            createItemRow();
-        }
+        div.innerHTML = `
+            <select name="items[][id]" class="form-control" required style="flex: 1;">
+                ${optionsHtml}
+            </select>
+            <button type="button" class="btn btn-danger btn-sm removeItem" data-row-id="${itemCount}" style="margin-left: 10px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        itemContainer.appendChild(div);
+    }
 
-        // Batasi tanggal minimal hari ini
-        const today = new Date().toISOString().split('T')[0];
-        const tanggalInput = document.getElementById('tanggalPinjam');
-        if (tanggalInput) {
-            tanggalInput.setAttribute('min', today);
+    addItemButton.addEventListener('click', createItemRow);
+
+    itemContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.removeItem')) {
+            const button = e.target.closest('.removeItem');
+            const rowId = button.getAttribute('data-row-id');
+            const rowToRemove = document.getElementById(`item-row-${rowId}`);
+            if (rowToRemove) rowToRemove.remove();
         }
     });
+
+    if (!Array.isArray(availableItems) || availableItems.length === 0) {
+        showNoItemsMessage();
+    } else {
+        clearNoItemsMessage();
+        createItemRow();
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const tanggalInput = document.getElementById('tanggalPinjam');
+    if (tanggalInput) {
+        tanggalInput.setAttribute('min', today);
+    }
+});
 </script>
 @endsection

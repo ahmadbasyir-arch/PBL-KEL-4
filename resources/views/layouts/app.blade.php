@@ -61,40 +61,42 @@
             </div>
 
             {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
-            <ul class="sidebar-menu">
-                <li class="{{ Route::is('dashboard') || Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') ? 'active' : '' }}">
-                    <a href="{{
-                        ($user->role ?? null) === 'admin' ? route('admin.dashboard') :
-                        (($user->role ?? null) === 'mahasiswa' ? route('dashboard') :
-                        (($user->role ?? null) === 'dosen' ? route('mahasiswa.dashboard') : '#'))
-                    }}">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a>
+<ul class="sidebar-menu">
+    <li class="{{ Route::is('dashboard') || Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') ? 'active' : '' }}">
+        <a href="{{ ($user->role ?? null) === 'admin' ? route('admin.dashboard') : (($user->role ?? null) === 'mahasiswa' ? route('dashboard') : (($user->role ?? null) === 'dosen' ? route('dashboard') : '#')) }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+    </li>
+
+    {{-- === Jika role Mahasiswa atau Dosen === --}}
+    @if(in_array(($user->role ?? null), ['mahasiswa', 'dosen']))
+        <li class="has-submenu {{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'active open' : '' }}">
+            <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
+            <ul class="submenu" style="{{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'display:block;' : 'display:none;' }}">
+                <li class="{{ request()->is('peminjaman/create*') && request()->query('jenis') == 'ruangan' ? 'active' : '' }}">
+                    <a href="{{ route('peminjaman.create', ['jenis' => 'ruangan']) }}">Ruangan</a>
                 </li>
-
-                {{-- === Jika role Mahasiswa === --}}
-                @if(($user->role ?? null) === 'mahasiswa')
-                    <li class="has-submenu {{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'active open' : '' }}">
-                        <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
-                        <ul class="submenu" style="{{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'display:block;' : 'display:none;' }}">
-                            <li class="{{ request()->is('peminjaman/create*') && request()->query('jenis') == 'ruangan' ? 'active' : '' }}"><a href="{{ route('peminjaman.create', ['jenis' => 'ruangan']) }}"> Ruangan</a></li>
-                            <li class="{{ request()->is('peminjaman/create*') && request()->query('jenis') == 'unit' ? 'active' : '' }}"><a href="{{ route('peminjaman.create', ['jenis' => 'unit']) }}"> Unit</a></li>
-                        </ul>
-                    </li>
-                    <li class="{{ request()->is('riwayat*') ? 'active' : '' }}"><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
-
-                {{-- === Jika role Admin / Staff === --}}
-                @elseif(in_array($user->role ?? '', ['admin', 'staff']))
-                    <li class="{{ request()->is('ruangan*') ? 'active' : '' }}"><a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a></li>
-                    <li class="{{ request()->is('users*') ? 'active' : '' }}"><a href="#"><i class="fas fa-users"></i> Data Pengguna</a></li>
-                    <li class="{{ request()->is('settings*') ? 'active' : '' }}"><a href="#"><i class="fas fa-cogs"></i> Pengaturan</a></li>
-
-                {{-- === Jika role Dosen === --}}
-                @elseif(($user->role ?? null) === 'dosen')
-                    <li class="{{ request()->is('dosen/peminjaman*') ? 'active' : '' }}"><a href="#"><i class="fas fa-clipboard-list"></i> Daftar Peminjaman</a></li>
-                    <li class="{{ request()->is('riwayat*') ? 'active' : '' }}"><a href="#"><i class="fas fa-history"></i> Riwayat</a></li>
-                @endif
+                <li class="{{ request()->is('peminjaman/create*') && request()->query('jenis') == 'unit' ? 'active' : '' }}">
+                    <a href="{{ route('peminjaman.create', ['jenis' => 'unit']) }}">Unit</a>
+                </li>
             </ul>
+        </li>
+        <li class="{{ request()->is('riwayat*') ? 'active' : '' }}">
+            <a href="#"><i class="fas fa-history"></i> Riwayat</a>
+        </li>
+    {{-- === Jika role Admin / Staff === --}}
+    @elseif(in_array($user->role ?? '', ['admin', 'staff']))
+        <li class="{{ request()->is('ruangan*') ? 'active' : '' }}">
+            <a href="#"><i class="fas fa-door-open"></i> Data Ruangan</a>
+        </li>
+        <li class="{{ request()->is('users*') ? 'active' : '' }}">
+            <a href="#"><i class="fas fa-users"></i> Data Pengguna</a>
+        </li>
+        <li class="{{ request()->is('settings*') ? 'active' : '' }}">
+            <a href="#"><i class="fas fa-cogs"></i> Pengaturan</a>
+        </li>
+    @endif
+</ul>
         </div>
         @endif
 

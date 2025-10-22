@@ -17,7 +17,9 @@ class PeminjamanController extends Controller
             ? Unit::orderBy('namaUnit', 'asc')->get(['id', 'namaUnit'])
             : Ruangan::orderBy('namaRuangan', 'asc')->get(['id', 'namaRuangan']);
 
-        return view('mahasiswa.peminjaman_form', compact('jenis', 'listData'));
+        $user = Auth::user(); // ✅ Tambahkan agar role bisa diketahui di view
+
+        return view('mahasiswa.peminjaman_form', compact('jenis', 'listData', 'user'));
     }
 
     public function store(Request $request)
@@ -36,16 +38,16 @@ class PeminjamanController extends Controller
                 : 'required|integer|exists:ruangan,id',
         ]);
 
-        $user = Auth::user(); // ✅ user login saat ini (mahasiswa)
+        $user = Auth::user();
 
-        // 🔒 Pastikan user yang login bukan admin
-        if ($user->role !== 'mahasiswa') {
-            return redirect()->back()->with('error', 'Hanya mahasiswa yang dapat melakukan peminjaman.');
+        // 🔧 Sekarang mahasiswa & dosen boleh melakukan peminjaman
+        if (!in_array($user->role, ['mahasiswa', 'dosen'])) {
+            return redirect()->back()->with('error', 'Hanya mahasiswa atau dosen yang dapat melakukan peminjaman.');
         }
 
         foreach ($validated['items'] as $item) {
             Peminjaman::create([
-                'idMahasiswa'   => $user->id, // ✅ perbaikan utama: simpan id user login
+                'idMahasiswa'   => $user->id, // tetap kolom ini
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
