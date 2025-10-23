@@ -15,7 +15,7 @@ class AdminRuanganController extends Controller
 
     public function create()
     {
-        // 🔹 ubah view ke sidebar-ruangan dengan mode 'create'
+        // mode create dikirim agar bisa dipakai di view
         return view('admin.sidebar-ruangan', ['mode' => 'create']);
     }
 
@@ -23,25 +23,28 @@ class AdminRuanganController extends Controller
     {
         $request->validate([
             'namaRuangan' => 'required|string|max:100|unique:ruangan,namaRuangan',
+            'lokasi' => 'required|string|max:100',
             'kapasitas' => 'required|integer|min:1',
-            'fasilitas' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:50'
         ]);
 
         Ruangan::create([
             'namaRuangan' => $request->namaRuangan,
+            'lokasi' => $request->lokasi,
             'kapasitas' => $request->kapasitas,
-            'fasilitas' => $request->fasilitas,
-            'status' => 'tersedia',
+            'status' => $request->status ?? 'tersedia',
         ]);
 
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil ditambahkan!');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Ruangan berhasil ditambahkan!');
     }
 
     public function edit($id)
     {
         $ruangan = Ruangan::findOrFail($id);
-        // 🔹 ubah view ke sidebar-ruangan dengan mode 'edit'
-        return view('admin.sidebar-ruangan', compact('ruangan'))->with('mode', 'edit');
+        return view('admin.sidebar-ruangan', [
+            'mode' => 'edit',
+            'ruangan' => $ruangan
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -50,13 +53,14 @@ class AdminRuanganController extends Controller
 
         $request->validate([
             'namaRuangan' => 'required|string|max:100|unique:ruangan,namaRuangan,' . $id,
+            'lokasi' => 'required|string|max:100',
             'kapasitas' => 'required|integer|min:1',
-            'fasilitas' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:50'
         ]);
 
-        $ruangan->update($request->only(['namaRuangan', 'kapasitas', 'fasilitas']));
+        $ruangan->update($request->only(['namaRuangan', 'lokasi', 'kapasitas', 'status']));
 
-        return redirect()->route('ruangan.index')->with('success', 'Data ruangan berhasil diperbarui!');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Data ruangan berhasil diperbarui!');
     }
 
     public function destroy($id)
@@ -64,13 +68,15 @@ class AdminRuanganController extends Controller
         $ruangan = Ruangan::findOrFail($id);
         $ruangan->delete();
 
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil dihapus!');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Ruangan berhasil dihapus!');
     }
 
     public function show($id)
     {
         $ruangan = Ruangan::findOrFail($id);
-        // 🔹 ubah view ke sidebar-ruangan dengan mode 'show'
-        return view('admin.sidebar-ruangan', compact('ruangan'))->with('mode', 'show');
+        return view('admin.sidebar-ruangan', [
+            'mode' => 'show',
+            'ruangan' => $ruangan
+        ]);
     }
 }

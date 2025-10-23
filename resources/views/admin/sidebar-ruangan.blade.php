@@ -39,15 +39,17 @@
             </div>
 
             <div class="form-group">
-                <label>Kapasitas</label>
-                <input type="number" name="kapasitas" class="form-control"
-                    value="{{ old('kapasitas', $ruangan->kapasitas ?? '') }}"
+                <label>Lokasi</label>
+                <input type="text" name="lokasi" class="form-control"
+                    value="{{ old('lokasi', $ruangan->lokasi ?? '') }}"
                     {{ $mode == 'show' ? 'readonly' : '' }}>
             </div>
 
             <div class="form-group">
-                <label>Fasilitas</label>
-                <textarea name="fasilitas" class="form-control" {{ $mode == 'show' ? 'readonly' : '' }}>{{ old('fasilitas', $ruangan->fasilitas ?? '') }}</textarea>
+                <label>Kapasitas</label>
+                <input type="number" name="kapasitas" class="form-control"
+                    value="{{ old('kapasitas', $ruangan->kapasitas ?? '') }}"
+                    {{ $mode == 'show' ? 'readonly' : '' }}>
             </div>
 
             <div class="form-group">
@@ -85,8 +87,8 @@
         <thead>
             <tr>
                 <th>Nama Ruangan</th>
+                <th>Lokasi</th>
                 <th>Kapasitas</th>
-                <th>Fasilitas</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
@@ -95,8 +97,8 @@
             @forelse ($ruangan as $item)
                 <tr>
                     <td><strong>{{ $item->namaRuangan }}</strong></td>
+                    <td>{{ $item->lokasi ?? '-' }}</td>
                     <td>{{ $item->kapasitas }} orang</td>
-                    <td>{{ $item->fasilitas ?? '-' }}</td>
                     <td>
                         <span class="status-badge status-{{ Str::slug($item->status) }}">
                             {{ ucfirst($item->status) }}

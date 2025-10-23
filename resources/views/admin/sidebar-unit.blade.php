@@ -11,6 +11,7 @@
     <div class="success-message">{{ session('success') }}</div>
 @endif
 
+{{-- ============ MODE TAMBAH / EDIT / DETAIL ============ --}}
 @if (isset($mode) && in_array($mode, ['create', 'edit', 'show']))
     <div class="card p-4">
         <h3>
@@ -31,6 +32,13 @@
             @endif
 
             <div class="form-group">
+                <label>Kode Unit</label>
+                <input type="text" name="kodeUnit" class="form-control"
+                    value="{{ old('kodeUnit', $unit->kodeUnit ?? '') }}" 
+                    {{ $mode == 'show' ? 'readonly' : '' }}>
+            </div>
+
+            <div class="form-group">
                 <label>Nama Unit</label>
                 <input type="text" name="namaUnit" class="form-control"
                     value="{{ old('namaUnit', $unit->namaUnit ?? '') }}" 
@@ -38,15 +46,10 @@
             </div>
 
             <div class="form-group">
-                <label>Jumlah</label>
-                <input type="number" name="jumlah" class="form-control"
-                    value="{{ old('jumlah', $unit->jumlah ?? '') }}"
+                <label>Kategori</label>
+                <input type="text" name="kategori" class="form-control"
+                    value="{{ old('kategori', $unit->kategori ?? '') }}" 
                     {{ $mode == 'show' ? 'readonly' : '' }}>
-            </div>
-
-            <div class="form-group">
-                <label>Keterangan</label>
-                <textarea name="keterangan" class="form-control" {{ $mode == 'show' ? 'readonly' : '' }}>{{ old('keterangan', $unit->keterangan ?? '') }}</textarea>
             </div>
 
             <div class="form-group">
@@ -74,6 +77,7 @@
         </form>
     </div>
 @else
+{{-- ============ MODE INDEX (DAFTAR) ============ --}}
 <a href="{{ route('admin.unit.create') }}" class="btn btn-primary btn-sm">
     <i class="fas fa-plus"></i> Tambah Unit
 </a>
@@ -82,9 +86,9 @@
     <table class="data-table">
         <thead>
             <tr>
+                <th>Kode Unit</th>
                 <th>Nama Unit</th>
-                <th>Jumlah</th>
-                <th>Keterangan</th>
+                <th>Kategori</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
@@ -92,9 +96,9 @@
         <tbody>
             @forelse ($unit as $item)
                 <tr>
-                    <td><strong>{{ $item->namaUnit }}</strong></td>
-                    <td>{{ $item->jumlah }}</td>
-                    <td>{{ $item->keterangan ?? '-' }}</td>
+                    <td><strong>{{ $item->kodeUnit }}</strong></td>
+                    <td>{{ $item->namaUnit }}</td>
+                    <td>{{ $item->kategori ?? '-' }}</td>
                     <td>
                         <span class="status-badge status-{{ Str::slug($item->status) }}">
                             {{ ucfirst($item->status) }}

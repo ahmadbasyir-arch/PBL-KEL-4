@@ -15,23 +15,22 @@ class AdminUnitController extends Controller
 
     public function create()
     {
-        // 🔹 ubah view ke sidebar-unit dengan mode 'create'
-        return view('admin.sidebar-unit', ['mode' => 'create']);
+        // tidak ubah logika, hanya pastikan route create berfungsi
+        return view('admin.unit.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'kodeUnit' => 'required|string|max:20|unique:unit,kodeUnit',
             'namaUnit' => 'required|string|max:100|unique:unit,namaUnit',
-            'jumlah' => 'required|integer|min:1',
-            'keterangan' => 'nullable|string|max:255',
+            'kategori' => 'nullable|string|max:100',
         ]);
 
         Unit::create([
+            'kodeUnit' => $request->kodeUnit,
             'namaUnit' => $request->namaUnit,
-            'jumlah' => $request->jumlah,
-            'keterangan' => $request->keterangan,
-            'status' => 'tersedia',
+            'kategori' => $request->kategori,
         ]);
 
         return redirect()->route('unit.index')->with('success', 'Unit berhasil ditambahkan!');
@@ -40,8 +39,7 @@ class AdminUnitController extends Controller
     public function edit($id)
     {
         $unit = Unit::findOrFail($id);
-        // 🔹 ubah view ke sidebar-unit dengan mode 'edit'
-        return view('admin.sidebar-unit', compact('unit'))->with('mode', 'edit');
+        return view('admin.unit.edit', compact('unit'));
     }
 
     public function update(Request $request, $id)
@@ -49,12 +47,12 @@ class AdminUnitController extends Controller
         $unit = Unit::findOrFail($id);
 
         $request->validate([
+            'kodeUnit' => 'required|string|max:20|unique:unit,kodeUnit,' . $id,
             'namaUnit' => 'required|string|max:100|unique:unit,namaUnit,' . $id,
-            'jumlah' => 'required|integer|min:1',
-            'keterangan' => 'nullable|string|max:255',
+            'kategori' => 'nullable|string|max:100',
         ]);
 
-        $unit->update($request->only(['namaUnit', 'jumlah', 'keterangan']));
+        $unit->update($request->only(['kodeUnit', 'namaUnit', 'kategori']));
 
         return redirect()->route('unit.index')->with('success', 'Data unit berhasil diperbarui!');
     }
@@ -70,7 +68,6 @@ class AdminUnitController extends Controller
     public function show($id)
     {
         $unit = Unit::findOrFail($id);
-        // 🔹 ubah view ke sidebar-unit dengan mode 'show'
-        return view('admin.sidebar-unit', compact('unit'))->with('mode', 'show');
+        return view('admin.unit.show', compact('unit'));
     }
 }
