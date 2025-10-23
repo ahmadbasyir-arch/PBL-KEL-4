@@ -182,9 +182,102 @@
         });
     </script>
 
-    {{-- ==== CSS TAMBAHAN UNTUK AVATAR & SIDEBAR AKTIF ==== --}}
+    {{-- ==== CSS TAMBAHAN UNTUK TAMPAK LEBIH RAPI ==== --}}
     <style>
-        /* ... (CSS kamu tidak diubah sama sekali) ... */
+        .sidebar-menu li {
+            transition: background 0.3s, padding-left 0.3s;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            color: #f1f1f1;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .sidebar-menu li.active > a,
+        .sidebar-menu li a:hover {
+            background-color: #1e88e5;
+            color: #fff;
+            font-weight: 600;
+            padding-left: 22px;
+        }
+
+        .sidebar-menu .submenu {
+            margin-left: 15px;
+            border-left: 2px solid #1e88e5;
+            padding-left: 10px;
+            margin-top: 4px;
+        }
+
+        .submenu li a {
+            color: #dcdcdc;
+            padding: 8px 10px;
+            display: block;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .submenu li.active a,
+        .submenu li a:hover {
+            background-color: #1565c0;
+            color: #fff;
+            font-weight: 600;
+            padding-left: 15px;
+        }
+
+        .sidebar-user {
+            background-color: #243447;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            text-align: center;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        .sidebar-user h3 {
+            font-size: 14px;
+            margin-top: 5px;
+            color: #fff;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        .sidebar-user p {
+            color: #9bbbd4;
+            font-size: 12px;
+            margin: 2px 0 0 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 100%;
+            display: block;
+        }
+
+        .avatar-placeholder {
+            width: 48px;
+            height: 48px;
+            background-color: #1e88e5;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        .submenu li.active a::before {
+            content: "• ";
+            color: #fff;
+            margin-right: 5px;
+        }
     </style>
 </body>
 </html>
