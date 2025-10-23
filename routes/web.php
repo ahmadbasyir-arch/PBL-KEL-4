@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\AdminRuanganController;
+use App\Http\Controllers\AdminUnitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +45,42 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Role: Mahasiswa & Dosen (digabung)
+    | Role: Admin (semua fitur admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+        // Dashboard admin
+        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+
+        // 🔹 Data Ruangan (CRUD)
+        Route::get('/ruangan', [AdminRuanganController::class, 'index'])->name('admin.ruangan.index');
+        Route::get('/ruangan/create', [AdminRuanganController::class, 'create'])->name('admin.ruangan.create');
+        Route::post('/ruangan', [AdminRuanganController::class, 'store'])->name('admin.ruangan.store');
+        Route::get('/ruangan/{id}/edit', [AdminRuanganController::class, 'edit'])->name('admin.ruangan.edit');
+        Route::put('/ruangan/{id}', [AdminRuanganController::class, 'update'])->name('admin.ruangan.update');
+        Route::delete('/ruangan/{id}', [AdminRuanganController::class, 'destroy'])->name('admin.ruangan.destroy');
+        Route::get('/ruangan/{id}', [AdminRuanganController::class, 'show'])->name('admin.ruangan.show');
+
+        // 🔹 Data Unit (CRUD)
+        Route::get('/unit', [AdminUnitController::class, 'index'])->name('admin.unit.index');
+        Route::get('/unit/create', [AdminUnitController::class, 'create'])->name('admin.unit.create');
+        Route::post('/unit', [AdminUnitController::class, 'store'])->name('admin.unit.store');
+        Route::get('/unit/{id}/edit', [AdminUnitController::class, 'edit'])->name('admin.unit.edit');
+        Route::put('/unit/{id}', [AdminUnitController::class, 'update'])->name('admin.unit.update');
+        Route::delete('/unit/{id}', [AdminUnitController::class, 'destroy'])->name('admin.unit.destroy');
+        Route::get('/unit/{id}', [AdminUnitController::class, 'show'])->name('admin.unit.show');
+
+        // 🔹 Peminjaman
+        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
+        Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');
+        Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
+        Route::post('/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.complete');
+        Route::post('/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])->name('admin.peminjaman.validate');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role: Mahasiswa & Dosen
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:mahasiswa,dosen')->group(function () {
@@ -57,31 +94,5 @@ Route::middleware('auth')->group(function () {
         // Ajukan selesai
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
             ->name('peminjaman.ajukanSelesai');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Role: Admin & Staff (digabung)
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware('role:admin,staff')->group(function () {
-        Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
-            ->name('admin.dashboard');
-
-        Route::post('/admin/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])
-            ->name('admin.peminjaman.approve');
-        Route::post('/admin/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])
-            ->name('admin.peminjaman.reject');
-        Route::post('/admin/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])
-            ->name('admin.peminjaman.complete');
-
-        Route::get('/admin/peminjaman', [AdminPeminjamanController::class, 'index'])
-            ->name('admin.peminjaman.index');
-
-        Route::post('/admin/peminjaman/{id}/validasi', [AdminPeminjamanController::class, 'validasi'])
-            ->name('admin.peminjaman.validasi');
-
-        Route::post('/admin/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])
-            ->name('admin.peminjaman.validate');
     });
 });
