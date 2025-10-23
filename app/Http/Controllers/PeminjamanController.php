@@ -17,7 +17,7 @@ class PeminjamanController extends Controller
             ? Unit::orderBy('namaUnit', 'asc')->get(['id', 'namaUnit'])
             : Ruangan::orderBy('namaRuangan', 'asc')->get(['id', 'namaRuangan']);
 
-        $user = Auth::user(); // ✅ Tambahkan agar role bisa diketahui di view
+        $user = Auth::user(); 
 
         return view('mahasiswa.peminjaman_form', compact('jenis', 'listData', 'user'));
     }
