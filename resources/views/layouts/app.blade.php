@@ -87,9 +87,9 @@
         <li class="{{ request()->is('admin/unit*') ? 'active' : '' }}">
             <a href="{{ route('admin.unit.index') }}"><i class="fas fa-video"></i> Data Unit</a>
         </li>
-        <li class="{{ request()->is('admin/users*') ? 'active' : '' }}">
-            <a href="#"><i class="fas fa-users"></i> Data Pengguna</a>
-        </li>
+        <li class="{{ request()->is('admin/pengguna*') ? 'active' : '' }}">
+    <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
+</li>
         <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
             <a href="#"><i class="fas fa-cogs"></i> Pengaturan</a>
         </li>
