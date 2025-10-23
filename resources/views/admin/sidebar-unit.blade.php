@@ -5,6 +5,7 @@
 @section('content')
 <div class="section-header">
     <h1>Manajemen Data Unit</h1>
+    <p>Kelola data unit peralatan dengan tampilan ringkas dan elegan.</p>
 </div>
 
 @if (session('success'))
@@ -13,8 +14,8 @@
 
 {{-- ============ MODE TAMBAH / EDIT / DETAIL ============ --}}
 @if (isset($mode) && in_array($mode, ['create', 'edit', 'show']))
-    <div class="card p-4">
-        <h3>
+    <div class="card p-4 shadow-sm">
+        <h3 class="mb-3">
             @if ($mode == 'create')
                 Tambah Unit Baru
             @elseif ($mode == 'edit')
@@ -23,6 +24,7 @@
                 Detail Unit
             @endif
         </h3>
+
         <form 
             action="{{ $mode == 'create' ? route('admin.unit.store') : ($mode == 'edit' ? route('admin.unit.update', $unit->id) : '#') }}" 
             method="POST">
@@ -31,28 +33,28 @@
                 @method('PUT')
             @endif
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Kode Unit</label>
                 <input type="text" name="kodeUnit" class="form-control"
                     value="{{ old('kodeUnit', $unit->kodeUnit ?? '') }}" 
                     {{ $mode == 'show' ? 'readonly' : '' }}>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Nama Unit</label>
                 <input type="text" name="namaUnit" class="form-control"
                     value="{{ old('namaUnit', $unit->namaUnit ?? '') }}" 
                     {{ $mode == 'show' ? 'readonly' : '' }}>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Kategori</label>
                 <input type="text" name="kategori" class="form-control"
                     value="{{ old('kategori', $unit->kategori ?? '') }}" 
                     {{ $mode == 'show' ? 'readonly' : '' }}>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Status</label>
                 <select name="status" class="form-control" {{ $mode == 'show' ? 'disabled' : '' }}>
                     @foreach (['tersedia', 'dipinjam', 'perawatan'] as $status)
@@ -66,7 +68,7 @@
 
             <div class="mt-3">
                 @if ($mode != 'show')
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success shadow-sm">
                         <i class="fas fa-save"></i> Simpan
                     </button>
                 @endif
@@ -78,11 +80,14 @@
     </div>
 @else
 {{-- ============ MODE INDEX (DAFTAR) ============ --}}
-<a href="{{ route('admin.unit.create') }}" class="btn btn-primary btn-sm">
-    <i class="fas fa-plus"></i> Tambah Unit
-</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Daftar Unit</h3>
+    <a href="{{ route('admin.unit.create') }}" class="btn btn-primary shadow-sm">
+        <i class="fas fa-plus"></i> Tambah Unit
+    </a>
+</div>
 
-<div class="table-container mt-3">
+<div class="card p-3 shadow-sm">
     <table class="data-table">
         <thead>
             <tr>
@@ -90,7 +95,7 @@
                 <th>Nama Unit</th>
                 <th>Kategori</th>
                 <th>Status</th>
-                <th>Aksi</th>
+                <th style="width:180px;">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -105,19 +110,19 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ route('admin.unit.show', $item->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</a>
-                        <a href="{{ route('admin.unit.edit', $item->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
-                        <form action="{{ route('admin.unit.destroy', $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus unit ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Hapus</button>
-                        </form>
+                        <div class="action-buttons">
+                            <a href="{{ route('admin.unit.show', $item->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                            <a href="{{ route('admin.unit.edit', $item->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                            <form action="{{ route('admin.unit.destroy', $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus unit ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
-                <tr>
-                    <td colspan="5" class="text-center">Belum ada data unit.</td>
-                </tr>
+                <tr><td colspan="5" class="text-center text-muted py-3">Belum ada data unit.</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -125,10 +130,32 @@
 @endif
 
 <style>
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.data-table th {
+    background: #f6f7f9;
+    padding: 12px;
+    text-align: left;
+    font-weight: 700;
+    color: #333;
+}
+.data-table td {
+    padding: 12px;
+    border-top: 1px solid #eee;
+    color: #333;
+}
+.data-table tbody tr:hover { background: #fafafa; }
+.action-buttons { display: flex; gap: 6px; }
 .status-badge {
     padding: 5px 10px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
+    font-size: 0.9rem;
 }
 .status-tersedia { background: #d4edda; color: #155724; }
 .status-dipinjam { background: #f8d7da; color: #721c24; }
