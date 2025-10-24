@@ -26,6 +26,35 @@ Route::middleware('guest')->group(function () {
     // Login via Google
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+    
+});
+/*
+|--------------------------------------------------------------------------
+| Rute untuk pengguna yang belum login
+|--------------------------------------------------------------------------
+*/
+/*
+|--------------------------------------------------------------------------
+| Rute untuk pengguna yang belum login
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    // Halaman utama publik (Free User)
+    Route::get('/', function () {
+        return view('freeuser.home');
+    })->name('freeuser.home');
+
+    // Login dan register
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Login via Google
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
 /*
@@ -76,6 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
         Route::post('/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.complete');
         Route::post('/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])->name('admin.peminjaman.validate');
+        
     });
 
     /*
@@ -93,6 +123,23 @@ Route::middleware('auth')->group(function () {
 
         // Ajukan selesai
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
-            ->name('peminjaman.ajukanSelesai');
+            ->name('peminjaman.ajukanSelesai');     
+            
     });
+
+    /*
+|--------------------------------------------------------------------------
+| Rute publik (tanpa login)
+|--------------------------------------------------------------------------
+*/
+
+// Halaman utama Free User
+Route::get('/', function () {
+    return view('freeuser.home');
+})->name('freeuser.home');
+
+// Daftar peminjaman (tanpa login)
+Route::get('/daftar-peminjaman', [App\Http\Controllers\PeminjamanController::class, 'index'])
+    ->name('peminjaman.index');
+
 });
