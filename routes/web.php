@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\AdminRuanganController;
 use App\Http\Controllers\AdminUnitController;
+use App\Http\Controllers\PenggunaController; // ✅ Tambahan baru
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/unit/{id}', [AdminUnitController::class, 'update'])->name('admin.unit.update');
         Route::delete('/unit/{id}', [AdminUnitController::class, 'destroy'])->name('admin.unit.destroy');
         Route::get('/unit/{id}', [AdminUnitController::class, 'show'])->name('admin.unit.show');
+
+        // 🔹 Data Pengguna (Mahasiswa & Dosen)
+        Route::get('/pengguna', [PenggunaController::class, 'index'])->name('admin.pengguna.index');
 
         // 🔹 Peminjaman
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
