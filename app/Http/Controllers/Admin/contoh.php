@@ -1,3 +1,1 @@
-contoh 1:
-
-Muhammad Fazar Rhahim
+Contoh 1 
