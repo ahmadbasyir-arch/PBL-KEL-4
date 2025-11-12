@@ -30,6 +30,15 @@ class GoogleController extends Controller
             return redirect('/login')->with('error', 'Gagal login dengan Google.');
         }
 
+        // [INI PENAMBAHANNYA]
+        // Validasi domain email
+        if (
+            !str_ends_with($googleUser->getEmail(), '@politala.ac.id') &&
+            !str_ends_with($googleUser->getEmail(), '@mhs.politala.ac.id')
+        ) {
+            return redirect('/login')->with('error', 'Login Google hanya diizinkan untuk email Politala.');
+        }
+
         // 🔍 Cek apakah user sudah ada berdasarkan google_id atau email
         $existingUser = User::where('google_id', $googleUser->getId())
             ->orWhere('email', $googleUser->getEmail())
@@ -63,7 +72,7 @@ class GoogleController extends Controller
             'google_id'    => $googleUser->getId(),
             'avatar'       => $googleUser->getAvatar(),
             'password'     => Hash::make(Str::random(16)),
-            'role'         => 'mahasiswa',
+            'role'         => 'mahasiswa', // Default role
             'is_completed' => 0,
         ]);
 
@@ -104,9 +113,9 @@ class GoogleController extends Controller
     public function storeCompleteProfile(Request $request)
     {
         $request->validate([
-            'nim'       => 'required|string|max:50|unique:users,nim,' . Auth::id(),
-            'role'      => 'required|in:mahasiswa,dosen',
-            'password'  => 'required|string|min:6|confirmed',
+            'nim'      => 'required|string|max:50|unique:users,nim,' . Auth::id(),
+            'role'     => 'required|in:mahasisw,dosen', // <-- Pastikan ini sesuai dengan enum di database Anda
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         /** @var \App\Models\User $user */
