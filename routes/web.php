@@ -28,17 +28,17 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
-
-    
+    // ✅ Tambahan baru untuk tombol Free User
+    Route::get('/login/free', function () {
+        // Di sini kamu bisa arahkan ke halaman khusus Free User atau langsung redirect
+        // Contoh: redirect ke halaman publik "freeuser.home"
+        return redirect()->route('freeuser.home');
+    })->name('free.login');
 });
+
 /*
 |--------------------------------------------------------------------------
-| Rute untuk pengguna yang belum login
-|--------------------------------------------------------------------------
-*/
-/*
-|--------------------------------------------------------------------------
-| Rute untuk pengguna yang belum login
+| Rute untuk pengguna yang belum login (halaman publik)
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -109,7 +109,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
         Route::post('/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.complete');
         Route::post('/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])->name('admin.peminjaman.validate');
-        
     });
 
     /*
@@ -127,23 +126,21 @@ Route::middleware('auth')->group(function () {
 
         // Ajukan selesai
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
-            ->name('peminjaman.ajukanSelesai');     
-            
+            ->name('peminjaman.ajukanSelesai');
     });
 
     /*
-|--------------------------------------------------------------------------
-| Rute publik (tanpa login)
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | Rute publik (tanpa login)
+    |--------------------------------------------------------------------------
+    */
 
-// Halaman utama Free User
-Route::get('/', function () {
-    return view('freeuser.home');
-})->name('freeuser.home');
+    // Halaman utama Free User
+    Route::get('/', function () {
+        return view('freeuser.home');
+    })->name('freeuser.home');
 
-// Daftar peminjaman (tanpa login)
-Route::get('/daftar-peminjaman', [App\Http\Controllers\PeminjamanController::class, 'index'])
-    ->name('peminjaman.index');
-
+    // Daftar peminjaman (tanpa login)
+    Route::get('/daftar-peminjaman', [App\Http\Controllers\PeminjamanController::class, 'index'])
+        ->name('peminjaman.index');
 });

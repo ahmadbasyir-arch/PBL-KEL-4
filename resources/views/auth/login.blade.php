@@ -71,6 +71,14 @@
 
                 <button type="submit" class="btn-login">Masuk</button>
 
+                {{-- ✅ Tombol login Free User (tambahan baru) --}}
+                <div class="text-center mt-3">
+                    <a href="{{ route('free.login') }}" class="btn-free-login">
+                        <i class="fas fa-user"></i>
+                        <span>Masuk sebagai Free User</span>
+                    </a>
+                </div>
+
                 {{-- ✅ Tombol login Google --}}
                 <div class="text-center mt-3">
                     <a href="{{ route('google.login') }}" class="btn-google-login">
@@ -106,6 +114,27 @@
         .btn-google-login:hover {
             background-color: #f5f5f5;
             border-color: #999;
+        }
+
+        /* ✅ Tombol Free User (tambahan baru) */
+        .btn-free-login {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            padding: 10px 0;
+            margin-top: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-free-login:hover {
+            background-color: #0056b3;
         }
 
         /* ✅ Styling checkbox agar sejajar & rapi */
