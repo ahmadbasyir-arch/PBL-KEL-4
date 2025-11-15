@@ -40,14 +40,13 @@ class PeminjamanController extends Controller
 
         $user = Auth::user();
 
-        // 🔧 Sekarang mahasiswa & dosen boleh melakukan peminjaman
         if (!in_array($user->role, ['mahasiswa', 'dosen'])) {
             return redirect()->back()->with('error', 'Hanya mahasiswa atau dosen yang dapat melakukan peminjaman.');
         }
 
         foreach ($validated['items'] as $item) {
             Peminjaman::create([
-                'idMahasiswa'   => $user->id, // tetap kolom ini
+                'idMahasiswa'   => $user->id,
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -73,5 +72,22 @@ class PeminjamanController extends Controller
         }
 
         return redirect()->back()->with('error', 'Peminjaman ini belum dapat diajukan selesai.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 METHOD BARU: RIWAYAT PEMINJAMAN
+    |--------------------------------------------------------------------------
+    */
+    public function riwayat()
+    {
+        $user = Auth::user();
+
+        // Ambil riwayat peminjaman user (mahasiswa/dosen)
+        $riwayat = Peminjaman::where('idMahasiswa', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('mahasiswa.riwayat', compact('riwayat', 'user'));
     }
 }

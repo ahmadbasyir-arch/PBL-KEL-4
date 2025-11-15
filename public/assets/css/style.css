@@ -900,3 +900,33 @@ hr {
     text-align: center;
     font-size: 0.9em;
 }
+/* FIX UNTUK HALAMAN RIWAYAT */
+.card {
+    width: 100%;
+    display: block;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    margin-bottom: 15px;
+}
+
+/* PERBESAR JUDUL RIWAYAT PEMINJAMAN */
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #26324a !important;
+    text-align: center !important;
+}
+.card-body {
+    width: 100%;
+}

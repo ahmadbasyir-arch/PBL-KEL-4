@@ -57,8 +57,20 @@
 
             {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
 <ul class="sidebar-menu">
-    <li class="{{ Route::is('dashboard') || Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') ? 'active' : '' }}">
-        <a href="{{ ($user->role ?? null) === 'admin' ? route('admin.dashboard') : (($user->role ?? null) === 'mahasiswa' ? route('dashboard') : (($user->role ?? null) === 'dosen' ? route('dashboard') : '#')) }}">
+
+    {{-- === DASHBOARD (Sudah Diperbaiki) === --}}
+    <li class="{{ Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') || Route::is('dosen.dashboard') ? 'active' : '' }}">
+        <a href="
+            @if($user->role === 'admin')
+                {{ route('admin.dashboard') }}
+            @elseif($user->role === 'mahasiswa')
+                {{ route('mahasiswa.dashboard') }}
+            @elseif($user->role === 'dosen')
+                {{ route('dosen.dashboard') }}
+            @else
+                #
+            @endif
+        ">
             <i class="fas fa-home"></i> Dashboard
         </a>
     </li>
@@ -76,9 +88,14 @@
                 </li>
             </ul>
         </li>
+
+        {{-- === R I W A Y A T === --}}
         <li class="{{ request()->is('riwayat*') ? 'active' : '' }}">
-            <a href="#"><i class="fas fa-history"></i> Riwayat</a>
+            <a href="{{ route('riwayat') }}">
+                <i class="fas fa-history"></i> Riwayat
+            </a>
         </li>
+
     {{-- === Jika role Admin / Staff === --}}
     @elseif(in_array($user->role ?? '', ['admin', 'staff']))
         <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
@@ -88,8 +105,8 @@
             <a href="{{ route('admin.unit.index') }}"><i class="fas fa-video"></i> Data Unit</a>
         </li>
         <li class="{{ request()->is('admin/pengguna*') ? 'active' : '' }}">
-    <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
-</li>
+            <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
+        </li>
         <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
             <a href="#"><i class="fas fa-cogs"></i> Pengaturan</a>
         </li>
@@ -119,7 +136,7 @@
                         <i class="fas fa-bell"></i>
                     </div>
 
-                    {{-- === FOTO PROFIL DI HEADER === --}}
+                    {{-- FOTO PROFIL HEADER --}}
                     <div class="profile-avatar" id="profileAvatar">
                         @if (!empty($user->foto_profil))
                             <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil" class="avatar-img">
@@ -128,10 +145,10 @@
                         @endif
                     </div>
 
-                    {{-- Dropdown Profil & Logout --}}
+                    {{-- DROPDOWN --}}
                     <div class="profile-dropdown" id="profileDropdown">
                         <a href="#"><i class="fas fa-user"></i> Lihat Profil</a>
-                        <a href="#"><i class="fas fa-history"></i> Aktivitas Saya</a>
+                        <a href="{{ route('riwayat') }}"><i class="fas fa-history"></i> Aktivitas Saya</a>
                         <div class="divider"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -182,7 +199,7 @@
         });
     </script>
 
-    {{-- ==== CSS TAMBAHAN UNTUK TAMPAK LEBIH RAPI ==== --}}
+    {{-- ==== CSS TAMBAHAN ==== --}}
     <style>
         .sidebar-menu li {
             transition: background 0.3s, padding-left 0.3s;
@@ -245,18 +262,12 @@
             word-break: break-word;
             line-height: 1.3;
             max-width: 100%;
-            overflow-wrap: break-word;
         }
 
         .sidebar-user p {
             color: #9bbbd4;
             font-size: 12px;
             margin: 2px 0 0 0;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            max-width: 100%;
-            display: block;
         }
 
         .avatar-placeholder {
