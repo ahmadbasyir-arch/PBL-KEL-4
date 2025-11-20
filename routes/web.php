@@ -10,10 +10,11 @@ use App\Http\Controllers\AdminRuanganController;
 use App\Http\Controllers\AdminUnitController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\FreeUserController;
 
 /*
 |--------------------------------------------------------------------------
-| Rute untuk pengguna yang belum login
+| Rute Guest (belum login)
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -25,24 +26,18 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    // Login via Google
+    // Login Google
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
-    // Tombol Free User
-    Route::get('/login/free', function () {
-        return redirect()->route('freeuser.home');
-    })->name('free.login');
-
-    // Halaman Free User
-    Route::get('/free', function () {
-        return view('freeuser.home');
-    })->name('freeuser.home');
+    // Free User
+    Route::get('/login/free', fn() => redirect()->route('freeuser.home'))->name('free.login');
+    Route::get('/free', [FreeUserController::class, 'index'])->name('freeuser.home');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Rute untuk pengguna yang sudah login
+| Rute Authenticated
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -50,7 +45,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Lengkapi profil Google
+    // Lengkapi Profil Google
     Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
     Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
@@ -59,15 +54,12 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Role: ADMIN
+    | ADMIN
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-
-        // Dashboard Admin
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
-        // CRUD Ruangan
         Route::resource('/ruangan', AdminRuanganController::class)->names([
             'index' => 'admin.ruangan.index',
             'create' => 'admin.ruangan.create',
@@ -78,7 +70,6 @@ Route::middleware('auth')->group(function () {
             'show' => 'admin.ruangan.show',
         ]);
 
-        // CRUD Unit
         Route::resource('/unit', AdminUnitController::class)->names([
             'index' => 'admin.unit.index',
             'create' => 'admin.unit.create',
@@ -89,10 +80,8 @@ Route::middleware('auth')->group(function () {
             'show' => 'admin.unit.show',
         ]);
 
-        // Pengguna
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('admin.pengguna.index');
 
-        // Peminjaman Admin
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
@@ -100,55 +89,49 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])->name('admin.peminjaman.validate');
     });
 
-
     /*
     |--------------------------------------------------------------------------
-    | Role: MAHASISWA (dashboard)
+    | Mahasiswa
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['auth','role:mahasiswa'])->group(function () {
+    Route::middleware(['role:mahasiswa'])->group(function () {
         Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])
             ->name('mahasiswa.dashboard');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Role: DOSEN (dashboard)
+    | Dosen
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['auth','role:dosen'])->group(function () {
+    Route::middleware(['role:dosen'])->group(function () {
         Route::get('/dosen/dashboard', [DashboardController::class, 'dosen'])
             ->name('dosen.dashboard');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Rute bersama Mahasiswa & Dosen
+    | Mahasiswa & Dosen
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['auth','role:mahasiswa,dosen'])->group(function () {
+    Route::middleware(['role:mahasiswa,dosen'])->group(function () {
 
-        // Form peminjaman
         Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])
             ->name('peminjaman.create');
 
         Route::post('/peminjaman/store', [PeminjamanController::class, 'store'])
             ->name('peminjaman.store');
 
-        // Ajukan selesai
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
             ->name('peminjaman.ajukanSelesai');
 
-        // 🔥 RIWAYAT BARU (pakai RiwayatController)
-        Route::get('/riwayat', [RiwayatController::class, 'index'])
-            ->name('riwayat');
+        Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
     });
-
 });
 
 /*
 |--------------------------------------------------------------------------
-| Halaman publik tanpa login
+| Halaman Publik
 |--------------------------------------------------------------------------
 */
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])

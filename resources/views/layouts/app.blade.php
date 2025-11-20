@@ -8,9 +8,14 @@
 </head>
 <body>
     <div class="container">
+
+        {{-- ==== DETEKSI HALAMAN FREE USER ==== --}}
+        @php
+            $isFreePage = request()->is('free');
+        @endphp
         
         {{-- ==== SIDEBAR ==== --}}
-        @if (!request()->is('lengkapi-profil'))
+        @if (!request()->is('lengkapi-profil') && !$isFreePage)
         <div class="sidebar">
             <div class="sidebar-header"><h2>Sarpras TI</h2></div>
 
@@ -58,14 +63,14 @@
             {{-- ==== MENU SIDEBAR SESUAI ROLE ==== --}}
 <ul class="sidebar-menu">
 
-    {{-- === DASHBOARD (Sudah Diperbaiki) === --}}
+    {{-- === DASHBOARD === --}}
     <li class="{{ Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') || Route::is('dosen.dashboard') ? 'active' : '' }}">
         <a href="
-            @if($user->role === 'admin')
+            @if(($user->role ?? '') === 'admin')
                 {{ route('admin.dashboard') }}
-            @elseif($user->role === 'mahasiswa')
+            @elseif(($user->role ?? '') === 'mahasiswa')
                 {{ route('mahasiswa.dashboard') }}
-            @elseif($user->role === 'dosen')
+            @elseif(($user->role ?? '') === 'dosen')
                 {{ route('dosen.dashboard') }}
             @else
                 #
@@ -76,7 +81,7 @@
     </li>
 
     {{-- === Jika role Mahasiswa atau Dosen === --}}
-    @if(in_array(($user->role ?? null), ['mahasiswa', 'dosen']))
+    @if(in_array(($user->role ?? ''), ['mahasiswa', 'dosen']))
         <li class="has-submenu {{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'active open' : '' }}">
             <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
             <ul class="submenu" style="{{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'display:block;' : 'display:none;' }}">
@@ -89,7 +94,6 @@
             </ul>
         </li>
 
-        {{-- === R I W A Y A T === --}}
         <li class="{{ request()->is('riwayat*') ? 'active' : '' }}">
             <a href="{{ route('riwayat') }}">
                 <i class="fas fa-history"></i> Riwayat
@@ -117,8 +121,9 @@
 
         {{-- ==== MAIN CONTENT ==== --}}
         <div class="main-content">
+
             {{-- ==== HEADER ==== --}}
-            @if (!request()->is('lengkapi-profil'))
+            @if (!request()->is('lengkapi-profil') && !$isFreePage)
             <div class="header header-dark">
                 <div class="header-left">
                     <div class="logos">
@@ -136,7 +141,6 @@
                         <i class="fas fa-bell"></i>
                     </div>
 
-                    {{-- FOTO PROFIL HEADER --}}
                     <div class="profile-avatar" id="profileAvatar">
                         @if (!empty($user->foto_profil))
                             <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil" class="avatar-img">
@@ -145,7 +149,6 @@
                         @endif
                     </div>
 
-                    {{-- DROPDOWN --}}
                     <div class="profile-dropdown" id="profileDropdown">
                         <a href="#"><i class="fas fa-user"></i> Lihat Profil</a>
                         <a href="{{ route('riwayat') }}"><i class="fas fa-history"></i> Aktivitas Saya</a>
@@ -199,7 +202,7 @@
         });
     </script>
 
-    {{-- ==== CSS TAMBAHAN ==== --}}
+    {{-- ==== CSS TAMBAHAN (TIDAK DIUBAH) ==== --}}
     <style>
         .sidebar-menu li {
             transition: background 0.3s, padding-left 0.3s;
