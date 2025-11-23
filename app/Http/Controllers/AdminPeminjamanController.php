@@ -21,10 +21,19 @@ class AdminPeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
+        /*
+        |--------------------------------------------------------------------------
+        | APPROVE
+        |--------------------------------------------------------------------------
+        */
         if ($request->is('admin/peminjaman/*/approve')) {
-            if ($peminjaman->status === 'pending') {
-                $peminjaman->status = 'digunakan';
 
+            if ($peminjaman->status === 'pending') {
+
+                // STATUS DISETUJUI
+                $peminjaman->status = 'disetujui';
+
+                // RUANGAN / UNIT DISET DIPINJAM
                 if ($peminjaman->ruangan) {
                     $peminjaman->ruangan->update(['status' => 'dipinjam']);
                 }
@@ -32,11 +41,19 @@ class AdminPeminjamanController extends Controller
                     $peminjaman->unit->update(['status' => 'dipinjam']);
                 }
 
-                $pesan = 'Peminjaman telah disetujui dan sedang digunakan.';
+                $pesan = 'Peminjaman telah disetujui.';
             } else {
                 return redirect()->back()->with('error', 'Peminjaman ini tidak dapat disetujui lagi.');
             }
-        } elseif ($request->is('admin/peminjaman/*/reject')) {
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | REJECT
+        |--------------------------------------------------------------------------
+        */
+        elseif ($request->is('admin/peminjaman/*/reject')) {
+
             if (in_array($peminjaman->status, ['pending', 'menyelesaikan'])) {
                 $peminjaman->status = 'ditolak';
 
@@ -51,7 +68,15 @@ class AdminPeminjamanController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Tidak dapat menolak peminjaman ini.');
             }
-        } elseif ($request->is('admin/peminjaman/*/complete')) {
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPLETE
+        |--------------------------------------------------------------------------
+        */
+        elseif ($request->is('admin/peminjaman/*/complete')) {
+
             if ($peminjaman->status === 'menyelesaikan') {
                 $peminjaman->status = 'selesai';
 
@@ -66,7 +91,9 @@ class AdminPeminjamanController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Mahasiswa belum mengajukan penyelesaian.');
             }
-        } else {
+        }
+
+        else {
             $pesan = 'Tidak ada aksi valid.';
         }
 
@@ -76,8 +103,7 @@ class AdminPeminjamanController extends Controller
     }
 
     /**
-     * ✅ Admin memvalidasi peminjaman yang diajukan selesai oleh mahasiswa.
-     * Sekarang juga otomatis masuk ke tabel pengembalian.
+     * VALIDASI SELESAI
      */
     public function validateSelesai(Request $request, $id)
     {
@@ -92,13 +118,11 @@ class AdminPeminjamanController extends Controller
             return redirect()->back()->with('error', 'Peminjaman ini belum diajukan penyelesaian oleh mahasiswa.');
         }
 
-        // Simpan ke tabel peminjaman
         $peminjaman->kondisi_pengembalian = $request->kondisi;
         $peminjaman->catatan_pengembalian = $request->catatan;
         $peminjaman->status = 'selesai';
         $peminjaman->save();
 
-        // ✅ Tambahkan juga ke tabel pengembalian
         Pengembalian::create([
             'idPeminjaman' => $peminjaman->id,
             'tanggal_pengembalian' => now(),
@@ -106,7 +130,6 @@ class AdminPeminjamanController extends Controller
             'catatan' => $request->catatan,
         ]);
 
-        // Update status ruangan/unit
         if ($peminjaman->ruangan) {
             $peminjaman->ruangan->update(['status' => 'tersedia']);
         }
@@ -114,6 +137,6 @@ class AdminPeminjamanController extends Controller
             $peminjaman->unit->update(['status' => 'tersedia']);
         }
 
-        return redirect()->back()->with('success', 'Peminjaman telah divalidasi, dinyatakan selesai, dan tercatat di tabel pengembalian.');
+        return redirect()->back()->with('success', 'Peminjaman telah divalidasi dan dicatat sebagai selesai.');
     }
 }

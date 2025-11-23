@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', (Auth::user()->role === 'dosen' ? 'Dashboard Dosen' : 'Dashboard Mahasiswa'))
+@section('title', 'Dashboard Mahasiswa')
 
 @section('content')
 @if (session('success'))
@@ -10,7 +10,9 @@
 @endif
 
 <div class="section-header">
-    <h1>Selamat Datang, {{ ucwords(Auth::user()->name ?? Auth::user()->username ?? 'Pengguna') }}! <small style="font-weight:600; color:#666">({{ ucfirst(Auth::user()->role) }})</small></h1>
+    <h1>Selamat Datang, {{ ucwords(Auth::user()->name ?? Auth::user()->username ?? 'Mahasiswa') }}! 
+        <small style="font-weight:600; color:#666">(Mahasiswa)</small>
+    </h1>
 </div>
 
 {{-- === Statistik Ringkasan === --}}
@@ -86,9 +88,9 @@
                 <tr>
                     <td>#{{ $p->id }}</td>
                     <td>
-                        @if (!empty($p->ruangan) && isset($p->ruangan->namaRuangan))
+                        @if (!empty($p->ruangan))
                             <strong>{{ $p->ruangan->namaRuangan }}</strong>
-                        @elseif (!empty($p->unit) && isset($p->unit->namaUnit))
+                        @elseif (!empty($p->unit))
                             <strong>{{ $p->unit->namaUnit }}</strong>
                         @else
                             -
@@ -96,101 +98,110 @@
                     </td>
                     <td>{{ $p->keperluan }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
+
                     <td>
                         @php
-                            $isDigunakan = in_array($p->status, ['digunakan', 'disetujui']);
-                            $isMenyelesaikan = in_array($p->status, ['menyelesaikan', 'menunggu_validasi']);
+                            $isDigunakan = in_array($p->status, ['digunakan','disetujui','sedang digunakan']);
+                            $isMenyelesaikan = in_array($p->status,['menyelesaikan','menunggu_validasi']);
+                            $canEdit = in_array($p->status,['pending','disetujui','digunakan','sedang digunakan']);
                         @endphp
 
+                        {{-- STATUS PENDING --}}
                         @if ($p->status == 'pending')
                             <span class="status-badge status-pending">
                                 <i class="fas fa-hourglass-half"></i> Menunggu Persetujuan
                             </span>
+
+                            {{-- TOMBOL EDIT --}}
+                            <a href="{{ route('peminjaman.edit', $p->id) }}" 
+                               class="btn btn-warning btn-sm" style="margin-left:6px;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+
+                        {{-- STATUS DISETUJUI / DIGUNAKAN --}}
                         @elseif ($isDigunakan)
-                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}" method="POST" style="display:inline;"
-                                onsubmit="return confirm('Apakah Anda yakin ingin mengajukan penyelesaian peminjaman ini? Setelah ini akan divalidasi oleh admin.')">
+
+                            {{-- TOMBOL AJUKAN SELESAI --}}
+                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
+                                  method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
                                     <i class="fas fa-check"></i> Ajukan Selesai
                                 </button>
                             </form>
+
+                            {{-- TOMBOL KEMBALIKAN --}}
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalKembalikan{{ $p->id }}" style="margin-left:6px;">
+                                <i class="fas fa-undo"></i> Kembalikan
+                            </button>
+
+                            {{-- TOMBOL EDIT --}}
+                            @if ($canEdit)
+                                <a href="{{ route('peminjaman.edit', $p->id) }}" 
+                                   class="btn btn-warning btn-sm" style="margin-left:6px;">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            @endif
+
+                        {{-- STATUS MENUNGGU VALIDASI --}}
                         @elseif ($isMenyelesaikan)
                             <span class="status-badge status-pending">
                                 <i class="fas fa-hourglass-half"></i> Menunggu Validasi Admin
                             </span>
+
+                        {{-- STATUS SELESAI --}}
                         @elseif ($p->status == 'selesai')
                             <span class="status-badge status-selesai">
                                 <i class="fas fa-check-circle"></i> Selesai
                             </span>
+
+                        {{-- STATUS DITOLAK --}}
                         @elseif ($p->status == 'ditolak')
                             <span class="status-badge status-ditolak">
                                 <i class="fas fa-times-circle"></i> Ditolak
                             </span>
-                        @else
-                            <span class="status-badge status-{{ $p->status }}">
-                                {{ ucfirst(str_replace('_', ' ', $p->status)) }}
-                            </span>
                         @endif
                     </td>
                 </tr>
+
+                {{-- MODAL KEMBALIKAN --}}
+                <div class="modal fade" id="modalKembalikan{{ $p->id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title">Konfirmasi Pengembalian</h5>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+
+                            <div class="modal-body">
+                                Apakah Anda yakin ingin mengembalikan ruangan/unit ini?
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <form action="{{ route('peminjaman.kembalikan', $p->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">Ya, Kembalikan</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             @empty
                 <tr>
-                    <td colspan="5" style="text-align: center;">Tidak ada data peminjaman terkini.</td>
+                    <td colspan="5" style="text-align:center;">Tidak ada peminjaman terbaru.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 </div>
 
-{{-- === Styling Modern === --}}
+{{-- === STYLE === --}}
 <style>
-    .dashboard-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .stat-card {
-        display: flex;
-        align-items: center;
-        padding: 20px;
-        border-radius: 16px;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .stat-card .card-icon {
-        background: rgba(255, 255, 255, 0.25);
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 26px;
-        margin-right: 15px;
-    }
-
-    .stat-card h3 {
-        font-size: 1rem;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .card-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-top: 4px;
-    }
-
-    /* === Kartu Statistik Modern (Warna Putih) === */
     .dashboard-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -205,16 +216,15 @@
         border-radius: 16px;
         background: #ffffff;
         color: #333;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         transition: all 0.3s ease;
     }
 
     .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
 
-    /* Ikon dengan warna khas masing-masing */
     .stat-card .card-icon {
         width: 60px;
         height: 60px;
@@ -227,27 +237,12 @@
         color: #fff;
     }
 
-    /* Warna ikon */
     .bg-primary .card-icon { background-color: #007bff; }
     .bg-warning .card-icon { background-color: #ffc107; }
     .bg-success .card-icon { background-color: #28a745; }
     .bg-danger .card-icon { background-color: #dc3545; }
     .bg-info .card-icon { background-color: #17a2b8; }
 
-    .stat-card h3 {
-        font-size: 1rem;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .card-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-top: 4px;
-    }
-
-
-    /* === Badge Status === */
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -256,44 +251,11 @@
         border-radius: 8px;
         font-weight: 600;
         font-size: 0.9rem;
-        text-transform: capitalize;
     }
 
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-disetujui {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-ditolak {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .status-selesai {
-        background: #e2e3e5;
-        color: #383d41;
-    }
-
-    /* === Tombol Aksi === */
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 5px 10px;
-        transition: 0.2s;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-        transform: scale(1.05);
-    }
+    .status-pending { background:#fff3cd; color:#856404; }
+    .status-ditolak { background:#f8d7da; color:#721c24; }
+    .status-selesai { background:#e2e3e5; color:#383d41; }
 
     .data-table {
         width: 100%;
@@ -302,7 +264,7 @@
         background: #fff;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     .data-table th {
@@ -310,16 +272,25 @@
         padding: 12px;
         text-align: left;
         font-weight: 700;
-        border-bottom: 2px solid #e0e0e0;
     }
 
     .data-table td {
         padding: 12px;
         border-bottom: 1px solid #f1f1f1;
+        vertical-align: middle;
     }
 
-    .data-table tr:hover {
-        background: #f9f9f9;
+    .btn-success {
+        background:#28a745; border:none; color:white; border-radius:8px; padding:5px 10px;
+    }
+
+    .btn-primary {
+        background:#007bff; border:none; color:white; border-radius:8px; padding:5px 10px;
+    }
+
+    .btn-warning {
+        background:#ffc107; border:none; color:black; border-radius:8px; padding:5px 10px;
     }
 </style>
+
 @endsection
