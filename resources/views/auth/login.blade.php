@@ -75,7 +75,7 @@
                 <div class="text-center mt-3">
                     <a href="{{ route('free.login') }}" class="btn-free-login">
                         <i class="fas fa-user"></i>
-                        <span>Masuk sebagai Free User</span>
+                        <span>Masuk sebagai Akun Tamu</span>
                     </a>
                 </div>
 

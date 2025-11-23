@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
     | MAHASISWA
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:mahasiswa'])->group(function () {
+    Route::middleware(['auth','role:mahasiswa'])->group(function () {
         Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])
             ->name('mahasiswa.dashboard');
     });
@@ -104,16 +104,16 @@ Route::middleware('auth')->group(function () {
     | DOSEN
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:dosen'])->group(function () {
+    Route::middleware(['auth','role:dosen'])->group(function () {
         Route::get('/dosen/dashboard', [DashboardController::class, 'dosen'])
             ->name('dosen.dashboard');
 
-        // 🟦 ROUTE EDIT & UPDATE KHUSUS DOSEN (PRIORITAS UTAMA)
-        Route::get('/dosen/peminjaman/{id}/edit',
+        // 🔵 ROUTE EDIT PEMINJAMAN KHUSUS DOSEN
+        Route::get('/dosen/peminjaman/{id}/edit', 
             [PeminjamanController::class, 'edit'])
             ->name('dosen.peminjaman.edit');
 
-        Route::put('/dosen/peminjaman/{id}',
+        Route::put('/dosen/peminjaman/{id}', 
             [PeminjamanController::class, 'update'])
             ->name('dosen.peminjaman.update');
     });
@@ -123,12 +123,13 @@ Route::middleware('auth')->group(function () {
     | RUTE BERSAMA MAHASISWA & DOSEN
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:mahasiswa,dosen'])->group(function () {
+    Route::middleware(['auth','role:mahasiswa,dosen'])->group(function () {
 
-        // 🟨 PENTING — ROUTE EDIT INI TIDAK MENIMPA ROUTE DOSEN LAGI
+        // EDIT
         Route::get('/peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])
             ->name('peminjaman.edit');
 
+        // UPDATE
         Route::put('/peminjaman/{id}', [PeminjamanController::class, 'update'])
             ->name('peminjaman.update');
 
@@ -165,4 +166,3 @@ Route::middleware('auth')->group(function () {
 */
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])
     ->name('peminjaman.index');
-
