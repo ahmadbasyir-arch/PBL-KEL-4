@@ -160,6 +160,14 @@
             accent-color: #007bff;
             cursor: pointer;
         }
+        /* FULL WIDTH LOGIN - Hilangkan putih kiri kanan */
+.login-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
     </style>
 
     <script>

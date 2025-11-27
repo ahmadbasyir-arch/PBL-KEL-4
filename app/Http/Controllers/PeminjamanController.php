@@ -16,28 +16,20 @@ class PeminjamanController extends Controller
     public function create(Request $request)
     {
         $jenis = $request->query('jenis', 'ruangan');
-
-        // Tanggal dipilih user (jika tidak ada = hari ini)
         $selectedDate = $request->query('tanggal', now()->toDateString());
 
-        // Ambil seluruh ruangan/unit
         $listData = $jenis === 'unit'
             ? Unit::orderBy('namaUnit')->get()
             : Ruangan::orderBy('namaRuangan')->get();
 
         foreach ($listData as $item) {
-
-            // Query: cari peminjaman yang disetujui pada tanggal tersebut
             $q = Peminjaman::where('tanggalPinjam', $selectedDate)
                 ->whereIn('status', ['disetujui', 'digunakan', 'sedang digunakan']);
 
-            if ($jenis === 'ruangan') {
-                $q->where('idRuangan', $item->id);
-            } else {
-                $q->where('idUnit', $item->id);
-            }
+            $jenis === 'ruangan'
+                ? $q->where('idRuangan', $item->id)
+                : $q->where('idUnit', $item->id);
 
-            // Jika ada peminjaman yg belum selesai → ruangan sedang digunakan
             $item->is_used = $q->exists();
         }
 
@@ -68,7 +60,7 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         foreach ($validated['items'] as $item) {
-            $payload = [
+            Peminjaman::create([
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -76,22 +68,17 @@ class PeminjamanController extends Controller
                 'jamSelesai'    => $validated['jamSelesai'],
                 'keperluan'     => $validated['keperluan'],
                 'status'        => 'pending',
-            ];
 
-            if ($user->role === 'dosen') {
-                $payload['id_dosen'] = $user->id;
-            } else {
-                $payload['idMahasiswa'] = $user->id;
-            }
-
-            Peminjaman::create($payload);
+                // SOLUSI UTAMA — dosen & mahasiswa disimpan di kolom sama
+                'idMahasiswa'   => $user->id,
+            ]);
         }
 
         return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
     }
 
     /**
-     * EDIT PEMINJAMAN (tampilkan form edit)
+     * EDIT PEMINJAMAN
      */
     public function edit($id)
     {
@@ -99,15 +86,14 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         if (! $this->belongsToUser($peminjaman, $user)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengedit peminjaman ini.');
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses.');
         }
 
         if (in_array($peminjaman->status, ['selesai', 'ditolak'])) {
-            return redirect()->back()->with('error', 'Peminjaman yang sudah selesai atau ditolak tidak dapat diedit.');
+            return redirect()->back()->with('error', 'Peminjaman ini tidak dapat diedit.');
         }
 
         $jenis = $peminjaman->idRuangan ? 'ruangan' : 'unit';
-
         $busyStatuses = ['disetujui', 'digunakan', 'pending', 'sedang digunakan'];
 
         if ($jenis === 'ruangan') {
@@ -120,11 +106,9 @@ class PeminjamanController extends Controller
 
             $listData = Ruangan::whereNotIn('id', $busyIds)->orderBy('namaRuangan')->get();
 
-            if ($peminjaman->idRuangan) {
-                $own = Ruangan::find($peminjaman->idRuangan);
-                if ($own && ! $listData->contains('id', $own->id)) {
-                    $listData->push($own);
-                }
+            $own = Ruangan::find($peminjaman->idRuangan);
+            if ($own && ! $listData->contains('id', $own->id)) {
+                $listData->push($own);
             }
         } else {
             $busyIds = Peminjaman::where('tanggalPinjam', $peminjaman->tanggalPinjam)
@@ -136,28 +120,21 @@ class PeminjamanController extends Controller
 
             $listData = Unit::whereNotIn('id', $busyIds)->orderBy('namaUnit')->get();
 
-            if ($peminjaman->idUnit) {
-                $own = Unit::find($peminjaman->idUnit);
-                if ($own && ! $listData->contains('id', $own->id)) {
-                    $listData->push($own);
-                }
+            $own = Unit::find($peminjaman->idUnit);
+            if ($own && ! $listData->contains('id', $own->id)) {
+                $listData->push($own);
             }
         }
 
         $items = [
-            (object)[
-                'id' => $peminjaman->idRuangan ?? $peminjaman->idUnit
-            ]
+            (object)[ 'id' => $peminjaman->idRuangan ?? $peminjaman->idUnit ]
         ];
 
-        $blade = $user->role === 'dosen' ? 'dosen.peminjaman_edit' : 'mahasiswa.peminjaman_edit';
+        $blade = $user->role === 'dosen'
+            ? 'dosen.peminjaman_edit'
+            : 'mahasiswa.peminjaman_edit';
 
-        return view($blade, [
-            'peminjaman' => $peminjaman,
-            'jenis' => $jenis,
-            'listData' => $listData,
-            'items' => $items
-        ]);
+        return view($blade, compact('peminjaman', 'jenis', 'listData', 'items'));
     }
 
     /**
@@ -169,11 +146,11 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         if (! $this->belongsToUser($existing, $user)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengubah peminjaman ini.');
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses.');
         }
 
         if (in_array($existing->status, ['selesai', 'ditolak'])) {
-            return redirect()->back()->with('error', 'Peminjaman yang sudah selesai atau ditolak tidak dapat diubah.');
+            return redirect()->back()->with('error', 'Peminjaman tidak dapat diubah.');
         }
 
         $jenis = $request->input('jenis_item', ($existing->idRuangan ? 'ruangan' : 'unit'));
@@ -193,7 +170,7 @@ class PeminjamanController extends Controller
         $existing->delete();
 
         foreach ($validated['items'] as $item) {
-            $payload = [
+            Peminjaman::create([
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -201,15 +178,10 @@ class PeminjamanController extends Controller
                 'jamSelesai'    => $validated['jamSelesai'],
                 'keperluan'     => $validated['keperluan'],
                 'status'        => $existing->status === 'pending' ? 'pending' : $existing->status,
-            ];
 
-            if ($user->role === 'dosen') {
-                $payload['id_dosen'] = $user->id;
-            } else {
-                $payload['idMahasiswa'] = $user->id;
-            }
-
-            Peminjaman::create($payload);
+                // SOLUSI UTAMA
+                'idMahasiswa'   => $user->id,
+            ]);
         }
 
         return redirect()->route('dashboard')->with('success', 'Peminjaman berhasil diperbarui.');
@@ -224,21 +196,20 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         if (! $this->belongsToUser($peminjaman, $user)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk aksi ini.');
+            return back()->with('error', 'Tidak memiliki akses.');
         }
 
         if (! in_array($peminjaman->status, ['menyelesaikan', 'menunggu_validasi', 'selesai', 'ditolak'])) {
             $peminjaman->status = 'menyelesaikan';
             $peminjaman->save();
-
-            return redirect()->back()->with('success', 'Pengajuan penyelesaian telah dikirim ke admin.');
+            return back()->with('success', 'Pengajuan penyelesaian dikirim.');
         }
 
-        return redirect()->back()->with('error', 'Status peminjaman tidak dapat diajukan penyelesaian lagi.');
+        return back()->with('error', 'Tidak dapat diajukan lagi.');
     }
 
     /**
-     * KEMBALIKAN
+     * KEMBALIKAN PEMINJAMAN
      */
     public function kembalikan(Request $request, $id)
     {
@@ -246,36 +217,24 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         if (! $this->belongsToUser($peminjaman, $user)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk aksi ini.');
+            return back()->with('error', 'Tidak memiliki akses.');
         }
 
         if (in_array($peminjaman->status, ['selesai', 'ditolak'])) {
-            return redirect()->back()->with('error', 'Peminjaman ini sudah selesai atau ditolak.');
+            return back()->with('error', 'Peminjaman sudah selesai.');
         }
 
         $peminjaman->status = 'menyelesaikan';
         $peminjaman->save();
 
-        return redirect()->back()->with('success', 'Permintaan pengembalian telah dikirim. Tunggu validasi admin.');
+        return back()->with('success', 'Permintaan pengembalian dikirim.');
     }
 
     /**
-     * FIX UTAMA — perbaikan akses pemilik peminjaman
+     * CEK PEMILIK PEMINJAMAN (DOSEN & MAHASISWA SAMA)
      */
     protected function belongsToUser(Peminjaman $peminjaman, $user)
     {
-        if (! $user) return false;
-
-        // Jika user = dosen → cek id_dosen
-        if ($user->role === 'dosen') {
-            return $peminjaman->id_dosen == $user->id;
-        }
-
-        // Jika user = mahasiswa → cek idMahasiswa
-        if ($user->role === 'mahasiswa') {
-            return $peminjaman->idMahasiswa == $user->id;
-        }
-
-        return false;
+        return $peminjaman->idMahasiswa == $user->id;
     }
 }

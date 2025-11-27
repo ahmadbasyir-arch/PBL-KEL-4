@@ -112,7 +112,7 @@ class AuthController extends Controller
             case 'mahasiswa':
                 return redirect()->route('mahasiswa.dashboard');
             case 'dosen':
-                return redirect()->route('mahasiswa.dashboard');
+                return redirect()->route('dosen.dashboard');
             case 'staff':
                 return redirect()->route('staff.dashboard');
             default:
