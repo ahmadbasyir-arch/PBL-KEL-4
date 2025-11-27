@@ -11,7 +11,7 @@
 
         {{-- ==== DETEKSI HALAMAN FREE USER ==== --}}
         @php
-            $isFreePage = request()->is('free');
+            $isFreePage = request()->is('free*');
         @endphp
         
         {{-- ==== SIDEBAR ==== --}}
@@ -293,5 +293,140 @@
             margin-right: 5px;
         }
     </style>
+
+    {{-- ========================================================= --}}
+    {{-- ============  CSS KHUSUS FREE USER BARU ================ --}}
+    {{-- ========================================================= --}}
+
+    @if($isFreePage)
+<style>
+
+    /* RESET layout global agar tidak ganggu tampilan free user */
+    .header,
+    .sidebar {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .dashboard-content-area {
+        margin-top: 0 !important;
+        padding: 15px !important;
+    }
+
+    .section-header {
+        margin-bottom: 8px !important;
+    }
+
+    /* ====== CARD GRID ====== */
+    .dashboard-cards {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px !important;
+        margin-top: 10px !important;
+    }
+
+    .stat-card {
+        padding: 18px !important;
+        border-radius: 14px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 4px 12px rgba(18,38,63,0.08);
+    }
+
+    .stat-card .card-icon {
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 14px;
+        font-size: 26px !important;
+    }
+
+    /* ====== TABEL ====== */
+    .interactive-table {
+        margin-top: 20px !important;
+        padding: 18px !important;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(18,38,63,0.08);
+    }
+
+    .data-table th {
+        background: #f4f6f8 !important;
+        font-weight: 700 !important;
+    }
+
+    .data-table tr:hover {
+        background: #fafafa !important;
+    }
+
+    .status-badge {
+        padding: 6px 12px !important;
+        font-size: 0.9rem !important;
+        border-radius: 8px;
+    }
+
+    .status-disetujui {
+        background: #d4f5d6 !important;
+        color: #0d6b37 !important;
+    }
+
+/* Hilangkan jarak kontainer bawaan template */
+.main-content,
+.section,
+.content,
+.dashboard-content-area {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Jarak header ke card diperkecil */
+.section-header {
+    margin-bottom: 10px !important;
+}
+
+/* Perkecil jarak card statistik ke tabel */
+.dashboard-cards {
+    margin-bottom: 10px !important;
+}
+
+/* Hilangkan padding ekstra dari container pembungkus */
+.container-fluid,
+.container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Biar tabel naik dan nempel */
+.interactive-table {
+    margin-top: 5px !important;
+}
+
+/* Menghilangkan jarak atas pada judul dan container free user */
+.free-header,
+.free-header h1,
+.free-header p {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Mengatur jarak antara judul dan card statistik */
+.free-top {
+    margin-bottom: 5px !important; 
+}
+
+/* Mengatur jarak card dengan elemen lain */
+.dashboard-cards {
+    margin-top: 5px !important;
+}
+
+</style>
+@endif
 </body>
 </html>

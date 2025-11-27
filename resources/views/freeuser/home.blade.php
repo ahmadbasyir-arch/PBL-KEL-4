@@ -10,7 +10,7 @@
     $proyektor = $proyektor ?? [];
 @endphp
 
-<div class="section-header">
+<div class="section-header" style="margin-bottom: 10px;">
     <h1>Dashboard Akun Tamu</h1>
     <p>Halo, Pengguna Tamu 👋 — berikut informasi penggunaan ruangan dan proyektor saat ini.</p>
 </div>
@@ -37,7 +37,7 @@
 </div>
 
 {{-- ==== Tabel Ruangan Dipakai ==== --}}
-<div class="interactive-table mt-4">
+<div class="interactive-table mt-3">
     <div class="section-header">
         <h2>Ruangan yang Sedang Dipakai</h2>
     </div>
@@ -72,7 +72,7 @@
 </div>
 
 {{-- ==== Tabel Proyektor Dipakai ==== --}}
-<div class="interactive-table mt-4">
+<div class="interactive-table mt-3">
     <div class="section-header">
         <h2>Proyektor yang Sedang Dipakai</h2>
     </div>
@@ -111,16 +111,16 @@
     /* Statistik cards */
     .dashboard-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 15px; /* rapikan jarak */
+        margin-top: 10px;
     }
 
     .stat-card {
         display: flex;
         align-items: center;
         gap: 14px;
-        padding: 20px;
+        padding: 18px;
         background: #fff;
         border-radius: 14px;
         box-shadow: 0 6px 18px rgba(18, 38, 63, 0.06);
@@ -128,19 +128,19 @@
     }
 
     .stat-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-3px);
         box-shadow: 0 10px 26px rgba(18, 38, 63, 0.08);
     }
 
     .stat-card .card-icon {
-        width: 62px;
-        height: 62px;
+        width: 58px;
+        height: 58px;
         border-radius: 50%;
         display:flex;
         align-items:center;
         justify-content:center;
         color:#fff;
-        font-size:24px;
+        font-size:22px;
         flex-shrink:0;
     }
 
@@ -149,13 +149,13 @@
 
     .card-content h3 {
         margin:0;
-        font-size:1.05rem;
+        font-size:1rem;
         font-weight:600;
     }
 
     .card-value {
-        margin-top:6px;
-        font-size:1.6rem;
+        margin-top:4px;
+        font-size:1.5rem;
         font-weight:700;
     }
 
