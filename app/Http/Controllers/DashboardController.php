@@ -10,33 +10,32 @@ use Carbon\Carbon;
 class DashboardController extends Controller
 {
     // ================================
-// DASHBOARD ADMIN & STAFF
-// ================================
-public function admin()
-{
-    // Hitung statistik
-    $totalPeminjaman = Peminjaman::count();
-    $totalPending = Peminjaman::where('status', 'pending')->count();
-    $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
-    $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
-    $totalRiwayat = Peminjaman::count(); // opsional
+    // DASHBOARD ADMIN & STAFF
+    // ================================
+    public function admin()
+    {
+        // Hitung statistik
+        $totalPeminjaman = Peminjaman::count();
+        $totalPending = Peminjaman::where('status', 'pending')->count();
+        $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
+        $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
+        $totalRiwayat = Peminjaman::count(); // opsional
 
-    // Data peminjaman terbaru
-    $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
-        ->orderByDesc('created_at')
-        ->limit(10)
-        ->get();
+        // Data peminjaman terbaru
+        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
 
-    return view('admin.dashboard', compact(
-        'totalPeminjaman',
-        'totalPending',
-        'totalDisetujui',
-        'totalDitolak',
-        'totalRiwayat',
-        'peminjamanTerkini'
-    ));
-}
-
+        return view('admin.dashboard', compact(
+            'totalPeminjaman',
+            'totalPending',
+            'totalDisetujui',
+            'totalDitolak',
+            'totalRiwayat',
+            'peminjamanTerkini'
+        ));
+    }
 
     public function index()
     {

@@ -10,11 +10,10 @@ use App\Http\Controllers\AdminRuanganController;
 use App\Http\Controllers\AdminUnitController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RiwayatController;
-use App\Http\Controllers\FreeUserController;
 
 /*
 |--------------------------------------------------------------------------
-| Rute Guest (belum login)
+| Rute untuk pengguna yang belum login
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -26,30 +25,30 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    // Login Google
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
-    // Free User
-    Route::get('/login/free', fn() => redirect()->route('freeuser.home'))->name('free.login');
-    Route::get('/free', [FreeUserController::class, 'index'])->name('freeuser.home');
+    Route::get('/login/free', function () {
+        return redirect()->route('freeuser.home');
+    })->name('free.login');
+
+    Route::get('/free', function () {
+        return view('freeuser.home');
+    })->name('freeuser.home');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Rute Authenticated
+| Rute untuk pengguna yang sudah login
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
 
-    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Lengkapi Profil Google
     Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
     Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
-    // Dashboard default
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
@@ -58,6 +57,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
         Route::resource('/ruangan', AdminRuanganController::class)->names([
@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
             'edit' => 'admin.ruangan.edit',
             'update' => 'admin.ruangan.update',
             'destroy' => 'admin.ruangan.destroy',
-            'show' => 'admin.ruangan.show',
+            'show'   => 'admin.ruangan.show',
         ]);
 
         Route::resource('/unit', AdminUnitController::class)->names([
@@ -77,7 +77,7 @@ Route::middleware('auth')->group(function () {
             'edit' => 'admin.unit.edit',
             'update' => 'admin.unit.update',
             'destroy' => 'admin.unit.destroy',
-            'show' => 'admin.unit.show',
+            'show'   => 'admin.unit.show',
         ]);
 
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('admin.pengguna.index');
@@ -91,47 +91,77 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Mahasiswa
+    | MAHASISWA
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:mahasiswa'])->group(function () {
+    Route::middleware(['auth','role:mahasiswa'])->group(function () {
         Route::get('/mahasiswa/dashboard', [DashboardController::class, 'mahasiswa'])
             ->name('mahasiswa.dashboard');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Dosen
+    | DOSEN
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:dosen'])->group(function () {
+    Route::middleware(['auth','role:dosen'])->group(function () {
         Route::get('/dosen/dashboard', [DashboardController::class, 'dosen'])
             ->name('dosen.dashboard');
+
+        // 🔵 ROUTE EDIT PEMINJAMAN KHUSUS DOSEN
+        Route::get('/dosen/peminjaman/{id}/edit', 
+            [PeminjamanController::class, 'edit'])
+            ->name('dosen.peminjaman.edit');
+
+        Route::put('/dosen/peminjaman/{id}', 
+            [PeminjamanController::class, 'update'])
+            ->name('dosen.peminjaman.update');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Mahasiswa & Dosen
+    | RUTE BERSAMA MAHASISWA & DOSEN
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:mahasiswa,dosen'])->group(function () {
+    Route::middleware(['auth','role:mahasiswa,dosen'])->group(function () {
 
+        // EDIT
+        Route::get('/peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])
+            ->name('peminjaman.edit');
+
+        // UPDATE
+        Route::put('/peminjaman/{id}', [PeminjamanController::class, 'update'])
+            ->name('peminjaman.update');
+
+        // CREATE
         Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])
             ->name('peminjaman.create');
 
         Route::post('/peminjaman/store', [PeminjamanController::class, 'store'])
             ->name('peminjaman.store');
 
+        // AJUKAN SELESAI
         Route::post('/peminjaman/{id}/ajukan-selesai', [PeminjamanController::class, 'ajukanSelesai'])
             ->name('peminjaman.ajukanSelesai');
 
-        Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
+        // KEMBALIKAN
+        Route::post('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])
+            ->name('peminjaman.kembalikan');
+
+        // RIWAYAT
+        Route::get('/riwayat', [RiwayatController::class, 'index'])
+            ->name('riwayat');
+
+        // SHOW
+        Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])
+            ->name('peminjaman.show');
     });
+
 });
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik
+| Halaman publik
 |--------------------------------------------------------------------------
 */
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])

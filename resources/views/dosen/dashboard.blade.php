@@ -98,42 +98,83 @@
                     </td>
                     <td>{{ $p->keperluan }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
+
                     <td>
                         @php
                             $isDigunakan = in_array($p->status, ['digunakan', 'disetujui']);
                             $isMenyelesaikan = in_array($p->status, ['menyelesaikan', 'menunggu_validasi']);
+                            $canEdit = in_array($p->status, ['pending','disetujui','digunakan']);
                         @endphp
 
+                        {{-- STATUS PENDING --}}
                         @if ($p->status == 'pending')
                             <span class="status-badge status-pending">
                                 <i class="fas fa-hourglass-half"></i> Menunggu Persetujuan
                             </span>
+
+                            {{-- 🔥 TOMBOL EDIT (DIPERBAIKI) --}}
+                            <div style="display:inline-block; margin-left:6px;">
+    <a href="{{ route('dosen.peminjaman.edit', $p->id) }}" 
+       class="btn btn-warning btn-sm">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+</div>
+
+
+                        {{-- STATUS DISETUJUI / DIGUNAKAN --}}
                         @elseif ($isDigunakan)
-                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}" method="POST"
-                                onsubmit="return confirm('Apakah Anda yakin ingin mengajukan penyelesaian peminjaman ini? Setelah ini akan divalidasi oleh admin.')">
+
+                            {{-- TOMBOL AJUKAN SELESAI --}}
+                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
+                                  method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
                                     <i class="fas fa-check"></i> Ajukan Selesai
                                 </button>
                             </form>
+
+                            {{-- TOMBOL KEMBALIKAN --}}
+                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
+                                  method="POST" style="display:inline; margin-left:6px;"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin mengembalikan ruangan/unit ini?')">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-undo"></i> Kembalikan
+                                </button>
+                            </form>
+
+                            {{-- 🔥 TOMBOL EDIT (DIPERBAIKI) --}}
+                            @if ($canEdit)
+                            <div style="display:inline-block; margin-left:6px;">
+                                <a href="{{ route('dosen.peminjaman.edit', $p->id) }}" 
+                                   class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </div>
+                            @endif
+
+                        {{-- STATUS MENUNGGU VALIDASI --}}
                         @elseif ($isMenyelesaikan)
                             <span class="status-badge status-pending">
                                 <i class="fas fa-hourglass-half"></i> Menunggu Validasi Admin
                             </span>
+
+                        {{-- STATUS SELESAI --}}
                         @elseif ($p->status == 'selesai')
                             <span class="status-badge status-selesai">
                                 <i class="fas fa-check-circle"></i> Selesai
                             </span>
+
+                        {{-- STATUS DITOLAK --}}
                         @elseif ($p->status == 'ditolak')
                             <span class="status-badge status-ditolak">
                                 <i class="fas fa-times-circle"></i> Ditolak
                             </span>
-                        @else
-                            <span class="status-badge status-{{ $p->status }}">
-                                {{ ucfirst(str_replace('_', ' ', $p->status)) }}
-                            </span>
+
                         @endif
                     </td>
+
                 </tr>
             @empty
                 <tr>
@@ -144,9 +185,8 @@
     </table>
 </div>
 
-{{-- === FULL STYLING (100% SAMA DENGAN MAHASISWA) === --}}
+{{-- === STYLE === --}}
 <style>
-    /* === CARD STATISTIK === */
     .dashboard-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -188,19 +228,6 @@
     .bg-danger .card-icon { background-color: #dc3545; }
     .bg-info .card-icon { background-color: #17a2b8; }
 
-    .stat-card h3 {
-        font-size: 1rem;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .card-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-top: 4px;
-    }
-
-    /* === BADGE STATUS (IDENTIK DENGAN MAHASISWA) === */
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -217,11 +244,6 @@
         color: #856404;
     }
 
-    .status-disetujui {
-        background: #d4edda;
-        color: #155724;
-    }
-
     .status-ditolak {
         background: #f8d7da;
         color: #721c24;
@@ -232,11 +254,6 @@
         color: #383d41;
     }
 
-    .status-badge i {
-        font-size: 14px;
-    }
-
-    /* === TABLE STYLE === */
     .data-table {
         width: 100%;
         border-collapse: collapse;
@@ -260,23 +277,28 @@
         border-bottom: 1px solid #f1f1f1;
     }
 
-    .data-table tr:hover {
-        background: #f9f9f9;
-    }
-
     .btn-success {
         background-color: #28a745;
-        border: none;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 5px 10px;
-        transition: 0.2s;
+        border:none;
+        color:white;
+        border-radius:8px;
+        padding:5px 10px;
     }
 
-    .btn-success:hover {
-        background-color: #218838;
-        transform: scale(1.05);
+    .btn-primary {
+        background-color:#007bff;
+        border:none;
+        color:white;
+        border-radius:8px;
+        padding:5px 10px;
+    }
+
+    .btn-warning {
+        background-color:#ffc107;
+        border:none;
+        color:black;
+        border-radius:8px;
+        padding:5px 10px;
     }
 </style>
 

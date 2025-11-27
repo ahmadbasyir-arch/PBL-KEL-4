@@ -14,15 +14,17 @@ class Peminjaman extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'idMahasiswa',
-        'idRuangan',
-        'idUnit',
-        'tanggalPinjam',
-        'jamMulai',
-        'jamSelesai',
-        'status',
-        'keperluan',
-    ];
+    'idMahasiswa',
+    'id_dosen',   // <-- WAJIB DITAMBAHKAN
+    'idRuangan',
+    'idUnit',
+    'tanggalPinjam',
+    'jamMulai',
+    'jamSelesai',
+    'status',     // <-- UPDATE status akan BERHASIL setelah ini
+    'keperluan',
+];
+
 
     // Relasi ke tabel users (mahasiswa)
     public function mahasiswa()
