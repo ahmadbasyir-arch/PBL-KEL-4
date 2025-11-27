@@ -114,7 +114,7 @@
 
                             {{-- TOMBOL EDIT --}}
                             <a href="{{ route('peminjaman.edit', $p->id) }}" 
-                               class="btn btn-warning btn-sm" style="margin-left:6px;">
+                            class="btn btn-warning btn-sm" style="margin-left:6px;">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
 
@@ -123,23 +123,20 @@
 
                             {{-- TOMBOL AJUKAN SELESAI --}}
                             <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
-                                  method="POST" style="display:inline;"
-                                  onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
+                                method="POST" style="display:inline;"
+                                onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
                                     <i class="fas fa-check"></i> Ajukan Selesai
                                 </button>
                             </form>
 
-                            {{-- TOMBOL KEMBALIKAN --}}
-                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalKembalikan{{ $p->id }}" style="margin-left:6px;">
-                                <i class="fas fa-undo"></i> Kembalikan
                             </button>
 
                             {{-- TOMBOL EDIT --}}
                             @if ($canEdit)
                                 <a href="{{ route('peminjaman.edit', $p->id) }}" 
-                                   class="btn btn-warning btn-sm" style="margin-left:6px;">
+                                class="btn btn-warning btn-sm" style="margin-left:6px;">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                             @endif
@@ -165,31 +162,6 @@
                     </td>
                 </tr>
 
-                {{-- MODAL KEMBALIKAN --}}
-                <div class="modal fade" id="modalKembalikan{{ $p->id }}" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-
-                            <div class="modal-header">
-                                <h5 class="modal-title">Konfirmasi Pengembalian</h5>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-
-                            <div class="modal-body">
-                                Apakah Anda yakin ingin mengembalikan ruangan/unit ini?
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                <form action="{{ route('peminjaman.kembalikan', $p->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary">Ya, Kembalikan</button>
-                                </form>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
 
             @empty
                 <tr>
