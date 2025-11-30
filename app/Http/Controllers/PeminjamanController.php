@@ -19,8 +19,9 @@ class PeminjamanController extends Controller
         $selectedDate = $request->query('tanggal', now()->toDateString());
 
         $listData = $jenis === 'unit'
-            ? Unit::orderBy('namaUnit')->get()
-            : Ruangan::orderBy('namaRuangan')->get();
+    ? Unit::orderBy('namaUnit')->get(['id','namaUnit','kodeUnit'])
+    : Ruangan::orderBy('namaRuangan')->get(['id','namaRuangan']);
+
 
         foreach ($listData as $item) {
             $q = Peminjaman::where('tanggalPinjam', $selectedDate)

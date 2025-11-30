@@ -38,7 +38,24 @@
 
     <div class="form-group">
         <label for="keperluan">Keperluan</label>
-        <textarea id="keperluan" name="keperluan" class="form-control" rows="4" required></textarea>
+        <select id="keperluan" name="keperluan" class="form-control" required>
+            <option value="">-- Pilih Keperluan --</option>
+            <option>Uji Kompetensi</option>
+            <option>Sidang Tugas Akhir</option>
+            <option>Acara Instintusi</option>
+            <option>Perkuliahan</option>
+            <option>Rapat Dosen</option>
+            <option>Kegiatan Sosial</option>
+            <option>Seminar</option>
+            <option>Evaluasi</option>
+            <option>Lomba</option>
+            <option>Bazar</option>
+            <option>Pelatihan Mahasiswa Baru</option>
+            <option>Rapat Panitia</option>
+            <option>Kegiatan Alumni</option>
+            <option>Pengabdian Masyarakat</option>
+            <option>Studi Banding</option>
+        </select>
     </div>
 
     <div class="form-actions" style="margin-top: 20px;">
@@ -65,17 +82,23 @@ document.addEventListener('DOMContentLoaded', function() {
         let optionsHtml = '<option value="">-- Pilih --</option>';
 
         availableItems.forEach(item => {
-            const name = item.namaRuangan || item.namaUnit;
+            let name = item.namaRuangan || item.namaUnit;
 
-            let text = '(tersedia)';
-            let disabled = '';
+// Jika UNIT → tampilkan kodeUnit
+if (item.kodeUnit) {
+    name = `${item.namaUnit} — ${item.kodeUnit}`;
+}
 
-            if (item.is_used) {
-                text = '(sedang digunakan)';
-                disabled = 'disabled';
-            }
+let text = '(tersedia)';
+let disabled = '';
 
-            optionsHtml += `<option value="${item.id}" ${disabled}>${name} ${text}</option>`;
+if (item.is_used) {
+    text = '(sedang digunakan)';
+    disabled = 'disabled';
+}
+
+optionsHtml += `<option value="${item.id}" ${disabled}>${name} ${text}</option>`;
+
         });
 
         const div = document.createElement('div');

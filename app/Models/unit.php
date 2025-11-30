@@ -15,9 +15,9 @@ class Unit extends Model
 
     protected $fillable = [
         'namaUnit',
+        'kodeUnit', // ← DITAMBAHKAN
     ];
 
-    // Relasi ke peminjaman
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class, 'idUnit');
