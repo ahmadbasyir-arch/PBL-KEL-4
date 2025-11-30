@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminRuanganController;
 use App\Http\Controllers\AdminUnitController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\FonnteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -166,3 +167,6 @@ Route::middleware('auth')->group(function () {
 */
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])
     ->name('peminjaman.index');
+
+    
+Route::get('/test-wa', [FonnteController::class, 'test']);
