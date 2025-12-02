@@ -24,6 +24,7 @@ protected $fillable = [
     'is_completed',
     'nim',
     'google_id',
+    'telepon',
 ];
 
 

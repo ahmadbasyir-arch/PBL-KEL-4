@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
+// Tambahkan service Fonnte
+use App\Services\FonnteService;
 
 class AuthController extends Controller
 {
@@ -33,17 +37,45 @@ class AuthController extends Controller
             'nim' => 'required|string|max:20|unique:users',
             'role' => 'required|in:mahasiswa,dosen,admin,staff',
             'password' => 'required|string|min:8',
+
+            // Nomor telepon boleh input 08xxxxxxxx
+            'telepon' => 'required|string|min:10|max:15|unique:users',
         ]);
 
-        // Simpan user baru tanpa kolom namaLengkap
+        // ===============================
+        // 🔧 NORMALISASI NOMOR TELEPON
+        // ===============================
+        $telepon = $validated['telepon'];
+
+        // Jika nomor mulai dengan 0 → ubah ke 62
+        if (substr($telepon, 0, 1) === "0") {
+            $telepon = "62" . substr($telepon, 1);
+        }
+
+        // Simpan user baru
         $user = User::create([
             'username' => $validated['username'],
             'email' => $validated['email'],
             'nim' => $validated['nim'],
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
-            'name' => $validated['username'], // default isi dengan username
+            'name' => $validated['username'],
+            'telepon' => $telepon,
         ]);
+
+        // ===============================
+        // 🔰 KIRIM NOTIFIKASI WA
+        // ===============================
+        try {
+            $wa = new FonnteService();
+            $wa->sendMessage(
+                $telepon,
+                "Halo *{$user->username}*, akun peminjaman sarpras kamu berhasil dibuat.\n\n" .
+                "Silakan login dan gunakan sistem peminjaman. 😊"
+            );
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim WA Fonnte: ' . $e->getMessage());
+        }
 
         Auth::login($user, true);
 
@@ -62,7 +94,6 @@ class AuthController extends Controller
 
         $loginInput = $request->input('email_or_nim');
 
-        // Deteksi tipe login: email / nim / username
         if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
             $loginType = 'email';
         } elseif (is_numeric($loginInput)) {
@@ -73,10 +104,10 @@ class AuthController extends Controller
 
         if (Auth::attempt([$loginType => $loginInput, 'password' => $credentials['password']], $request->filled('remember'))) {
             $request->session()->regenerate();
-            /** @var \App\Models\User $user */
+
             $user = Auth::user();
 
-            // Pastikan nama tetap terisi (misalnya login dari Google)
+            /** @var \App\Models\User $user */
             if (empty($user->name) && !empty($user->username)) {
                 $user->name = $user->username;
                 $user->save();
