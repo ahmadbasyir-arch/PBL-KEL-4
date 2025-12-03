@@ -5,17 +5,181 @@
     <title>@yield('title', 'Sarpras TI') - Politeknik Negeri Tanah Laut</title>
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
+        
+        /* Global Dashboard Styles */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        /* Card Colors */
+        .bg-primary .card-icon, .bg-primary { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+        .bg-warning .card-icon, .bg-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .bg-success .card-icon, .bg-success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .bg-danger .card-icon, .bg-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .bg-info .card-icon, .bg-info { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+        .bg-secondary .card-icon, .bg-secondary { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+
+        /* Override card background if class is on parent */
+        .stat-card.bg-primary, .stat-card.bg-warning, .stat-card.bg-success, .stat-card.bg-danger, .stat-card.bg-info {
+            background: #fff; /* Reset to white */
+        }
+
+        .card-content h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            margin-top: 5px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        /* Table Styles */
+        .interactive-table {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 15px;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e5e7eb;
+            background: transparent;
+        }
+
+        .data-table td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover td {
+            background-color: #f9fafb;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-disetujui, .status-digunakan { background: #dcfce7; color: #166534; }
+        .status-ditolak { background: #fee2e2; color: #991b1b; }
+        .status-selesai { background: #f3f4f6; color: #374151; }
+        .status-menyelesaikan, .status-menunggu_validasi { background: #e0f2fe; color: #075985; }
+        .status-tersedia { background: #dcfce7; color: #166534; }
+        .status-dipinjam { background: #fee2e2; color: #991b1b; }
+        .status-perawatan { background: #fef3c7; color: #854d0e; }
+
+        /* Buttons */
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-banner h1, .welcome-banner h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .welcome-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Decorative circle for banner */
+        .welcome-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+    </style>
 <body>
     <div class="container">
 
-        {{-- ==== DETEKSI HALAMAN FREE USER ==== --}}
-        @php
-            $isFreePage = request()->is('free*');
-        @endphp
-        
         {{-- ==== SIDEBAR ==== --}}
-        @if (!request()->is('lengkapi-profil') && !$isFreePage)
+        @if (!request()->is('lengkapi-profil'))
         <div class="sidebar">
             <div class="sidebar-header"><h2>Sarpras TI</h2></div>
 
@@ -123,7 +287,7 @@
         <div class="main-content">
 
             {{-- ==== HEADER ==== --}}
-            @if (!request()->is('lengkapi-profil') && !$isFreePage)
+            @if (!request()->is('lengkapi-profil'))
             <div class="header header-dark">
                 <div class="header-left">
                     <div class="logos">
@@ -294,139 +458,6 @@
         }
     </style>
 
-    {{-- ========================================================= --}}
-    {{-- ============  CSS KHUSUS FREE USER BARU ================ --}}
-    {{-- ========================================================= --}}
 
-    @if($isFreePage)
-<style>
-
-    /* RESET layout global agar tidak ganggu tampilan free user */
-    .header,
-    .sidebar {
-        display: none !important;
-    }
-
-    .main-content {
-        margin-left: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-    }
-
-    .dashboard-content-area {
-        margin-top: 0 !important;
-        padding: 15px !important;
-    }
-
-    .section-header {
-        margin-bottom: 8px !important;
-    }
-
-    /* ====== CARD GRID ====== */
-    .dashboard-cards {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px !important;
-        margin-top: 10px !important;
-    }
-
-    .stat-card {
-        padding: 18px !important;
-        border-radius: 14px;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        box-shadow: 0 4px 12px rgba(18,38,63,0.08);
-    }
-
-    .stat-card .card-icon {
-        width: 60px !important;
-        height: 60px !important;
-        border-radius: 14px;
-        font-size: 26px !important;
-    }
-
-    /* ====== TABEL ====== */
-    .interactive-table {
-        margin-top: 20px !important;
-        padding: 18px !important;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 4px 12px rgba(18,38,63,0.08);
-    }
-
-    .data-table th {
-        background: #f4f6f8 !important;
-        font-weight: 700 !important;
-    }
-
-    .data-table tr:hover {
-        background: #fafafa !important;
-    }
-
-    .status-badge {
-        padding: 6px 12px !important;
-        font-size: 0.9rem !important;
-        border-radius: 8px;
-    }
-
-    .status-disetujui {
-        background: #d4f5d6 !important;
-        color: #0d6b37 !important;
-    }
-
-/* Hilangkan jarak kontainer bawaan template */
-.main-content,
-.section,
-.content,
-.dashboard-content-area {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-/* Jarak header ke card diperkecil */
-.section-header {
-    margin-bottom: 10px !important;
-}
-
-/* Perkecil jarak card statistik ke tabel */
-.dashboard-cards {
-    margin-bottom: 10px !important;
-}
-
-/* Hilangkan padding ekstra dari container pembungkus */
-.container-fluid,
-.container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-/* Biar tabel naik dan nempel */
-.interactive-table {
-    margin-top: 5px !important;
-}
-
-/* Menghilangkan jarak atas pada judul dan container free user */
-.free-header,
-.free-header h1,
-.free-header p {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* Mengatur jarak antara judul dan card statistik */
-.free-top {
-    margin-bottom: 5px !important; 
-}
-
-/* Mengatur jarak card dengan elemen lain */
-.dashboard-cards {
-    margin-top: 5px !important;
-}
-
-</style>
-@endif
 </body>
 </html>

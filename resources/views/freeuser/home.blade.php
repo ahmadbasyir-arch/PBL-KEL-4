@@ -1,208 +1,314 @@
-@extends('layouts.app')
+@extends('layouts.free')
 
 @section('title', 'Dashboard Akun Tamu')
 
 @section('content')
 
 @php
-    // Pastikan variabel tidak null agar tidak error
     $ruangan = $ruangan ?? [];
     $proyektor = $proyektor ?? [];
 @endphp
 
-<div class="section-header" style="margin-bottom: 10px;">
-    <h1>Dashboard Akun Tamu</h1>
-    <p>Halo, Pengguna Tamu 👋 — berikut informasi penggunaan ruangan dan proyektor saat ini.</p>
+<div class="welcome-banner">
+    <h2>Selamat Datang, Tamu! 👋</h2>
+    <p>Berikut adalah informasi terkini mengenai penggunaan fasilitas ruangan dan proyektor di Jurusan Teknologi Informasi.</p>
 </div>
 
 {{-- ==== Statistik ==== --}}
-<div class="dashboard-cards">
-
-    <div class="card stat-card">
-        <div class="card-icon bg-primary"><i class="fas fa-door-open"></i></div>
-        <div class="card-content">
+<div class="stats-grid">
+    <div class="stat-card blue-card">
+        <div class="icon-wrapper">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="stat-info">
             <h3>Ruangan Dipakai</h3>
-            <p class="card-value">{{ count($ruangan) }}</p>
+            <div class="value">{{ count($ruangan) }}</div>
         </div>
     </div>
 
-    <div class="card stat-card">
-        <div class="card-icon bg-warning"><i class="fas fa-video"></i></div>
-        <div class="card-content">
+    <div class="stat-card orange-card">
+        <div class="icon-wrapper">
+            <i class="fas fa-video"></i>
+        </div>
+        <div class="stat-info">
             <h3>Proyektor Dipakai</h3>
-            <p class="card-value">{{ count($proyektor) }}</p>
+            <div class="value">{{ count($proyektor) }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="content-grid">
+    {{-- ==== Tabel Ruangan ==== --}}
+    <div class="data-section">
+        <div class="section-title">
+            <i class="fas fa-door-closed"></i> Ruangan Sedang Digunakan
+        </div>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th width="10%">No</th>
+                        <th>Nama Ruangan</th>
+                        <th width="20%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($ruangan as $index => $r)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td class="fw-bold">{{ $r->namaRuangan ?? $r->nama_ruangan ?? '-' }}</td>
+                            <td>
+                                <span class="status-pill active">
+                                    <i class="fas fa-circle-play"></i> Dipakai
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <p>Tidak ada ruangan yang sedang digunakan saat ini.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-</div>
-
-{{-- ==== Tabel Ruangan Dipakai ==== --}}
-<div class="interactive-table mt-3">
-    <div class="section-header">
-        <h2>Ruangan yang Sedang Dipakai</h2>
+    {{-- ==== Tabel Proyektor ==== --}}
+    <div class="data-section">
+        <div class="section-title">
+            <i class="fas fa-video"></i> Proyektor Sedang Digunakan
+        </div>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th width="10%">No</th>
+                        <th>Nama Proyektor</th>
+                        <th width="20%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($proyektor as $index => $p)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td class="fw-bold">{{ $p->namaProyektor ?? $p->nama_proyektor ?? '-' }}</td>
+                            <td>
+                                <span class="status-pill active">
+                                    <i class="fas fa-circle-play"></i> Dipakai
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <p>Tidak ada proyektor yang sedang digunakan saat ini.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Ruangan</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @forelse ($ruangan as $index => $r)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $r->namaRuangan ?? $r->nama_ruangan ?? '-' }}</td>
-                    <td>
-                        <span class="status-badge status-disetujui">
-                            <i class="fas fa-play"></i> Dipakai
-                        </span>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="text-center">Tidak ada ruangan yang sedang digunakan.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
 </div>
 
-{{-- ==== Tabel Proyektor Dipakai ==== --}}
-<div class="interactive-table mt-3">
-    <div class="section-header">
-        <h2>Proyektor yang Sedang Dipakai</h2>
-    </div>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Proyektor</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @forelse ($proyektor as $index => $p)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->namaProyektor ?? $p->nama_proyektor ?? '-' }}</td>
-                    <td>
-                        <span class="status-badge status-disetujui">
-                            <i class="fas fa-play"></i> Dipakai
-                        </span>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="text-center">Tidak ada proyektor yang sedang digunakan.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-
-{{-- ==== Styling ==== --}}
 <style>
-    /* Statistik cards */
-    .dashboard-cards {
+    /* Welcome Banner */
+    .welcome-banner {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    
+    .welcome-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .welcome-banner p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.05rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 15px; /* rapikan jarak */
-        margin-top: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
     }
 
     .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 18px;
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 6px 18px rgba(18, 38, 63, 0.06);
-        transition: transform .18s ease, box-shadow .18s ease;
+        gap: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0,0,0,0.03);
     }
 
     .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 26px rgba(18, 38, 63, 0.08);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    .stat-card .card-icon {
-        width: 58px;
-        height: 58px;
-        border-radius: 50%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#fff;
-        font-size:22px;
-        flex-shrink:0;
+    .icon-wrapper {
+        width: 70px;
+        height: 70px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
     }
 
-    .bg-primary { background: linear-gradient(180deg,#007bff,#0056c7); }
-    .bg-warning { background: linear-gradient(180deg,#ffc107,#d39e00); }
-
-    .card-content h3 {
-        margin:0;
-        font-size:1rem;
-        font-weight:600;
+    .blue-card .icon-wrapper {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
     }
 
-    .card-value {
-        margin-top:4px;
-        font-size:1.5rem;
-        font-weight:700;
+    .orange-card .icon-wrapper {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
     }
 
-    /* Table styling */
-    .data-table {
-        width:100%;
-        border-collapse:collapse;
-        margin-top:10px;
-        background:#fff;
-        border-radius:12px;
-        overflow:hidden;
-        box-shadow:0 6px 18px rgba(18,38,63,0.06);
+    .stat-info h3 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .data-table th {
-        background:#f6f7f9;
-        padding:14px;
-        text-align:left;
-        font-weight:700;
-        border-bottom:1px solid #e5e5e5;
+    .stat-info .value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.2;
     }
 
-    .data-table td {
-        padding:14px;
-        border-bottom:1px solid #efefef;
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+        gap: 30px;
     }
 
-    .data-table tr:hover {
-        background:#fafafa;
+    .data-section {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0,0,0,0.03);
     }
 
-    .status-badge {
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:6px 12px;
-        border-radius:8px;
-        font-size:0.9rem;
-        font-weight:700;
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f3f4f6;
     }
 
-    .status-disetujui {
-        background:#d4edda;
-        color:#155724;
+    .section-title i {
+        color: #4f46e5;
     }
 
-    .text-center { text-align:center; }
+    /* Modern Table */
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .modern-table th {
+        text-align: left;
+        padding: 12px 15px;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modern-table td {
+        padding: 16px 15px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+
+    .modern-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-pill.active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px !important;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        color: #e5e7eb;
+    }
+
+    .empty-state p {
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .welcome-banner {
+            padding: 20px;
+        }
+        
+        .welcome-banner h2 {
+            font-size: 1.5rem;
+        }
+    }
 </style>
-
 @endsection

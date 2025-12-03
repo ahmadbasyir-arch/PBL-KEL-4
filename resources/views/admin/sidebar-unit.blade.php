@@ -1,19 +1,14 @@
+
 @extends('layouts.app')
 
 @section('title', 'Manajemen Data Unit')
 
 @section('content')
-<div class="main-container">
-    <div class="section-header mb-4">
+    <div class="welcome-banner">
         <h1>Manajemen Data Unit</h1>
         <p>Kelola data unit peralatan dengan ringkas.</p>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success shadow-sm">{{ session('success') }}</div>
-    @endif
-
-    {{-- ============ MODE TAMBAH / EDIT / DETAIL ============ --}}
     @if (isset($mode) && in_array($mode, ['create', 'edit', 'show']))
         <div class="card p-4 shadow-sm rounded-3">
             <h3 class="mb-3">
