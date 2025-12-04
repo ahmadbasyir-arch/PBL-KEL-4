@@ -18,18 +18,43 @@ class AdminPeminjamanController extends Controller
     }
 
     /**
-     * TOMBOL VALIDASI — arahkan ke halaman form jika Unit
+     * -----------------------------
+     * HANDLE SETUJU / TOLAK / COMPLETE
+     * -----------------------------
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        // Tentukan aksi berdasarkan route name
+        $action = $request->route()->getName();
+
+        if ($action === 'admin.peminjaman.approve') {
+            $peminjaman->status = 'disetujui';
+        } 
+        elseif ($action === 'admin.peminjaman.reject') {
+            $peminjaman->status = 'ditolak';
+        } 
+        elseif ($action === 'admin.peminjaman.complete') {
+            $peminjaman->status = 'menyelesaikan';
+        }
+
+        $peminjaman->save();
+
+        return back()->with('success', 'Status berhasil diperbarui.');
+    }
+
+    /**
+     * FORM VALIDASI UNIT / RUANGAN
      */
     public function formValidasi($id)
     {
         $peminjaman = Peminjaman::with(['unit', 'ruangan'])->findOrFail($id);
 
-        // jika ruangan → tidak perlu form → langsung selesai
         if ($peminjaman->ruangan && !$peminjaman->unit) {
             return $this->validateSelesaiDirect($peminjaman);
         }
 
-        // jika unit → tampilkan form validasi
         return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
@@ -41,7 +66,6 @@ class AdminPeminjamanController extends Controller
         $peminjaman = Peminjaman::findOrFail($id);
         $isUnit = !empty($peminjaman->idUnit);
 
-        // validasi hanya jika Unit
         if ($isUnit) {
             $request->validate([
                 'kondisi' => 'required|string|max:50',
@@ -53,7 +77,6 @@ class AdminPeminjamanController extends Controller
             return redirect()->back()->with('error', 'Peminjaman ini belum diajukan penyelesaian oleh mahasiswa.');
         }
 
-        // simpan kondisi (jika unit)
         if ($isUnit) {
             $peminjaman->kondisi_pengembalian = $request->kondisi;
             $peminjaman->catatan_pengembalian = $request->catatan;
@@ -69,10 +92,6 @@ class AdminPeminjamanController extends Controller
             'catatan' => $isUnit ? $request->catatan : null,
         ]);
 
-        // update stok
-        if ($peminjaman->ruangan) {
-            $peminjaman->ruangan->update(['status' => 'tersedia']);
-        }
         if ($peminjaman->unit) {
             $peminjaman->unit->update(['status' => 'tersedia']);
         }
@@ -81,7 +100,7 @@ class AdminPeminjamanController extends Controller
     }
 
     /**
-     * Jika Ruangan → auto selesai
+     * AUTO SELESAI UNTUK RUANGAN
      */
     private function validateSelesaiDirect($peminjaman)
     {
@@ -95,12 +114,8 @@ class AdminPeminjamanController extends Controller
             'catatan' => null
         ]);
 
-        if ($peminjaman->ruangan) {
-            $peminjaman->ruangan->update(['status' => 'tersedia']);
-        }
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Peminjaman ruangan selesai tanpa validasi kondisi.');
     }
 }
-

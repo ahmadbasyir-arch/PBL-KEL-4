@@ -23,6 +23,8 @@ class Peminjaman extends Model
     'jamSelesai',
     'status',     // <-- UPDATE status akan BERHASIL setelah ini
     'keperluan',
+    'kondisi_pengembalian',
+    'catatan_pengembalian',
 ];
 
 

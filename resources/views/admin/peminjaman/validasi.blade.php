@@ -8,6 +8,16 @@
     <p><strong>Unit:</strong> {{ $peminjaman->unit->namaUnit }}</p>
     <p><strong>Peminjam:</strong> {{ $peminjaman->mahasiswa->namaLengkap }}</p>
 
+    @if ($errors->any())
+        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+            <ul style="margin: 0; padding-left: 20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.peminjaman.validate', $peminjaman->id) }}" method="POST">
         @csrf
 
@@ -15,8 +25,8 @@
             <label>Kondisi Unit Setelah Dikembalikan:</label>
             <select name="kondisi" class="form-control" required>
                 <option value="">-- Pilih Kondisi --</option>
-                <option value="Bagus">Bagus</option>
-                <option value="Lecet">Lecet</option>
+                <option value="Baik">Baik</option>
+                <option value="Kurang Baik">Kurang Baik</option>
                 <option value="Rusak">Rusak</option>
             </select>
         </div>
