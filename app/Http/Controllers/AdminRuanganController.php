@@ -4,11 +4,34 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ruangan;
+use App\Models\Peminjaman;
 
 class AdminRuanganController extends Controller
 {
     public function index()
     {
+        // 1. Perbaikan Data Otomatis (jika null)
+        Ruangan::whereNull('status')->orWhere('status', '')->update(['status' => 'tersedia']);
+
+        // 2. Sinkronisasi Status dengan Peminjaman Aktif (HANYA HARI INI)
+        // Ambil ID ruangan yang sedang dipinjam HARI INI
+        $activeIds = Peminjaman::whereNotNull('idRuangan')
+            ->whereDate('tanggalPinjam', now()->toDateString()) // Filter tanggal hari ini
+            ->whereIn('status', ['disetujui', 'digunakan', 'sedang digunakan', 'menyelesaikan', 'menunggu_validasi'])
+            ->pluck('idRuangan')
+            ->toArray();
+
+        // Update status menjadi 'digunakan' untuk ruangan yang ada di daftar aktif
+        if (!empty($activeIds)) {
+            Ruangan::whereIn('id', $activeIds)->update(['status' => 'digunakan']);
+        }
+
+        // Update status menjadi 'tersedia' untuk ruangan yang TIDAK ada di daftar aktif
+        // (Opsional: hanya jika sebelumnya 'digunakan' atau 'dipinjam' agar tidak menimpa status 'perawatan' jika ada)
+        Ruangan::whereNotIn('id', $activeIds)
+            ->whereIn('status', ['dipinjam', 'digunakan'])
+            ->update(['status' => 'tersedia']);
+
         $ruangan = Ruangan::orderBy('namaRuangan')->get();
         return view('admin.sidebar-ruangan', compact('ruangan'));
     }

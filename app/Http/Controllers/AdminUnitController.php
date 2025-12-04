@@ -4,11 +4,30 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Unit;
+use App\Models\Peminjaman;
 
 class AdminUnitController extends Controller
 {
     public function index()
     {
+        // 1. Perbaikan Data Otomatis
+        Unit::whereNull('status')->orWhere('status', '')->update(['status' => 'tersedia']);
+
+        // 2. Sinkronisasi Status dengan Peminjaman Aktif (HANYA HARI INI)
+        $activeIds = Peminjaman::whereNotNull('idUnit')
+            ->whereDate('tanggalPinjam', now()->toDateString()) // Filter tanggal hari ini
+            ->whereIn('status', ['disetujui', 'digunakan', 'sedang digunakan', 'menyelesaikan', 'menunggu_validasi'])
+            ->pluck('idUnit')
+            ->toArray();
+
+        if (!empty($activeIds)) {
+            Unit::whereIn('id', $activeIds)->update(['status' => 'digunakan']);
+        }
+
+        Unit::whereNotIn('id', $activeIds)
+            ->whereIn('status', ['dipinjam', 'digunakan'])
+            ->update(['status' => 'tersedia']);
+
         $unit = Unit::orderBy('namaUnit')->get();
         return view('admin.sidebar-unit', compact('unit'));
     }
@@ -31,6 +50,7 @@ class AdminUnitController extends Controller
             'kodeUnit' => $request->kodeUnit,
             'namaUnit' => $request->namaUnit,
             'kategori' => $request->kategori,
+            'status'   => 'tersedia', // Default status
         ]);
 
         return redirect()->route('unit.index')->with('success', 'Unit berhasil ditambahkan!');

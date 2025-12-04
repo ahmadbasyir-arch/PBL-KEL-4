@@ -126,12 +126,12 @@
         }
 
         .status-pending { background: #fef3c7; color: #d97706; }
-        .status-disetujui, .status-digunakan { background: #dcfce7; color: #166534; }
+        .status-disetujui { background: #dcfce7; color: #166534; }
         .status-ditolak { background: #fee2e2; color: #991b1b; }
         .status-selesai { background: #f3f4f6; color: #374151; }
         .status-menyelesaikan, .status-menunggu_validasi { background: #e0f2fe; color: #075985; }
         .status-tersedia { background: #dcfce7; color: #166534; }
-        .status-dipinjam { background: #fee2e2; color: #991b1b; }
+        .status-dipinjam, .status-digunakan { background: #fee2e2; color: #991b1b; }
         .status-perawatan { background: #fef3c7; color: #854d0e; }
 
         /* Buttons */

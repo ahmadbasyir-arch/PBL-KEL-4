@@ -31,6 +31,16 @@ class AdminPeminjamanController extends Controller
 
         if ($action === 'admin.peminjaman.approve') {
             $peminjaman->status = 'disetujui';
+            
+            // Update status unit menjadi 'digunakan' jika ada unit yang dipinjam
+            if ($peminjaman->unit) {
+                $peminjaman->unit->update(['status' => 'digunakan']);
+            }
+
+            // Update status ruangan menjadi 'digunakan' jika ada ruangan yang dipinjam
+            if ($peminjaman->ruangan) {
+                $peminjaman->ruangan->update(['status' => 'digunakan']);
+            }
         } 
         elseif ($action === 'admin.peminjaman.reject') {
             $peminjaman->status = 'ditolak';
@@ -96,6 +106,10 @@ class AdminPeminjamanController extends Controller
             $peminjaman->unit->update(['status' => 'tersedia']);
         }
 
+        if ($peminjaman->ruangan) {
+            $peminjaman->ruangan->update(['status' => 'tersedia']);
+        }
+
         return redirect()->route('admin.dashboard')->with('success', 'Peminjaman berhasil divalidasi sebagai selesai.');
     }
 
@@ -113,6 +127,10 @@ class AdminPeminjamanController extends Controller
             'kondisi' => 'Baik',
             'catatan' => null
         ]);
+
+        if ($peminjaman->ruangan) {
+            $peminjaman->ruangan->update(['status' => 'tersedia']);
+        }
 
 
         return redirect()->route('admin.dashboard')
