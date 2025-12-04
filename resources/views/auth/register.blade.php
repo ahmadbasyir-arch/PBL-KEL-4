@@ -121,12 +121,73 @@
             font-size: 0.9rem;
             border-left: 4px solid #ef4444;
         }
+
+        .welcome-text {
+            position: relative;
+            z-index: 10;
+            color: white;
+            margin-right: auto;
+            margin-left: 8%;
+            max-width: 650px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .welcome-text h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 0 0 15px 0;
+            line-height: 1.1;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-text h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin: 0 0 25px 0;
+            line-height: 1.6;
+            color: #e0e7ff;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            max-width: 90%;
+        }
+
+        .welcome-text h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fbbf24; /* Amber accent */
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            display: inline-block;
+            border-bottom: 2px solid #fbbf24;
+            padding-bottom: 5px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1024px) {
+            .welcome-text { display: none; }
+            .login-container { justify-content: center; padding-right: 0; }
+        }
     </style>
 </head>
 
 <body>
 <div class="login-container">
     <img src="{{ asset('assets/images/Gedung Nadiem Makarim 1.jpg') }}" alt="Gedung Kuliah" class="login-background-img">
+
+    <div class="welcome-text">
+        <h1>SELAMAT DATANG</h1>
+        <h2>Sistem Informasi Peminjaman Sarana dan Prasarana Berbasis Web untuk Prodi TI</h2>
+        <h3>POLITEKNIK NEGERI TANAH LAUT</h3>
+    </div>
 
     <div class="login-card">
         <div class="login-logos">

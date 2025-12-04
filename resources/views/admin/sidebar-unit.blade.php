@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Manajemen Data Unit')
@@ -84,14 +83,13 @@
     </div>
 
     <div class="card p-3 shadow-sm rounded-3">
-        <table class="data-table">
+        <table class="data-table" style="width: 100%;">
             <thead>
                 <tr>
-                    <th>Kode Unit</th>
-                    <th>Nama Unit</th>
-                    <th>Kategori</th>
-                    <th>Status</th>
-                    <th style="width:180px;">Aksi</th>
+                    <th style="width: 20%;">Kode Unit</th>
+                    <th style="width: 40%;">Nama Unit</th>
+                    <th style="width: 20%;">Status</th>
+                    <th style="width: 20%; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,14 +97,13 @@
                     <tr>
                         <td><strong>{{ $item->kodeUnit }}</strong></td>
                         <td>{{ $item->namaUnit }}</td>
-                        <td>{{ $item->kategori ?? '-' }}</td>
                         <td>
                             <span class="status-badge status-{{ Str::slug($item->status) }}">
                                 {{ ucfirst($item->status) }}
                             </span>
                         </td>
-                        <td>
-                            <div class="action-buttons">
+                        <td style="text-align: center;">
+                            <div class="action-buttons" style="justify-content: center;">
                                 <a href="{{ route('admin.unit.show', $item->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
                                 <a href="{{ route('admin.unit.edit', $item->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
                                 <form action="{{ route('admin.unit.destroy', $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus unit ini?')">
@@ -118,7 +115,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-center text-muted py-3">Belum ada data unit.</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted py-3">Belum ada data unit.</td></tr>
                 @endforelse
             </tbody>
         </table>

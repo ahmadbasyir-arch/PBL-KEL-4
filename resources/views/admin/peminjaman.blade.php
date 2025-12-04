@@ -72,8 +72,9 @@
 
                         @elseif ($p->status === 'menyelesaikan' || $p->status === 'menunggu_validasi')
                             <button type="button" class="btn btn-success btn-sm"
-    onclick="openValidationModal({{ $p->id }})"
-    data-id="{{ $p->id }}">
+    onclick="openValidationModal({{ $p->id }}, '{{ $p->ruangan ? 'ruangan' : 'unit' }}')"
+    data-id="{{ $p->id }}"
+    data-jenis="{{ $p->ruangan ? 'ruangan' : 'unit' }}">
     <i class="fas fa-check"></i> Validasi
 </button>
 
@@ -114,12 +115,13 @@
         <h4>Validasi Pengembalian</h4>
         <form id="validationForm" method="POST" action="">
             @csrf
+            
             <div class="form-group">
                 <label for="kondisi">Kondisi Barang</label>
                 <select name="kondisi" id="kondisi" class="form-control" required>
                     <option value="">-- Pilih Kondisi --</option>
-                    <option value="Baik">Baik</option>
-                    <option value="Kurang Baik">Kurang Baik</option>
+                    <option value="Bagus">Bagus</option>
+                    <option value="Lecet">Lecet</option>
                     <option value="Rusak">Rusak</option>
                 </select>
             </div>
@@ -143,124 +145,110 @@
      ============================ --}}
 <script>
 (function () {
-    // Definisikan fungsi global supaya onclick inline tahu memanggilnya
-    window.openValidationModal = function (peminjamanId) {
-        try {
-            console.log('[debug] openValidationModal dipanggil dengan id:', peminjamanId);
-            const modal = document.getElementById('validationModal');
-            const form = document.getElementById('validationForm');
-            if (!modal || !form) {
-                console.error('[debug] Modal atau form tidak ditemukan');
-                return;
+    // Helper untuk mengambil CSRF Token
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+               document.querySelector('input[name="_token"]')?.value;
+    }
+
+    // Fungsi Submit Validation (Re-usable)
+    function submitValidation(url, payload) {
+        console.log('[debug] Submitting validation to:', url, payload);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+            credentials: 'same-origin'
+        })
+        .then(async (res) => {
+            if (res.ok) {
+                // Tutup modal jika terbuka
+                closeValidationModal();
+                // Reload halaman
+                window.location.reload();
+            } else {
+                let text = 'Gagal memproses validasi.';
+                try {
+                    const err = await res.json();
+                    if (err && err.message) text = err.message;
+                } catch (e) {}
+                alert(text);
             }
+        })
+        .catch((err) => {
+            console.error('Fetch error:', err);
+            alert('Terjadi kesalahan koneksi.');
+        });
+    }
 
-            // set action sesuai route yang ada di web.php
-            form.action = `/admin/peminjaman/${peminjamanId}/validate`;
+    // Global: Buka Modal atau Langsung Validasi
+    window.openValidationModal = function (peminjamanId, jenis) {
+        const url = `/admin/peminjaman/${peminjamanId}/validate`;
 
-            // tampilkan modal
+        // LOGIKA UTAMA:
+        // Jika Ruangan -> Langsung konfirmasi & submit (tanpa form)
+        // Jika Unit    -> Buka modal isi form
+        
+        if (jenis !== 'unit') {
+            if (confirm('Validasi pengembalian ruangan ini? Status akan menjadi Selesai.')) {
+                // Payload kosong / default untuk ruangan
+                submitValidation(url, { kondisi: 'Baik', catatan: '-' });
+            }
+            return; 
+        }
+
+        // Jika Unit, buka modal
+        const modal = document.getElementById('validationModal');
+        const form = document.getElementById('validationForm');
+        
+        if (modal && form) {
+            form.action = url; // Set action form
+            
+            // Reset form
+            document.getElementById('kondisi').value = '';
+            document.getElementById('catatan').value = '';
+
             modal.style.display = 'flex';
-            modal.style.position = 'fixed';
-            modal.style.zIndex = '9999';
-        } catch (err) {
-            console.error('[debug] error di openValidationModal:', err);
         }
     };
 
-    function closeValidationModal() {
+    window.closeValidationModal = function () {
         const modal = document.getElementById('validationModal');
         if (modal) modal.style.display = 'none';
+    };
 
-        const kondisi = document.getElementById('kondisi');
-        const catatan = document.getElementById('catatan');
-        if (kondisi) kondisi.value = '';
-        if (catatan) catatan.value = '';
-    }
-
-    // Delegation: jika tombol validasi diklik tapi inline onclick tidak bekerja,
-    // gunakan data-id sebagai fallback.
-    document.addEventListener('click', function (e) {
-        try {
-            const btn = e.target.closest('button');
-            if (!btn) return;
-
-            // tombol validasi kita punya text 'Validasi' dan/atau data-id
-            const isValidasiText = btn.textContent && btn.textContent.trim().toLowerCase().includes('validasi');
-            const hasDataId = btn.hasAttribute && btn.hasAttribute('data-id');
-
-            if (isValidasiText && hasDataId) {
-                const id = btn.getAttribute('data-id');
-                if (id) {
-                    e.preventDefault();
-                    // panggil fungsi global (ini aman)
-                    window.openValidationModal(Number(id));
-                }
-            }
-        } catch (err) {
-            console.error('[debug] error di delegation click handler:', err);
-        }
-    });
-
-    // Submit handler menggunakan fetch (JSON) seperti sebelumnya
+    // Event Listener untuk Submit Form (Hanya untuk Unit)
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('validationForm');
-        if (!form) {
-            console.warn('[debug] validationForm tidak ditemukan');
-            return;
-        }
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const action = form.action;
-            if (!action) {
-                alert('Target action tidak tersedia. Silakan coba ulang.');
-                return;
-            }
-
-            // Ambil token CSRF dari input hidden yang dibuat oleh @csrf
-            const tokenInput = form.querySelector('input[name="_token"]');
-            const csrfToken = tokenInput ? tokenInput.value : '';
-
-            const payload = {
-                kondisi: document.getElementById('kondisi') ? document.getElementById('kondisi').value : '',
-                catatan: document.getElementById('catatan') ? document.getElementById('catatan').value : ''
-            };
-
-            console.log('[debug] submit payload ke', action, payload);
-
-            fetch(action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload),
-                credentials: 'same-origin'
-            })
-            .then(async (res) => {
-                if (res.ok) {
-                    closeValidationModal();
-                    // jika server redirect 302, res.ok tetap true di fetch; reload agar UI update
-                    window.location.reload();
-                } else {
-                    let text = 'Gagal memproses validasi.';
-                    try {
-                        const err = await res.json();
-                        if (err && err.message) text = err.message;
-                    } catch (err) { /* ignore */ }
-                    alert(text);
-                }
-            })
-            .catch((err) => {
-                console.error('Fetch error:', err);
-                alert('Terjadi kesalahan koneksi. Silakan coba lagi.');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const payload = {
+                    kondisi: document.getElementById('kondisi').value,
+                    catatan: document.getElementById('catatan').value
+                };
+                submitValidation(form.action, payload);
             });
-        });
+        }
     });
 
-    // expose close function agar tombol "Batal" tetap bekerja
-    window.closeValidationModal = closeValidationModal;
+    // Delegation untuk tombol validasi (jika onclick inline gagal)
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('button');
+        if (btn && btn.hasAttribute('data-id') && btn.textContent.toLowerCase().includes('validasi')) {
+            const id = btn.getAttribute('data-id');
+            const jenis = btn.getAttribute('data-jenis');
+            // Panggil global function jika belum terpanggil oleh onclick
+            // Note: Biasanya onclick inline menangani ini, tapi ini backup.
+            // Kita cek apakah event sudah di-handle? Tidak mudah.
+            // Asumsi: jika inline onclick ada, dia jalan duluan.
+        }
+    });
 })();
 </script>
 

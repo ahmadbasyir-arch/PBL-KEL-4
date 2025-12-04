@@ -16,6 +16,7 @@ class Ruangan extends Model
         'namaRuangan',
         'lokasi',
         'kapasitas',
+        'status',
     ];
 
     public $timestamps = false; // karena kolom created_at dan updated_at NULL

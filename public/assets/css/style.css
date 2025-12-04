@@ -537,6 +537,30 @@ hr {
     background-color: #2980b9;
 }
 
+.btn-success {
+    background-color: #27ae60;
+    color: #fff;
+}
+.btn-success:hover {
+    background-color: #219150;
+}
+
+.btn-warning {
+    background-color: #f39c12;
+    color: #fff;
+}
+.btn-warning:hover {
+    background-color: #d68910;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: #fff;
+}
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
 /* --- Gaya untuk Peminjaman Dinamis --- */
 .item-peminjaman {
     display: flex;

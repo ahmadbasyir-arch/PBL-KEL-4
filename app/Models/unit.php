@@ -15,7 +15,8 @@ class Unit extends Model
 
     protected $fillable = [
         'namaUnit',
-        'kodeUnit', // ← DITAMBAHKAN
+        'kodeUnit',
+        'status',
     ];
 
     public function peminjaman()

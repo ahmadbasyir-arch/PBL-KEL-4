@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
     */
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
 
+        Route::get('/peminjaman/{id}/validasi', [AdminPeminjamanController::class, 'formValidasi'])
+        ->name('admin.peminjaman.formValidasi');
+
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
         Route::resource('/ruangan', AdminRuanganController::class)->names([

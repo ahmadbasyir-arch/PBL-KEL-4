@@ -25,7 +25,7 @@ class PeminjamanController extends Controller
 
         foreach ($listData as $item) {
             $q = Peminjaman::where('tanggalPinjam', $selectedDate)
-                ->whereIn('status', ['disetujui', 'digunakan', 'sedang digunakan']);
+                ->whereIn('status', ['pending', 'disetujui', 'digunakan', 'sedang digunakan', 'menyelesaikan', 'menunggu_validasi']);
 
             $jenis === 'ruangan'
                 ? $q->where('idRuangan', $item->id)
@@ -95,7 +95,7 @@ class PeminjamanController extends Controller
         }
 
         $jenis = $peminjaman->idRuangan ? 'ruangan' : 'unit';
-        $busyStatuses = ['disetujui', 'digunakan', 'pending', 'sedang digunakan'];
+        $busyStatuses = ['pending', 'disetujui', 'digunakan', 'sedang digunakan', 'menyelesaikan', 'menunggu_validasi'];
 
         if ($jenis === 'ruangan') {
             $busyIds = Peminjaman::where('tanggalPinjam', $peminjaman->tanggalPinjam)

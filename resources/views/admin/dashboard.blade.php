@@ -103,26 +103,23 @@
 
                     {{-- STATUS BADGE --}}
                     <td>
-    @php 
-        $status = strtolower($p->status);
+                        @php 
+                            $class = match($status) {
+                                'pending' => 'status-pending',
+                                'disetujui' => 'status-disetujui',
+                                'digunakan', 'sedang digunakan' => 'status-digunakan',
+                                'menyelesaikan' => 'status-menyelesaikan',
+                                'menunggu_validasi' => 'status-menunggu_validasi',
+                                'selesai' => 'status-selesai',
+                                'ditolak' => 'status-ditolak',
+                                default => 'status-default'
+                            };
+                        @endphp
 
-        $class = match($status) {
-            'pending' => 'status-pending',
-            'disetujui' => 'status-disetujui',
-            'digunakan', 'sedang digunakan' => 'status-digunakan',
-            'menyelesaikan' => 'status-menyelesaikan',
-            'menunggu_validasi' => 'status-menunggu_validasi',
-            'selesai' => 'status-selesai',
-            'ditolak' => 'status-ditolak',
-            default => 'status-default'
-        };
-    @endphp
-
-    <span class="status-badge {{ $class }}">
-        {{ ucfirst($status) }}
-    </span>
-</td>
-
+                        <span class="status-badge {{ $class }}">
+                            {{ ucfirst($status) }}
+                        </span>
+                    </td>
 
                     <td style="white-space: nowrap;">
                         {{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMM YYYY') }}
@@ -136,12 +133,12 @@
                             @if ($status === 'pending')
                                 <form action="{{ route('admin.peminjaman.approve', $p->id) }}" method="POST" style="display:inline;">
                                     @csrf
-                                    <button type="submit" class="btn-approve">Setujui</button>
+                                    <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Setujui</button>
                                 </form>
 
                                 <form action="{{ route('admin.peminjaman.reject', $p->id) }}" method="POST" style="display:inline;">
                                     @csrf
-                                    <button type="submit" class="btn-reject">Tolak</button>
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Tolak</button>
                                 </form>
 
                             {{-- Sedang digunakan --}}
@@ -152,15 +149,17 @@
 
                             {{-- Menunggu validasi --}}
                             @elseif (in_array($status, ['menyelesaikan', 'menunggu_validasi']))
-                                <form action="{{ route('admin.peminjaman.validate', $p->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    <button type="submit" class="btn-validate"
-                                        onclick="return confirm('Validasi peminjaman ini sebagai selesai?')">Validasi</button>
+
+                                {{-- 🔥 VALIDASI MENGGUNAKAN GET (MASUK FORM JIKA UNIT) --}}
+                                <form action="{{ route('admin.peminjaman.formValidasi', $p->id) }}" method="GET" style="display:inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Validasi
+                                    </button>
                                 </form>
 
                                 <form action="{{ route('admin.peminjaman.reject', $p->id) }}" method="POST" style="display:inline;">
                                     @csrf
-                                    <button type="submit" class="btn-reject">Tolak Selesai</button>
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Tolak Selesai</button>
                                 </form>
 
                             {{-- Selesai --}}
@@ -191,8 +190,5 @@
         </tbody>
     </table>
 </div>
-
-{{-- === Styling tampilan (presentasi) === --}}
-
 
 @endsection
