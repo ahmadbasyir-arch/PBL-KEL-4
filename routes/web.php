@@ -84,7 +84,12 @@ Route::middleware('auth')->group(function () {
             'show'   => 'admin.unit.show',
         ]);
 
-        Route::get('/pengguna', [PenggunaController::class, 'index'])->name('admin.pengguna.index');
+        Route::resource('/pengguna', PenggunaController::class)->names([
+            'index' => 'admin.pengguna.index',
+            'edit' => 'admin.pengguna.edit',
+            'update' => 'admin.pengguna.update',
+            'destroy' => 'admin.pengguna.destroy',
+        ]);
 
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');
@@ -120,6 +125,15 @@ Route::middleware('auth')->group(function () {
         Route::put('/dosen/peminjaman/{id}', 
             [PeminjamanController::class, 'update'])
             ->name('dosen.peminjaman.update');
+
+        // 🔵 ROUTE MANAJEMEN PENGGUNA (DOSEN)
+        Route::resource('/dosen/pengguna', \App\Http\Controllers\DosenPenggunaController::class)
+            ->names([
+                'index' => 'dosen.pengguna.index',
+                'edit' => 'dosen.pengguna.edit',
+                'update' => 'dosen.pengguna.update',
+                'destroy' => 'dosen.pengguna.destroy',
+            ]);
     });
 
     /*

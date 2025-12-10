@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Data Pengguna')
+@section('title', 'Manajemen Data Pengguna (Dosen)')
 
 @section('content')
     <div class="welcome-banner">
-        <h1>Manajemen Data Pengguna</h1>
-        <p>Semua pengguna yang terdaftar di sistem berdasarkan peran (Mahasiswa & Dosen).</p>
+        <h1>Manajemen Data Pengguna (DOSEN)</h1>
+        <p>Kelola data mahasiswa dan dosen (Edit & Hapus).</p>
     </div>
 
     {{-- ===================== MAHASISWA ===================== --}}
@@ -33,10 +33,10 @@
                         <td>{{ $user->created_at->format('d M Y') }}</td>
                         <td style="text-align: center;">
                             <div class="action-buttons" style="justify-content: center; display: flex; gap: 5px;">
-                                <a href="{{ route('admin.pengguna.edit', $user->id) }}" class="btn btn-warning btn-sm" style="background-color: #f59e0b; border: none; color: white; padding: 5px 10px; border-radius: 4px;">
+                                <a href="{{ route('dosen.pengguna.edit', $user->id) }}" class="btn btn-warning btn-sm" style="background-color: #f59e0b; border: none; color: white; padding: 5px 10px; border-radius: 4px;">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.pengguna.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
+                                <form action="{{ route('dosen.pengguna.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm" style="background-color: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 4px;">
@@ -80,10 +80,10 @@
                         <td>{{ $user->created_at->format('d M Y') }}</td>
                         <td style="text-align: center;">
                             <div class="action-buttons" style="justify-content: center; display: flex; gap: 5px;">
-                                <a href="{{ route('admin.pengguna.edit', $user->id) }}" class="btn btn-warning btn-sm" style="background-color: #f59e0b; border: none; color: white; padding: 5px 10px; border-radius: 4px;">
+                                <a href="{{ route('dosen.pengguna.edit', $user->id) }}" class="btn btn-warning btn-sm" style="background-color: #f59e0b; border: none; color: white; padding: 5px 10px; border-radius: 4px;">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.pengguna.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
+                                <form action="{{ route('dosen.pengguna.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm" style="background-color: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 4px;">

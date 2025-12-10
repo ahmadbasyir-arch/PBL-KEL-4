@@ -6,20 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class PenggunaController extends Controller
+class DosenPenggunaController extends Controller
 {
     public function index()
     {
         $mahasiswa = User::where('role', 'mahasiswa')->orderBy('name')->get();
         $dosen = User::where('role', 'dosen')->orderBy('name')->get();
 
-        return view('admin.sidebar-pengguna', compact('mahasiswa', 'dosen'));
+        return view('dosen.sidebar-pengguna', compact('mahasiswa', 'dosen'));
     }
 
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.pengguna.edit', compact('user'));
+        return view('dosen.pengguna.edit', compact('user'));
     }
 
     public function update(Request $request, $id)
@@ -45,7 +45,7 @@ class PenggunaController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.pengguna.index')->with('success', 'Data pengguna berhasil diperbarui.');
+        return redirect()->route('dosen.pengguna.index')->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -53,6 +53,6 @@ class PenggunaController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('admin.pengguna.index')->with('success', 'Pengguna berhasil dihapus.');
+        return redirect()->route('dosen.pengguna.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 }

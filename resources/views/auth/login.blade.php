@@ -253,6 +253,12 @@
                     </div>
                 @endif
 
+                @if (session('error'))
+                    <div class="error-message">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <div class="form-group">
                     <label for="email_or_nim">Email atau NIM</label>
                     <input type="text" id="email_or_nim" name="email_or_nim" placeholder="Masukkan email atau NIM" required value="{{ old('email_or_nim') }}">

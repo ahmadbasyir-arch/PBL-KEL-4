@@ -264,6 +264,14 @@
             </a>
         </li>
 
+        @if(($user->role ?? '') === 'dosen')
+        <li class="{{ request()->is('dosen/pengguna*') ? 'active' : '' }}">
+            <a href="{{ route('dosen.pengguna.index') }}">
+                <i class="fas fa-users"></i> Data Pengguna
+            </a>
+        </li>
+        @endif
+
     {{-- === Jika role Admin / Staff === --}}
     @elseif(in_array($user->role ?? '', ['admin', 'staff']))
         <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
