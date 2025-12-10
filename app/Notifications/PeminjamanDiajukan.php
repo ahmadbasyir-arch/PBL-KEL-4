@@ -39,8 +39,12 @@ class PeminjamanDiajukan extends Notification
     public function toArray(object $notifiable): array
     {
         $item = $this->peminjaman->ruangan ?? $this->peminjaman->unit;
-        $namaItem = $item ? $item->nama : 'Item tidak ditemukan';
         $jenis = $this->peminjaman->ruangan ? 'Ruangan' : 'Unit';
+        
+        $namaItem = 'Item tidak ditemukan';
+        if ($item) {
+            $namaItem = $jenis === 'Ruangan' ? $item->namaRuangan : $item->namaUnit;
+        }
 
         return [
             'peminjaman_id' => $this->peminjaman->id,
@@ -54,8 +58,12 @@ class PeminjamanDiajukan extends Notification
     public function toWhatsApp($notifiable)
     {
         $item = $this->peminjaman->ruangan ?? $this->peminjaman->unit;
-        $namaItem = $item ? $item->nama : 'Item tidak ditemukan';
         $jenis = $this->peminjaman->ruangan ? 'Ruangan' : 'Unit';
+        
+        $namaItem = 'Item tidak ditemukan';
+        if ($item) {
+            $namaItem = $jenis === 'Ruangan' ? $item->namaRuangan : $item->namaUnit;
+        }
         
         $tgl = \Carbon\Carbon::parse($this->peminjaman->tanggalPinjam)->format('d-m-Y');
         $jam = $this->peminjaman->jamMulai . ' - ' . $this->peminjaman->jamSelesai;
