@@ -81,7 +81,7 @@
                 @endphp
 
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $loop->remaining + 1 }}</td>
 
                     <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                         {{ $p->mahasiswa->namaLengkap ?? $p->mahasiswa->name ?? '-' }}

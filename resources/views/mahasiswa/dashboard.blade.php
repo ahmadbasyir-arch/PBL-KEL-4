@@ -75,7 +75,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>No</th>
                 <th>Ruangan/Unit</th>
                 <th>Keperluan</th>
                 <th>Tanggal Pinjam</th>
@@ -85,7 +85,7 @@
         <tbody>
             @forelse ($peminjamanTerkini as $p)
                 <tr>
-                    <td>#{{ $p->id }}</td>
+                    <td>{{ $loop->remaining + 1 }}</td>
                     <td>
                         @if (!empty($p->ruangan))
                             <strong>{{ $p->ruangan->namaRuangan }}</strong>
