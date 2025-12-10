@@ -40,6 +40,10 @@ public function mahasiswa()
     return $this->hasOne(Mahasiswa::class, 'user_id');
 }
 
+    public function peminjaman()
+    {
+        return $this->hasMany(\App\Models\Peminjaman::class, 'idMahasiswa');
+    }
 
     // 🔹 Tambahkan accessor untuk uniformitas tampilan di blade
     public function getNameAttribute()

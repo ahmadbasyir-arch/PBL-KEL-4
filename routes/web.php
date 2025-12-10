@@ -50,6 +50,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/lengkapi-profil', [GoogleController::class, 'showCompleteProfile'])->name('lengkapi.profil');
     Route::post('/lengkapi-profil', [GoogleController::class, 'storeCompleteProfile'])->name('lengkapi.profil.store');
 
+    // ROUTE PENGATURAN PROFIL
+    Route::get('/settings', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/settings', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    // ROUTE NOTIFIKASI
+    Route::get('/notifications/mark-read', [\App\Http\Controllers\ProfileController::class, 'markNotificationsRead'])->name('notifications.markRead');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
@@ -90,6 +96,11 @@ Route::middleware('auth')->group(function () {
             'update' => 'admin.pengguna.update',
             'destroy' => 'admin.pengguna.destroy',
         ]);
+
+        // ROUTE RANKING
+        Route::get('/ranking/export', [\App\Http\Controllers\AdminRankingController::class, 'exportPdf'])->name('admin.ranking.export');
+        Route::get('/ranking', [\App\Http\Controllers\AdminRankingController::class, 'index'])->name('admin.ranking.index');
+
 
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');

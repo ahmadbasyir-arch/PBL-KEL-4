@@ -176,15 +176,7 @@
         }
     </style>
 <body>
-    <div class="container">
-
-        {{-- ==== SIDEBAR ==== --}}
-        @if (!request()->is('lengkapi-profil'))
-        <div class="sidebar">
-            <div class="sidebar-header"><h2>Sarpras TI</h2></div>
-
-            {{-- ==== DATA USER ==== --}}
-@php
+    @php
     $authUser = Auth::user();
     $user = null;
     if ($authUser && isset($authUser->id)) {
@@ -208,7 +200,17 @@
     if ($inisialNama === '') {
         $inisialNama = 'U';
     }
-@endphp
+    @endphp
+
+    <div class="container">
+
+        {{-- ==== SIDEBAR ==== --}}
+        @if (!request()->is('lengkapi-profil'))
+        <div class="sidebar">
+            <div class="sidebar-header"><h2>Sarpras TI</h2></div>
+
+            {{-- ==== DATA USER ==== --}}
+
 
             <div class="sidebar-user">
                 <div class="user-avatar">
@@ -272,6 +274,12 @@
         </li>
         @endif
 
+        <li class="{{ request()->is('settings*') ? 'active' : '' }}">
+            <a href="{{ route('profile.edit') }}">
+                <i class="fas fa-cog"></i> Pengaturan
+            </a>
+        </li>
+
     {{-- === Jika role Admin / Staff === --}}
     @elseif(in_array($user->role ?? '', ['admin', 'staff']))
         <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
@@ -283,9 +291,10 @@
         <li class="{{ request()->is('admin/pengguna*') ? 'active' : '' }}">
             <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
         </li>
-        <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
-            <a href="#"><i class="fas fa-cogs"></i> Pengaturan</a>
+        <li class="{{ request()->is('admin/ranking*') ? 'active' : '' }}">
+            <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-trophy"></i> Ranking Peminjaman</a>
         </li>
+
     @endif
 </ul>
         </div>
@@ -311,6 +320,44 @@
                 <div class="header-right">
                     <div class="notification-bell icon-link" id="notificationBell">
                         <i class="fas fa-bell"></i>
+                        @php
+                            $unreadCount = $user ? $user->unreadNotifications->count() : 0;
+                        @endphp
+                        @if($unreadCount > 0)
+                            <span class="notification-badge">{{ $unreadCount }}</span>
+                        @endif
+                        
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <span>Notifikasi</span>
+                                @if($unreadCount > 0)
+                                    <a href="{{ route('notifications.markRead') }}" class="mark-read">Tandai sudah dibaca</a>
+                                @endif
+                            </div>
+                            <div class="dropdown-content">
+                                @forelse($user->notifications as $notification)
+                                    <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-item {{ $notification->read_at ? '' : 'unread' }}">
+                                        <div class="icon">
+                                            @if(($notification->data['status'] ?? '') == 'disetujui')
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            @elseif(($notification->data['status'] ?? '') == 'ditolak')
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                            @else
+                                                <i class="fas fa-info-circle text-info"></i>
+                                            @endif
+                                        </div>
+                                        <div class="text">
+                                            <p>{{ $notification->data['message'] ?? 'Notifikasi baru' }}</p>
+                                            <small>{{ $notification->created_at->diffForHumans() }}</small>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="empty-state">
+                                        <p>Tidak ada notifikasi</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
                     </div>
 
                     <div class="profile-avatar" id="profileAvatar">
@@ -354,9 +401,29 @@
                     profileDropdown.classList.toggle('show');
                 });
             }
+
+            // Notification Dropdown Logic
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+
+            if (notificationBell && notificationDropdown) {
+                notificationBell.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // Close profile dropdown if open
+                    if (profileDropdown) profileDropdown.classList.remove('show');
+                    notificationDropdown.classList.toggle('show');
+                });
+            }
+
+            // Close when clicking outside
             window.addEventListener('click', function(e) {
                 if (profileDropdown && profileDropdown.classList.contains('show')) {
                     profileDropdown.classList.remove('show');
+                }
+                if (notificationDropdown && notificationDropdown.classList.contains('show')) {
+                    if (!notificationDropdown.contains(e.target) && !notificationBell.contains(e.target)) {
+                        notificationDropdown.classList.remove('show');
+                    }
                 }
             });
 

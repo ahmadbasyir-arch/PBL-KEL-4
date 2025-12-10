@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 
+use App\Notifications\PeminjamanStatusUpdated;
+
 class AdminPeminjamanController extends Controller
 {
     public function index()
@@ -50,6 +52,11 @@ class AdminPeminjamanController extends Controller
         }
 
         $peminjaman->save();
+
+        // Kirim Notifikasi
+        if ($peminjaman->mahasiswa) {
+            $peminjaman->mahasiswa->notify(new PeminjamanStatusUpdated($peminjaman, $peminjaman->status));
+        }
 
         return back()->with('success', 'Status berhasil diperbarui.');
     }
@@ -110,6 +117,11 @@ class AdminPeminjamanController extends Controller
             $peminjaman->ruangan->update(['status' => 'tersedia']);
         }
 
+        // Kirim Notifikasi
+        if ($peminjaman->mahasiswa) {
+            $peminjaman->mahasiswa->notify(new PeminjamanStatusUpdated($peminjaman, 'selesai'));
+        }
+
         return redirect()->route('admin.dashboard')->with('success', 'Peminjaman berhasil divalidasi sebagai selesai.');
     }
 
@@ -132,6 +144,10 @@ class AdminPeminjamanController extends Controller
             $peminjaman->ruangan->update(['status' => 'tersedia']);
         }
 
+        // Kirim Notifikasi
+        if ($peminjaman->mahasiswa) {
+            $peminjaman->mahasiswa->notify(new PeminjamanStatusUpdated($peminjaman, 'selesai'));
+        }
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Peminjaman ruangan selesai tanpa validasi kondisi.');

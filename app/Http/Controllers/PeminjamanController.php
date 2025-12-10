@@ -61,7 +61,7 @@ class PeminjamanController extends Controller
         $user = Auth::user();
 
         foreach ($validated['items'] as $item) {
-            Peminjaman::create([
+            $peminjaman = Peminjaman::create([
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -73,6 +73,9 @@ class PeminjamanController extends Controller
                 // SOLUSI UTAMA — dosen & mahasiswa disimpan di kolom sama
                 'idMahasiswa'   => $user->id,
             ]);
+
+            // Kirim Notifikasi (Web & WA)
+            $user->notify(new \App\Notifications\PeminjamanDiajukan($peminjaman));
         }
 
         return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
