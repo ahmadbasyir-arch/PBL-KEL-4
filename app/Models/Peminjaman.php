@@ -51,6 +51,11 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Unit::class, 'idUnit');
     }
+    
+    public function feedback()
+    {
+        return $this->hasOne(Feedback::class);
+    }
 
     // Relasi ke tabel pengembalian
     public function pengembalian()

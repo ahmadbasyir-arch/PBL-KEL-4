@@ -24,7 +24,8 @@ class RiwayatController extends Controller
         }
 
         // Ambil ulang 30 data terbaru
-        $riwayat = Peminjaman::where('idMahasiswa', $user->id)
+        $riwayat = Peminjaman::with(['ruangan', 'unit', 'feedback']) // Load relation feedback
+            ->where('idMahasiswa', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(30)
             ->get();

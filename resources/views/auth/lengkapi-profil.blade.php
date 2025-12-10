@@ -47,6 +47,13 @@
             </div>
 
             <div class="form-group">
+                <label for="telepon">Nomor WhatsApp</label>
+                <input type="text" id="telepon" name="telepon" 
+                    value="{{ old('telepon', $user->telepon ?? '') }}" 
+                    placeholder="Contoh: 08xxxxxxxxxx" required>
+            </div>
+
+            <div class="form-group">
                 <label for="password">Password Baru</label>
                 <input type="password" id="password" name="password" placeholder="Masukkan password baru" required>
             </div>

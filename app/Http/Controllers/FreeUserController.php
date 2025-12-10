@@ -8,26 +8,27 @@ class FreeUserController extends Controller
 {
     public function index()
     {
-        $statusSedangDipakai = ['disetujui', 'digunakan'];
+        $today = now()->toDateString();
+        $statusSedangDipakai = ['disetujui', 'digunakan', 'sedang digunakan'];
 
-        $ruangan = Peminjaman::with('ruangan')
+        // Ambil ID Ruangan & Unit yang sedang dipakai HARI INI
+        $usedRuanganIds = Peminjaman::whereDate('tanggalPinjam', $today)
             ->whereIn('status', $statusSedangDipakai)
             ->whereNotNull('idRuangan')
-            ->get()
-            ->pluck('ruangan')
-            ->filter()
-            ->unique('id')
-            ->values();
+            ->pluck('idRuangan');
 
-        $proyektor = Peminjaman::with('unit')
+        $usedUnitIds = Peminjaman::whereDate('tanggalPinjam', $today)
             ->whereIn('status', $statusSedangDipakai)
             ->whereNotNull('idUnit')
-            ->get()
-            ->pluck('unit')
-            ->filter()
-            ->unique('id')
-            ->values();
+            ->pluck('idUnit');
 
-        return view('freeuser.home', compact('ruangan', 'proyektor'));
+        // Data Objek untuk View (Yang Sedang Dipakai)
+        $ruangan = \App\Models\Ruangan::whereIn('id', $usedRuanganIds)->get();
+        $proyektor = \App\Models\Unit::whereIn('id', $usedUnitIds)->get();
+
+        // Data Objek untuk View (Yang Tersedia / Kosong)
+        $availableRuangan = \App\Models\Ruangan::whereNotIn('id', $usedRuanganIds)->get();
+
+        return view('freeuser.home', compact('ruangan', 'proyektor', 'availableRuangan'));
     }
 }

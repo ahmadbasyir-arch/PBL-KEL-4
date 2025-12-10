@@ -42,7 +42,7 @@
             <option value="">-- Pilih Keperluan --</option>
             <option>Uji Kompetensi</option>
             <option>Sidang Tugas Akhir</option>
-            <option>Acara Instintusi</option>
+            <option>Acara Institusi</option>
             <option>Perkuliahan</option>
             <option>Rapat Dosen</option>
             <option>Kegiatan Sosial</option>

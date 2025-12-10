@@ -33,9 +33,8 @@ Route::middleware('guest')->group(function () {
         return redirect()->route('freeuser.home');
     })->name('free.login');
 
-    Route::get('/free', function () {
-        return view('freeuser.home');
-    })->name('freeuser.home');
+    Route::get('/free', [\App\Http\Controllers\FreeUserController::class, 'index'])
+        ->name('freeuser.home');
 });
 
 /*
@@ -176,6 +175,10 @@ Route::middleware('auth')->group(function () {
         // KEMBALIKAN
         Route::post('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])
             ->name('peminjaman.kembalikan');
+
+        // FEEDBACK
+        Route::post('/peminjaman/{id}/feedback', [PeminjamanController::class, 'storeFeedback'])
+            ->name('peminjaman.feedback');
 
         // RIWAYAT
         Route::get('/riwayat', [RiwayatController::class, 'index'])

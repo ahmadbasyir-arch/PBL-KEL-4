@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+use App\Services\FonnteService;
+use Illuminate\Support\Facades\Log;
+
 class GoogleController extends Controller
 {
     /**
@@ -115,20 +118,40 @@ class GoogleController extends Controller
     {
         $request->validate([
             'nim'      => 'required|string|max:50|unique:users,nim,' . Auth::id(),
-            'role'     => 'required|in:mahasisw,dosen', // <-- Pastikan ini sesuai dengan enum di database Anda
+            'role'     => 'required|in:mahasiswa,dosen', // <-- Typo fixed here
+            'telepon'  => 'required|string|max:20', // New validation for phone number
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // 🔧 Normalisasi Nomor Telepon (0 -> 62)
+        $telepon = $request->telepon;
+        if (substr($telepon, 0, 1) === "0") {
+            $telepon = "62" . substr($telepon, 1);
+        }
+
         // Perbarui data tanpa mengubah nama dari Google
         $user->update([
             'nim'          => $request->nim,
             'role'         => $request->role,
+            'telepon'      => $telepon, // Saving normalized phone number
             'password'     => Hash::make($request->password),
             'is_completed' => 1,
         ]);
+
+        // 🔰 KIRIM NOTIFIKASI WA (Mirip AuthController)
+        try {
+            $wa = new FonnteService();
+            $wa->sendMessage(
+                $telepon,
+                "Halo *{$user->username}*, akun peminjaman sarpras kamu (Google Login) berhasil dilengkapi.\n\n" .
+                "Silakan gunakan sistem peminjaman. 😊"
+            );
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim WA Fonnte (Google Login): ' . $e->getMessage());
+        }
 
         // 🔁 Arahkan ke dashboard sesuai role
         return $this->redirectByRole($user, 'Profil berhasil dilengkapi!');

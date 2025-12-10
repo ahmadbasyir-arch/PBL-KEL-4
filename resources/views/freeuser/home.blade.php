@@ -38,10 +38,48 @@
 </div>
 
 <div class="content-grid">
-    {{-- ==== Tabel Ruangan ==== --}}
+    {{-- ==== Tabel Ruangan Tersedia ==== --}}
     <div class="data-section">
         <div class="section-title">
-            <i class="fas fa-door-closed"></i> Ruangan Sedang Digunakan
+            <i class="fas fa-door-open" style="color: #10b981;"></i> Info Ruang Kosong (Hari Ini)
+        </div>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th width="10%">No</th>
+                        <th>Nama Ruangan</th>
+                        <th width="20%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($availableRuangan as $index => $r)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td class="fw-bold">{{ $r->namaRuangan }}</td>
+                            <td>
+                                <span class="status-pill" style="background: #d1fae5; color: #047857;">
+                                    <i class="fas fa-check-circle"></i> Tersedia
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <p>Semua ruangan sedang penuh hari ini.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- ==== Tabel Ruangan Terpakai ==== --}}
+    <div class="data-section">
+        <div class="section-title">
+            <i class="fas fa-door-closed" style="color: #ef4444;"></i> Ruangan Terpakai Hari Ini
         </div>
         <div class="table-responsive">
             <table class="modern-table">
@@ -58,7 +96,7 @@
                             <td>{{ $index + 1 }}</td>
                             <td class="fw-bold">{{ $r->namaRuangan ?? $r->nama_ruangan ?? '-' }}</td>
                             <td>
-                                <span class="status-pill active">
+                                <span class="status-pill active" style="background: #fee2e2; color: #b91c1c;">
                                     <i class="fas fa-circle-play"></i> Dipakai
                                 </span>
                             </td>

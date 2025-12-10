@@ -48,6 +48,8 @@ class PeminjamanStatusUpdated extends Notification
             $message = 'Maaf, permohonan peminjaman Anda DITOLAK.';
         } elseif ($this->status == 'selesai') {
             $message = 'Peminjaman Anda telah SELESAI. Terima kasih.';
+        } elseif ($this->status == 'menyelesaikan') {
+            $message = 'Pengajuan pengembalian Anda berhasil dikirim. Menunggu validasi admin.';
         }
 
         return [
@@ -88,6 +90,10 @@ class PeminjamanStatusUpdated extends Notification
             $header = "PEMINJAMAN SELESAI";
             $body = "Peminjaman Anda telah ditandai *SELESAI*. Terima kasih telah menggunakan fasilitas kami.";
             $emoji = "🏁";
+        } elseif ($this->status == 'menyelesaikan') {
+            $header = "PENGAJUAN PENGEMBALIAN";
+            $body = "Pengajuan pengembalian Anda telah *DITERIMA*. Mohon tunggu validasi dari Admin.";
+            $emoji = "⏳";
         } else {
             $header = "STATUS PEMINJAMAN UPDATE";
             $body = "Status peminjaman Anda berubah menjadi: *" . ucfirst($this->status) . "*.";

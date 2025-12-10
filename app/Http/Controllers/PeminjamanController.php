@@ -206,6 +206,10 @@ class PeminjamanController extends Controller
         if (! in_array($peminjaman->status, ['menyelesaikan', 'menunggu_validasi', 'selesai', 'ditolak'])) {
             $peminjaman->status = 'menyelesaikan';
             $peminjaman->save();
+
+            // 🔔 Kirim Notifikasi (Web & WA)
+            $user->notify(new \App\Notifications\PeminjamanStatusUpdated($peminjaman, 'menyelesaikan'));
+
             return back()->with('success', 'Pengajuan penyelesaian dikirim.');
         }
 
@@ -231,6 +235,9 @@ class PeminjamanController extends Controller
         $peminjaman->status = 'menyelesaikan';
         $peminjaman->save();
 
+        // 🔔 Kirim Notifikasi (Web & WA)
+        $user->notify(new \App\Notifications\PeminjamanStatusUpdated($peminjaman, 'menyelesaikan'));
+
         return back()->with('success', 'Permintaan pengembalian dikirim.');
     }
 
@@ -240,5 +247,41 @@ class PeminjamanController extends Controller
     protected function belongsToUser(Peminjaman $peminjaman, $user)
     {
         return $peminjaman->idMahasiswa == $user->id;
+    }
+
+    /**
+     * SIMPAN FEEDBACK
+     */
+    public function storeFeedback(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+        
+        // Cek kepemilikan
+        if ($peminjaman->idMahasiswa != Auth::id()) {
+            return back()->with('error', 'Akses ditolak.');
+        }
+
+        // Cek status harus selesai
+        if ($peminjaman->status != 'selesai') {
+            return back()->with('error', 'Hanya peminjaman selesai yang bisa diberi feedback.');
+        }
+
+        // Cek apakah sudah ada feedback
+        if (\App\Models\Feedback::where('peminjaman_id', $id)->exists()) {
+            return back()->with('error', 'Anda sudah memberikan feedback.');
+        }
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'komentar' => 'nullable|string|max:500',
+        ]);
+
+        \App\Models\Feedback::create([
+            'peminjaman_id' => $id,
+            'rating' => $validated['rating'],
+            'komentar' => $validated['komentar'],
+        ]);
+
+        return back()->with('success', 'Terima kasih atas masukan Anda!');
     }
 }
