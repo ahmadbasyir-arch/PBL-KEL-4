@@ -24,8 +24,7 @@ class DashboardController extends Controller
         // Data peminjaman terbaru
         $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
             ->orderByDesc('created_at')
-            ->limit(10)
-            ->get();
+            ->paginate(10);
 
         return view('admin.dashboard', compact(
             'totalPeminjaman',
@@ -81,8 +80,7 @@ class DashboardController extends Controller
         $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
             ->where('idMahasiswa', $user->id)
             ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+            ->paginate(10);
 
         return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
     }
@@ -108,8 +106,7 @@ class DashboardController extends Controller
         $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
             ->where('idMahasiswa', $user->id)
             ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+            ->paginate(10);
 
         return view('dosen.dashboard', compact('stats', 'peminjamanTerkini'));
     }

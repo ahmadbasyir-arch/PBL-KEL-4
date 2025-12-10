@@ -22,7 +22,7 @@
         </div>
         <div class="stat-info">
             <h3>Ruangan Dipakai</h3>
-            <div class="value">{{ count($ruangan) }}</div>
+            <div class="value">{{ $ruanganDipakai }}</div>
         </div>
     </div>
 
@@ -32,16 +32,23 @@
         </div>
         <div class="stat-info">
             <h3>Proyektor Dipakai</h3>
-            <div class="value">{{ count($proyektor) }}</div>
+            <div class="value">{{ $unitDipakai }}</div>
         </div>
     </div>
 </div>
 
+<div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+    <span style="font-weight: 600; color: #374151;">Filter Status:</span>
+    <button type="button" class="btn-filter active" data-filter="all">Semua</button>
+    <button type="button" class="btn-filter" data-filter="tersedia">Tersedia</button>
+    <button type="button" class="btn-filter" data-filter="dipakai">Sedang Digunakan</button>
+</div>
+
 <div class="content-grid">
-    {{-- ==== Tabel Ruangan Tersedia ==== --}}
+    {{-- ==== Tabel Info Ruangan ==== --}}
     <div class="data-section">
         <div class="section-title">
-            <i class="fas fa-door-open" style="color: #10b981;"></i> Info Ruang Kosong (Hari Ini)
+            <i class="fas fa-door-open" style="color: #10b981;"></i> Info Ruangan Hari Ini
         </div>
         <div class="table-responsive">
             <table class="modern-table">
@@ -49,25 +56,31 @@
                     <tr>
                         <th width="10%">No</th>
                         <th>Nama Ruangan</th>
-                        <th width="20%">Status</th>
+                        <th width="25%">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($availableRuangan as $index => $r)
-                        <tr>
+                    @forelse ($allRuangan as $index => $r)
+                        <tr class="item-row" data-status="{{ $r->status }}">
                             <td>{{ $index + 1 }}</td>
                             <td class="fw-bold">{{ $r->namaRuangan }}</td>
                             <td>
-                                <span class="status-pill" style="background: #d1fae5; color: #047857;">
-                                    <i class="fas fa-check-circle"></i> Tersedia
-                                </span>
+                                @if($r->status == 'tersedia')
+                                    <span class="status-pill" style="background: #d1fae5; color: #047857;">
+                                        <i class="fas fa-check-circle"></i> Tersedia
+                                    </span>
+                                @else
+                                    <span class="status-pill active" style="background: #fee2e2; color: #b91c1c;">
+                                        <i class="fas fa-circle-play"></i> Sedang Digunakan
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="3" class="empty-state">
                                 <i class="fas fa-exclamation-circle"></i>
-                                <p>Semua ruangan sedang penuh hari ini.</p>
+                                <p>Data ruangan tidak tersedia.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -76,48 +89,10 @@
         </div>
     </div>
 
-    {{-- ==== Tabel Ruangan Terpakai ==== --}}
+    {{-- ==== Tabel Info Proyektor ==== --}}
     <div class="data-section">
         <div class="section-title">
-            <i class="fas fa-door-closed" style="color: #ef4444;"></i> Ruangan Terpakai Hari Ini
-        </div>
-        <div class="table-responsive">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th width="10%">No</th>
-                        <th>Nama Ruangan</th>
-                        <th width="20%">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($ruangan as $index => $r)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td class="fw-bold">{{ $r->namaRuangan ?? $r->nama_ruangan ?? '-' }}</td>
-                            <td>
-                                <span class="status-pill active" style="background: #fee2e2; color: #b91c1c;">
-                                    <i class="fas fa-circle-play"></i> Dipakai
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="empty-state">
-                                <i class="fas fa-check-circle"></i>
-                                <p>Tidak ada ruangan yang sedang digunakan saat ini.</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {{-- ==== Tabel Proyektor ==== --}}
-    <div class="data-section">
-        <div class="section-title">
-            <i class="fas fa-video"></i> Proyektor Sedang Digunakan
+            <i class="fas fa-video" style="color: #f59e0b;"></i> Info Proyektor Hari Ini
         </div>
         <div class="table-responsive">
             <table class="modern-table">
@@ -125,25 +100,35 @@
                     <tr>
                         <th width="10%">No</th>
                         <th>Nama Proyektor</th>
-                        <th width="20%">Status</th>
+                        <th width="25%">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($proyektor as $index => $p)
-                        <tr>
+                    @forelse ($allUnits as $index => $u)
+                        <tr class="item-row" data-status="{{ $u->status }}">
                             <td>{{ $index + 1 }}</td>
-                            <td class="fw-bold">{{ $p->namaProyektor ?? $p->nama_proyektor ?? '-' }}</td>
+                            <td class="fw-bold">{{ $u->namaUnit }} 
+                                @if($u->kodeUnit) 
+                                    <span style="font-weight:normal; color:#666; font-size:0.85em;">({{ $u->kodeUnit }})</span>
+                                @endif
+                            </td>
                             <td>
-                                <span class="status-pill active">
-                                    <i class="fas fa-circle-play"></i> Dipakai
-                                </span>
+                                @if($u->status == 'tersedia')
+                                    <span class="status-pill" style="background: #d1fae5; color: #047857;">
+                                        <i class="fas fa-check-circle"></i> Tersedia
+                                    </span>
+                                @else
+                                    <span class="status-pill active" style="background: #fee2e2; color: #b91c1c;">
+                                        <i class="fas fa-circle-play"></i> Sedang Digunakan
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="3" class="empty-state">
-                                <i class="fas fa-check-circle"></i>
-                                <p>Tidak ada proyektor yang sedang digunakan saat ini.</p>
+                                <i class="fas fa-exclamation-circle"></i>
+                                <p>Data proyektor tidak tersedia.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -348,5 +333,56 @@
             font-size: 1.5rem;
         }
     }
+
+    /* Filter Buttons */
+    .btn-filter {
+        padding: 8px 16px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #374151;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-filter:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .btn-filter.active {
+        background: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.btn-filter');
+    const rows = document.querySelectorAll('.item-row');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all buttons
+            filterButtons.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            btn.classList.add('active');
+
+            const filterValue = btn.getAttribute('data-filter');
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (filterValue === 'all' || status === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
 @endsection

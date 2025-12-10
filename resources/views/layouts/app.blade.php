@@ -294,6 +294,12 @@
         <li class="{{ request()->is('admin/ranking*') ? 'active' : '' }}">
             <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-trophy"></i> Ranking Peminjaman</a>
         </li>
+        <li class="{{ request()->is('admin/jadwal*') ? 'active' : '' }}">
+            <a href="{{ route('admin.jadwal.index') }}"><i class="fas fa-calendar-alt"></i> Jadwal Perkuliahan</a>
+        </li>
+        <li class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
+            <a href="{{ route('admin.laporan.index') }}"><i class="fas fa-file-alt"></i> Laporan</a>
+        </li>
 
     @endif
 </ul>
@@ -530,6 +536,43 @@
             content: "• ";
             color: #fff;
             margin-right: 5px;
+        }
+
+        /* CUSTOM PAGINATION STYLE */
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .page-item .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .page-item.active .page-link {
+            background-color: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+        }
+
+        .page-item.disabled .page-link {
+            color: #ccc;
+            pointer-events: none;
+            background-color: #f9fafb;
+        }
+
+        .page-item:not(.active):not(.disabled) .page-link:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
         }
     </style>
 

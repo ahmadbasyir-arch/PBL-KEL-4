@@ -15,20 +15,35 @@ class FreeUserController extends Controller
         $usedRuanganIds = Peminjaman::whereDate('tanggalPinjam', $today)
             ->whereIn('status', $statusSedangDipakai)
             ->whereNotNull('idRuangan')
-            ->pluck('idRuangan');
+            ->pluck('idRuangan')
+            ->toArray();
 
         $usedUnitIds = Peminjaman::whereDate('tanggalPinjam', $today)
             ->whereIn('status', $statusSedangDipakai)
             ->whereNotNull('idUnit')
-            ->pluck('idUnit');
+            ->pluck('idUnit')
+            ->toArray();
 
-        // Data Objek untuk View (Yang Sedang Dipakai)
-        $ruangan = \App\Models\Ruangan::whereIn('id', $usedRuanganIds)->get();
-        $proyektor = \App\Models\Unit::whereIn('id', $usedUnitIds)->get();
+        // Ambil SEMUA Data Ruangan & Unit
+        $allRuangan = \App\Models\Ruangan::orderBy('namaRuangan')->get();
+        $allUnits = \App\Models\Unit::orderBy('namaUnit')->get();
 
-        // Data Objek untuk View (Yang Tersedia / Kosong)
-        $availableRuangan = \App\Models\Ruangan::whereNotIn('id', $usedRuanganIds)->get();
+        // Map status untuk Ruangan
+        $allRuangan->map(function ($room) use ($usedRuanganIds) {
+            $room->status = in_array($room->id, $usedRuanganIds) ? 'dipakai' : 'tersedia';
+            return $room;
+        });
 
-        return view('freeuser.home', compact('ruangan', 'proyektor', 'availableRuangan'));
+        // Map status untuk Unit (Proyektor)
+        $allUnits->map(function ($unit) use ($usedUnitIds) {
+            $unit->status = in_array($unit->id, $usedUnitIds) ? 'dipakai' : 'tersedia';
+            return $unit;
+        });
+
+        // Hitung statistik
+        $ruanganDipakai = count($usedRuanganIds);
+        $unitDipakai = count($usedUnitIds);
+
+        return view('freeuser.home', compact('allRuangan', 'allUnits', 'ruanganDipakai', 'unitDipakai'));
     }
 }

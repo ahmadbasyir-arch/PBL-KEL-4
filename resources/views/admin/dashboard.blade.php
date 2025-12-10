@@ -81,7 +81,7 @@
                 @endphp
 
                 <tr>
-                    <td>{{ $loop->remaining + 1 }}</td>
+                    <td class="text-center">{{ $peminjamanTerkini->total() - ($peminjamanTerkini->firstItem() + $loop->index) + 1 }}</td>
 
                     <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                         {{ $p->mahasiswa->namaLengkap ?? $p->mahasiswa->name ?? '-' }}
@@ -189,6 +189,9 @@
             @endforelse
         </tbody>
     </table>
+    <div class="d-flex justify-content-center mt-3">
+        {{ $peminjamanTerkini->links('pagination::bootstrap-4') }}
+    </div>
 </div>
 
 @endsection

@@ -106,6 +106,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
         Route::post('/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.complete');
         Route::post('/peminjaman/{id}/validate', [AdminPeminjamanController::class, 'validateSelesai'])->name('admin.peminjaman.validate');
+
+        // ROUTE JADWAL
+        Route::get('/jadwal', [\App\Http\Controllers\AdminJadwalController::class, 'index'])->name('admin.jadwal.index');
+        Route::post('/jadwal/import', [\App\Http\Controllers\AdminJadwalController::class, 'import'])->name('admin.jadwal.import');
+
+        // ROUTE LAPORAN
+        Route::get('/laporan', [\App\Http\Controllers\AdminLaporanController::class, 'index'])->name('admin.laporan.index');
+        Route::get('/laporan/print', [\App\Http\Controllers\AdminLaporanController::class, 'print'])->name('admin.laporan.print');
+        Route::get('/laporan/pdf', [\App\Http\Controllers\AdminLaporanController::class, 'exportPdf'])->name('admin.laporan.pdf');
     });
 
     /*

@@ -85,7 +85,7 @@
         <tbody>
             @forelse ($peminjamanTerkini as $p)
                 <tr>
-                    <td>{{ $loop->remaining + 1 }}</td>
+                    <td class="text-center">{{ $peminjamanTerkini->total() - ($peminjamanTerkini->firstItem() + $loop->index) + 1 }}</td>
                     <td>
                         @if (!empty($p->ruangan))
                             <strong>{{ $p->ruangan->namaRuangan }}</strong>
@@ -97,7 +97,6 @@
                     </td>
                     <td>{{ $p->keperluan }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
-
                     <td>
                         @php
                             $isDigunakan = in_array($p->status, ['digunakan','disetujui','sedang digunakan']);
@@ -111,7 +110,6 @@
                                 <i class="fas fa-hourglass-half"></i> Menunggu Persetujuan
                             </span>
 
-                            {{-- TOMBOL EDIT --}}
                             <a href="{{ route('peminjaman.edit', $p->id) }}" 
                             class="btn btn-warning btn-sm" style="margin-left:6px;">
                                 <i class="fas fa-edit"></i> Edit
@@ -119,8 +117,6 @@
 
                         {{-- STATUS DISETUJUI / DIGUNAKAN --}}
                         @elseif ($isDigunakan)
-
-                            {{-- TOMBOL AJUKAN SELESAI --}}
                             <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
                                 method="POST" style="display:inline;"
                                 onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
@@ -130,9 +126,6 @@
                                 </button>
                             </form>
 
-                            </button>
-
-                            {{-- TOMBOL EDIT --}}
                             @if ($canEdit)
                                 <a href="{{ route('peminjaman.edit', $p->id) }}" 
                                 class="btn btn-warning btn-sm" style="margin-left:6px;">
@@ -160,8 +153,6 @@
                         @endif
                     </td>
                 </tr>
-
-
             @empty
                 <tr>
                     <td colspan="5" style="text-align:center;">Tidak ada peminjaman terbaru.</td>
@@ -169,6 +160,9 @@
             @endforelse
         </tbody>
     </table>
+    <div class="mt-3">
+        {{ $peminjamanTerkini->links('pagination::bootstrap-4') }}
+    </div>
 </div>
 
 {{-- === STYLE === --}}

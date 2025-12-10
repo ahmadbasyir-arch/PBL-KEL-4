@@ -85,7 +85,7 @@
         <tbody>
             @forelse ($peminjamanTerkini as $p)
                 <tr>
-                    <td>#{{ $p->id }}</td>
+                    <td class="text-center">{{ $peminjamanTerkini->total() - ($peminjamanTerkini->firstItem() + $loop->index) + 1 }}</td>
                     <td>
                         @if (!empty($p->ruangan))
                             <strong>{{ $p->ruangan->namaRuangan }}</strong>
@@ -97,7 +97,6 @@
                     </td>
                     <td>{{ $p->keperluan }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggalPinjam)->isoFormat('D MMMM YYYY') }}</td>
-
                     <td>
                         @php
                             $isDigunakan = in_array($p->status, ['digunakan', 'disetujui']);
@@ -111,19 +110,17 @@
                                 <i class="fas fa-hourglass-half"></i> Menunggu Persetujuan
                             </span>
 
-                            {{-- 🔥 TOMBOL EDIT (DIPERBAIKI) --}}
+                            {{-- 🔥 TOMBOL EDIT --}}
                             <div style="display:inline-block; margin-left:6px;">
-    <a href="{{ route('dosen.peminjaman.edit', $p->id) }}" 
-       class="btn btn-warning btn-sm">
-        <i class="fas fa-edit"></i> Edit
-    </a>
-</div>
+                                <a href="{{ route('dosen.peminjaman.edit', $p->id) }}" 
+                                class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </div>
 
 
                         {{-- STATUS DISETUJUI / DIGUNAKAN --}}
                         @elseif ($isDigunakan)
-
-                            {{-- TOMBOL AJUKAN SELESAI --}}
                             <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
                                   method="POST" style="display:inline;"
                                   onsubmit="return confirm('Ajukan penyelesaian? Setelah ini akan divalidasi admin.')">
@@ -133,7 +130,6 @@
                                 </button>
                             </form>
 
-                            {{-- TOMBOL KEMBALIKAN --}}
                             <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
                                   method="POST" style="display:inline; margin-left:6px;"
                                   onsubmit="return confirm('Apakah Anda yakin ingin mengembalikan ruangan/unit ini?')">
@@ -143,7 +139,6 @@
                                 </button>
                             </form>
 
-                            {{-- 🔥 TOMBOL EDIT (DIPERBAIKI) --}}
                             @if ($canEdit)
                             <div style="display:inline-block; margin-left:6px;">
                                 <a href="{{ route('dosen.peminjaman.edit', $p->id) }}" 
@@ -170,10 +165,8 @@
                             <span class="status-badge status-ditolak">
                                 <i class="fas fa-times-circle"></i> Ditolak
                             </span>
-
                         @endif
                     </td>
-
                 </tr>
             @empty
                 <tr>
@@ -182,6 +175,9 @@
             @endforelse
         </tbody>
     </table>
+    <div class="mt-3">
+        {{ $peminjamanTerkini->links('pagination::bootstrap-4') }}
+    </div>
 </div>
 
 {{-- === STYLE === --}}
