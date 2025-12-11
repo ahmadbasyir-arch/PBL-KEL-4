@@ -49,7 +49,9 @@ class AdminRankingController extends Controller
             $q->whereIn('status', ['selesai', 'disetujui']);
             $now = \Carbon\Carbon::now();
             
-            if ($periode == 'mingguan') {
+            if ($periode == 'harian') {
+                $q->whereDate('tanggalPinjam', $now->format('Y-m-d'));
+            } elseif ($periode == 'mingguan') {
                 $q->whereBetween('tanggalPinjam', [$now->startOfWeek()->format('Y-m-d'), $now->endOfWeek()->format('Y-m-d')]);
             } elseif ($periode == 'bulanan') {
                 $q->whereMonth('tanggalPinjam', $now->month)->whereYear('tanggalPinjam', $now->year);

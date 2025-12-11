@@ -20,7 +20,7 @@
         <div class="card-icon bg-primary"><i class="fas fa-box"></i></div>
         <div class="card-content">
             <h3>Total Peminjaman</h3>
-            <p class="card-value">{{ $totalPeminjaman }}</p>
+            <p class="card-value" id="stat-total">{{ $totalPeminjaman }}</p>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
         <div class="card-icon bg-warning"><i class="fas fa-clock"></i></div>
         <div class="card-content">
             <h3>Menunggu Persetujuan</h3>
-            <p class="card-value">{{ $totalPending }}</p>
+            <p class="card-value" id="stat-pending">{{ $totalPending }}</p>
         </div>
     </div>
 
@@ -36,7 +36,7 @@
         <div class="card-icon bg-success"><i class="fas fa-check-circle"></i></div>
         <div class="card-content">
             <h3>Disetujui</h3>
-            <p class="card-value">{{ $totalDisetujui }}</p>
+            <p class="card-value" id="stat-disetujui">{{ $totalDisetujui }}</p>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
         <div class="card-icon bg-danger"><i class="fas fa-times-circle"></i></div>
         <div class="card-content">
             <h3>Ditolak</h3>
-            <p class="card-value">{{ $totalDitolak }}</p>
+            <p class="card-value" id="stat-ditolak">{{ $totalDitolak }}</p>
         </div>
     </div>
 
@@ -52,7 +52,7 @@
         <div class="card-icon bg-secondary"><i class="fas fa-history"></i></div>
         <div class="card-content">
             <h3>Riwayat Peminjaman</h3>
-            <p class="card-value">{{ $totalRiwayat ?? 0 }}</p>
+            <p class="card-value" id="stat-riwayat">{{ $totalRiwayat ?? 0 }}</p>
         </div>
     </div>
 </div>

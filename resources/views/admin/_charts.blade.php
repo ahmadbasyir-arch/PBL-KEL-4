@@ -65,12 +65,13 @@
     {{-- element fallback untuk pesan "tidak ada data" akan dibuat oleh JS bila perlu --}}
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
 (function() {
-
-    const chartSarpras = @json($chartSarpras ?? ['labels'=>[], 'data'=>[]]);
-    const chartUsers   = @json($chartUsers ?? ['labels'=>[], 'data'=>[]]);
-    const chartDurasi  = @json($chartDurasi ?? ['labels'=>[], 'data'=>[]]);
+    // Init Data from Server
+    let dataSarpras = @json($chartSarpras ?? ['labels'=>[], 'data'=>[]]);
+    let dataUsers   = @json($chartUsers ?? ['labels'=>[], 'data'=>[]]);
+    let dataDurasi  = @json($chartDurasi ?? ['labels'=>[], 'data'=>[]]);
 
     function buildPieChart(ctx, labels, data, optionsExtra = {}) {
         const bg = [
@@ -99,9 +100,20 @@
                             return context.label + ': ' + context.formattedValue;
                         }
                     }
+                },
+                // KONFIGURASI DATALABELS
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    },
+                    formatter: function(value, context) {
+                        return value > 0 ? value : '';
+                    }
                 }
             },
-            cutout: '55%',
+            cutout: '50%', // sedikit diperkecil agar text muat
         };
 
         const finalOptions = Object.assign({}, baseOptions, optionsExtra);
@@ -125,65 +137,97 @@
         const canvas = document.getElementById(canvasId);
         const container = document.getElementById(containerId);
 
-        // bersihkan pesan fallback sebelumnya (jika ada)
+        // bersihkan pesan fallback
         const existingMsg = container.querySelector('.no-data-message');
         if (existingMsg) existingMsg.remove();
 
-        if (!canvas) return; // safety
+        if (!canvas) return null;
 
         if (sum <= 0) {
-            // sembunyikan canvas dan tampilkan pesan "Tidak ada data"
             canvas.style.display = 'none';
-
             const msg = document.createElement('div');
             msg.className = 'no-data-message';
             msg.innerText = 'Tidak ada data untuk grafik ini.';
             container.appendChild(msg);
             return null;
         } else {
-            // pastikan canvas ditampilkan
             canvas.style.display = 'block';
             try {
-                // inisialisasi chart
                 const ctx = canvas.getContext('2d');
 
-                // clear any previously created chart instance on this canvas (if Chart.instances available)
-                // (this reduces duplicates if partial re-render)
+                // Jika sudah ada instance, destroy dulu
                 if (window._charts === undefined) window._charts = {};
                 if (window._charts[canvasId]) {
-                    try { window._charts[canvasId].destroy(); } catch(e){}
+                    window._charts[canvasId].destroy();
                     window._charts[canvasId] = null;
                 }
 
                 window._charts[canvasId] = buildPieChart(ctx, labels, data);
                 return window._charts[canvasId];
             } catch (e) {
-                // fallback: tampilkan pesan error kecil
+                console.error(e);
                 canvas.style.display = 'none';
-                const msg = document.createElement('div');
-                msg.className = 'no-data-message';
-                msg.innerText = 'Gagal menampilkan grafik.';
-                container.appendChild(msg);
                 return null;
             }
         }
     }
 
+    // Fungsi Render Awal
+    function initCharts() {
+        // Safe Registration
+        try {
+            if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+        } catch(e) {}
+
+        renderOrFallback('chartSarpras', 'card-sarpras', dataSarpras.labels || [], dataSarpras.data || []);
+        renderOrFallback('chartUsers', 'card-users', dataUsers.labels || [], dataUsers.data || []);
+        renderOrFallback('chartDurasi', 'card-durasi', dataDurasi.labels || [], dataDurasi.data || []);
+    }
+
+    // REAL-TIME / POLLING (5 detik)
+    function startPolling() {
+        setInterval(() => {
+            fetch(window.location.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest', // trigger $request->ajax()
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Update Stat Cards
+                if(document.getElementById('stat-total')) document.getElementById('stat-total').innerText = data.totalPeminjaman;
+                if(document.getElementById('stat-pending')) document.getElementById('stat-pending').innerText = data.totalPending;
+                if(document.getElementById('stat-disetujui')) document.getElementById('stat-disetujui').innerText = data.totalDisetujui;
+                if(document.getElementById('stat-ditolak')) document.getElementById('stat-ditolak').innerText = data.totalDitolak;
+                if(document.getElementById('stat-riwayat')) document.getElementById('stat-riwayat').innerText = data.totalRiwayat;
+
+                // Update Charts
+                // Sarpras
+                if (JSON.stringify(dataSarpras) !== JSON.stringify(data.chartSarpras)) {
+                    dataSarpras = data.chartSarpras;
+                    renderOrFallback('chartSarpras', 'card-sarpras', dataSarpras.labels, dataSarpras.data);
+                }
+                // Users
+                if (JSON.stringify(dataUsers) !== JSON.stringify(data.chartUsers)) {
+                    dataUsers = data.chartUsers;
+                    renderOrFallback('chartUsers', 'card-users', dataUsers.labels, dataUsers.data);
+                }
+                // Durasi
+                if (JSON.stringify(dataDurasi) !== JSON.stringify(data.chartDurasi)) {
+                    dataDurasi = data.chartDurasi;
+                    renderOrFallback('chartDurasi', 'card-durasi', dataDurasi.labels, dataDurasi.data);
+                }
+            })
+            .catch(err => console.error("Polling error:", err));
+        }, 5000); // 5000ms = 5 detik
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Sarpras
-        try {
-            renderOrFallback('chartSarpras', 'card-sarpras', chartSarpras.labels || [], chartSarpras.data || []);
-        } catch (e) { console.error(e); }
-
-        // Users
-        try {
-            renderOrFallback('chartUsers', 'card-users', chartUsers.labels || [], chartUsers.data || []);
-        } catch (e) { console.error(e); }
-
-        // Durasi (catatan: mungkin semua 0)
-        try {
-            renderOrFallback('chartDurasi', 'card-durasi', chartDurasi.labels || [], chartDurasi.data || []);
-        } catch (e) { console.error(e); }
+        initCharts();
+        startPolling();
     });
 
 })();

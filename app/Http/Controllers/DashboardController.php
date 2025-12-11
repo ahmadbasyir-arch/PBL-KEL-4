@@ -14,7 +14,7 @@ class DashboardController extends Controller
     // ================================
     // DASHBOARD ADMIN & STAFF
     // ================================
-    public function admin()
+    public function admin(Request $request)
     {
         // Hitung statistik
         $totalPeminjaman = Peminjaman::count();
@@ -22,11 +22,6 @@ class DashboardController extends Controller
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
         $totalRiwayat = Peminjaman::count(); // opsional
-
-        // Data peminjaman terbaru
-        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
-            ->orderByDesc('created_at')
-            ->paginate(10);
 
         // ------------- Data untuk charts -------------
         // Chart 1: distribusi jenis sarpras (ruangan vs unit)
@@ -43,6 +38,7 @@ class DashboardController extends Controller
         ];
 
         // Chart 2: distribusi peminjam berdasarkan role (via relation mahasiswa -> user)
+        // REVISI: Hapus "Unknown" sesuai request, hanya 3 role utama
         try {
             $totalMahasiswa = Peminjaman::whereHas('mahasiswa', function($q){
                 $q->where('role', 'mahasiswa');
@@ -59,21 +55,9 @@ class DashboardController extends Controller
             $totalMahasiswa = $totalDosen = $totalAdmin = 0;
         }
 
-        $sumKnown = $totalMahasiswa + $totalDosen + $totalAdmin;
-        $unknown = max(0, $totalPeminjaman - $sumKnown);
-
-        // Build labels/data but only include Unknown if > 0
-        $userLabels = ['Mahasiswa', 'Dosen', 'Admin'];
-        $userData = [$totalMahasiswa, $totalDosen, $totalAdmin];
-
-        if ($unknown > 0) {
-            $userLabels[] = 'Unknown';
-            $userData[] = $unknown;
-        }
-
         $chartUsers = [
-            'labels' => $userLabels,
-            'data' => $userData,
+            'labels' => ['Mahasiswa', 'Dosen', 'Admin'],
+            'data' => [$totalMahasiswa, $totalDosen, $totalAdmin],
         ];
 
         // Chart 3: distribusi durasi (dalam jam) -> lebih tahan banting
@@ -256,6 +240,25 @@ class DashboardController extends Controller
             'labels' => array_keys($durasiBuckets),
             'data' => array_values($durasiBuckets),
         ];
+
+        // Jika request AJAX (polling), return JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'totalPeminjaman' => $totalPeminjaman,
+                'totalPending' => $totalPending,
+                'totalDisetujui' => $totalDisetujui,
+                'totalDitolak' => $totalDitolak,
+                'totalRiwayat' => $totalRiwayat,
+                'chartSarpras' => $chartSarpras,
+                'chartUsers' => $chartUsers,
+                'chartDurasi' => $chartDurasi,
+            ]);
+        }
+
+        // Data peminjaman terbaru (untuk load awal)
+        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
+            ->orderByDesc('created_at')
+            ->paginate(10);
 
         // ------------- Kirim ke view -------------
         return view('admin.dashboard', compact(

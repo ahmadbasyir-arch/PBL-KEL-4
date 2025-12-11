@@ -22,6 +22,7 @@
             <form action="{{ route('admin.ranking.export') }}" method="GET" style="display: flex; gap: 12px; align-items: center; margin: 0;">
                 <div style="position: relative;">
                     <select name="periode" class="form-select" style="appearance: none; -webkit-appearance: none; padding: 10px 35px 10px 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none; cursor: pointer; background-color: #f9fafb; color: #374151; font-weight: 500; transition: border-color 0.2s;">
+                        <option value="harian">Hari Ini</option>
                         <option value="mingguan">Minggu Ini</option>
                         <option value="bulanan" selected>Bulan Ini</option>
                         <option value="semester">Semester Ini</option>
