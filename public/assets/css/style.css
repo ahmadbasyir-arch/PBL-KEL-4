@@ -1267,3 +1267,163 @@ hr {
 .card-body {
     width: 100%;
 }
+
+/* ========================= */
+/* CHARTS LAYOUT (HORIZONTAL) */
+/* ========================= */
+/* Pastikan kartu chart tampil 3 kolom di layar cukup lebar, 2 kolom tablet, 1 kolom mobile */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 20px;
+}
+
+/* Chart card styling yang konsisten */
+.chart-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(13, 47, 79, 0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+/* Memaksa canvas tidak memanjang vertikal */
+.chart-card canvas {
+    width: 100% !important;
+    height: 160px !important;
+    max-height: 160px !important;
+    object-fit: contain;
+    margin-bottom: 6px;
+}
+
+/* Judul chart */
+.chart-title {
+    width: 100%;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+/* fallback pesan pada card chart */
+.no-data-message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.98rem;
+}
+
+/* responsif */
+@media (max-width: 1100px) {
+    .chart-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .chart-card { min-height: 260px; }
+}
+
+/* ========================= */
+/* PAGINATION FIX (HORIZONTAL) */
+/* ========================= */
+/* Override global rules that membentuk bullets */
+.interactive-table .pagination,
+.dashboard-content-area .pagination,
+.pagination {
+  display: flex !important;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding-left: 0;
+  margin: 14px 0 0 0;
+  list-style: none !important; /* hilangkan bullets */
+  flex-wrap: wrap;
+}
+
+/* setiap item li agar inline */
+.interactive-table .pagination .page-item,
+.pagination .page-item {
+  display: inline-flex;
+}
+
+/* tampilan link/button */
+.interactive-table .pagination .page-link,
+.pagination .page-link,
+.pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111827;
+  text-decoration: none;
+  background: #fff;
+  min-width: 38px;
+  height: 38px;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+/* hover */
+.interactive-table .pagination .page-link:hover,
+.pagination .page-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+/* aktif */
+.interactive-table .pagination .active .page-link,
+.pagination .active .page-link {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+}
+
+/* disabled */
+.interactive-table .pagination .disabled .page-link,
+.pagination .disabled .page-link {
+  color: #9ca3af;
+  pointer-events: none;
+  background: #f8fafc;
+  border-color: #e6eefb;
+}
+
+/* previous / next icons spacing */
+.interactive-table .pagination .page-link svg,
+.pagination .page-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* responsiveness: kecilkan padding di layar sempit */
+@media (max-width: 480px) {
+  .interactive-table .pagination .page-link,
+  .pagination .page-link {
+    padding: 6px 9px;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 6px;
+  }
+}
+
+/* ========================= */
+/* SMALL UTILITY CLASSES */
+/* ========================= */
+.d-flex { display:flex; }
+.justify-content-center { justify-content:center; }
+.p-2 { padding: .5rem; }
+.mb-2 { margin-bottom:.5rem; }
+
+/* Optional final tweaks */
+html, body { height: 100%; }

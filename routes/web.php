@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     // ROUTE PENGATURAN PROFIL
     Route::get('/settings', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/settings', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
     // ROUTE NOTIFIKASI
     Route::get('/notifications/mark-read', [\App\Http\Controllers\ProfileController::class, 'markNotificationsRead'])->name('notifications.markRead');
 
@@ -65,9 +66,14 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
 
         Route::get('/peminjaman/{id}/validasi', [AdminPeminjamanController::class, 'formValidasi'])
-        ->name('admin.peminjaman.formValidasi');
+            ->name('admin.peminjaman.formValidasi');
 
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+
+        // API endpoint untuk chart durasi (nama route : admin.chart.durasi)
+       Route::get('/charts/durasi', [DashboardController::class, 'apiChartDurasi'])
+    ->name('admin.charts.durasi');
+
 
         Route::resource('/ruangan', AdminRuanganController::class)->names([
             'index' => 'admin.ruangan.index',
@@ -99,7 +105,6 @@ Route::middleware('auth')->group(function () {
         // ROUTE RANKING
         Route::get('/ranking/export', [\App\Http\Controllers\AdminRankingController::class, 'exportPdf'])->name('admin.ranking.export');
         Route::get('/ranking', [\App\Http\Controllers\AdminRankingController::class, 'index'])->name('admin.ranking.index');
-
 
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');
@@ -136,7 +141,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dosen/dashboard', [DashboardController::class, 'dosen'])
             ->name('dosen.dashboard');
 
-        // 🔵 ROUTE EDIT PEMINJAMAN KHUSUS DOSEN
+        // ROUTE EDIT PEMINJAMAN KHUSUS DOSEN
         Route::get('/dosen/peminjaman/{id}/edit', 
             [PeminjamanController::class, 'edit'])
             ->name('dosen.peminjaman.edit');
@@ -145,7 +150,7 @@ Route::middleware('auth')->group(function () {
             [PeminjamanController::class, 'update'])
             ->name('dosen.peminjaman.update');
 
-        // 🔵 ROUTE MANAJEMEN PENGGUNA (DOSEN)
+        // ROUTE MANAJEMEN PENGGUNA (DOSEN)
         Route::resource('/dosen/pengguna', \App\Http\Controllers\DosenPenggunaController::class)
             ->names([
                 'index' => 'dosen.pengguna.index',
@@ -208,5 +213,4 @@ Route::middleware('auth')->group(function () {
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])
     ->name('peminjaman.index');
 
-    
 Route::get('/test-wa', [FonnteController::class, 'test']);

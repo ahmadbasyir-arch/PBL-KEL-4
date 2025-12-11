@@ -57,6 +57,11 @@
     </div>
 </div>
 
+{{-- ==== CHARTS (DITAMBAHKAN DI SINI) ==== --}}
+<div class="chart-grid">
+    @include('admin._charts')
+</div>
+
 {{-- ==== Data Peminjaman ==== --}}
 <div class="interactive-table mt-4">
     <div class="section-header">
@@ -93,7 +98,7 @@
                         @elseif($p->unit)
                             {{ $p->unit->namaUnit }}
                         @else
-                            -
+                            - 
                         @endif
                     </td>
 
