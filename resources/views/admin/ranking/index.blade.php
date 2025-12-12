@@ -12,14 +12,34 @@
         </div>
         
         <div class="section-header" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 15px;">
-            <h2 style="font-size: 1.25rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 12px; margin: 0;">
-                <div style="background: #fffbeb; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-trophy" style="color: #f59e0b; font-size: 1.1rem;"></i>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <div style="background: #fffbeb; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-trophy" style="color: #f59e0b; font-size: 1.1rem;"></i>
+                    </div>
+                    Leaderboard
+                </h2>
+                
+                {{-- Filter Role Buttons --}}
+                <div class="filter-group" style="display: flex; background: #f3f4f6; padding: 4px; border-radius: 8px; margin-left: 20px;">
+                    <a href="{{ route('admin.ranking.index', ['role' => 'all']) }}" 
+                       style="text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: {{ request('role') == 'all' || !request('role') ? '#fff' : '#4b5563' }}; background: {{ request('role') == 'all' || !request('role') ? '#3b82f6' : 'transparent' }};">
+                       Semua
+                    </a>
+                    <a href="{{ route('admin.ranking.index', ['role' => 'mahasiswa']) }}" 
+                       style="text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: {{ request('role') == 'mahasiswa' ? '#fff' : '#4b5563' }}; background: {{ request('role') == 'mahasiswa' ? '#3b82f6' : 'transparent' }};">
+                       Mahasiswa
+                    </a>
+                    <a href="{{ route('admin.ranking.index', ['role' => 'dosen']) }}" 
+                       style="text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: {{ request('role') == 'dosen' ? '#fff' : '#4b5563' }}; background: {{ request('role') == 'dosen' ? '#3b82f6' : 'transparent' }};">
+                       Dosen
+                    </a>
                 </div>
-                Leaderboard Peminjaman
-            </h2>
+            </div>
 
             <form action="{{ route('admin.ranking.export') }}" method="GET" style="display: flex; gap: 12px; align-items: center; margin: 0;">
+                <input type="hidden" name="role" value="{{ request('role', 'all') }}">
+                
                 <div style="position: relative;">
                     <select name="periode" class="form-select" style="appearance: none; -webkit-appearance: none; padding: 10px 35px 10px 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none; cursor: pointer; background-color: #f9fafb; color: #374151; font-weight: 500; transition: border-color 0.2s;">
                         <option value="harian">Hari Ini</option>

@@ -34,4 +34,38 @@ class UlasanController extends Controller
         $ulasan = Ulasan::with('user')->orderByDesc('created_at')->get();
         return view('admin.ulasan.index', compact('ulasan'));
     }
+
+    public function exportPdf(Request $request)
+    {
+        $periode = $request->input('periode', 'bulanan');
+        $query = Ulasan::with('user');
+
+        $now = \Carbon\Carbon::now();
+
+        if ($periode == 'harian') {
+            $query->whereDate('created_at', $now->format('Y-m-d'));
+        } elseif ($periode == 'mingguan') {
+            $query->whereBetween('created_at', [$now->startOfWeek()->format('Y-m-d'), $now->endOfWeek()->format('Y-m-d')]);
+        } elseif ($periode == 'bulanan') {
+            $query->whereMonth('created_at', $now->month)->whereYear('created_at', $now->year);
+        } elseif ($periode == 'semester') {
+            if ($now->month >= 7) {
+                $query->whereMonth('created_at', '>=', 7);
+            } else {
+                $query->whereMonth('created_at', '<=', 6);
+            }
+            $query->whereYear('created_at', $now->year);
+        } elseif ($periode == 'tahunan') {
+            $query->whereYear('created_at', $now->year);
+        }
+
+        $ulasan = $query->orderByDesc('created_at')->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.ulasan.pdf', [
+            'ulasan' => $ulasan,
+            'periode' => ucfirst($periode)
+        ]);
+
+        return $pdf->download('Laporan_Ulasan_' . ucfirst($periode) . '_' . date('Ymd') . '.pdf');
+    }
 }

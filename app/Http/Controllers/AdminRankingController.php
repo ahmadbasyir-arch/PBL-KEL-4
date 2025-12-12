@@ -9,18 +9,26 @@ use Illuminate\Support\Facades\DB;
 
 class AdminRankingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua user dengan role mahasiswa atau dosen
-        // Hitung jumlah peminjaman yang statusnya 'selesai' atau 'disetujui'
-        // Ini adalah implementasi sederhana dari kriteria "Frekuensi Peminjaman" untuk SAW/AHP
-        // Di mana bobot kriteria ini adalah 100% untuk saat ini.
-        
-        $rankings = User::whereIn('role', ['mahasiswa', 'dosen'])
-            ->withCount(['peminjaman as total_minjam' => function ($query) {
+        // Ambil filter role dari request, default 'all'
+        $roleFilter = $request->input('role', 'all');
+
+        $query = User::query();
+
+        if ($roleFilter === 'mahasiswa') {
+            $query->where('role', 'mahasiswa');
+        } elseif ($roleFilter === 'dosen') {
+            $query->where('role', 'dosen');
+        } else {
+            // Default: mahasiswa & dosen
+            $query->whereIn('role', ['mahasiswa', 'dosen']);
+        }
+
+        $rankings = $query->withCount(['peminjaman as total_minjam' => function ($query) {
                 $query->whereIn('status', ['selesai', 'disetujui']);
             }])
-            ->orderByDesc('total_minjam') // Ranking berdasarkan nilai tertinggi (Benefit)
+            ->orderByDesc('total_minjam')
             ->get();
 
         // Berikan ranking
@@ -43,7 +51,17 @@ class AdminRankingController extends Controller
     public function exportPdf(Request $request)
     {
         $periode = $request->input('periode', 'bulanan');
-        $query = User::whereIn('role', ['mahasiswa', 'dosen']);
+        $roleFilter = $request->input('role', 'all');
+
+        $query = User::query();
+
+        if ($roleFilter === 'mahasiswa') {
+            $query->where('role', 'mahasiswa');
+        } elseif ($roleFilter === 'dosen') {
+            $query->where('role', 'dosen');
+        } else {
+            $query->whereIn('role', ['mahasiswa', 'dosen']);
+        }
 
         $dateFilter = function ($q) use ($periode) {
             $q->whereIn('status', ['selesai', 'disetujui']);

@@ -9,13 +9,33 @@
         <p>Kritik, saran, ve evaluasi yang dikirimkan oleh mahasiswa dan dosen.</p>
     </div>
 
-    <div class="section-header" style="margin-bottom: 25px; border-bottom: 1px solid #f3f4f6; padding-bottom: 15px;">
+    <div class="section-header" style="margin-bottom: 25px; border-bottom: 1px solid #f3f4f6; padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 1.25rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 12px; margin: 0;">
             <div style="background: #e0e7ff; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-comments" style="color: #4f46e5; font-size: 1.1rem;"></i>
             </div>
             Daftar Masukan
         </h2>
+
+        <form action="{{ route('admin.ulasan.export') }}" method="GET" style="display: flex; gap: 12px; align-items: center; margin: 0;">
+            
+            <div style="position: relative;">
+                <select name="periode" class="form-select" style="appearance: none; -webkit-appearance: none; padding: 10px 35px 10px 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none; cursor: pointer; background-color: #f9fafb; color: #374151; font-weight: 500; transition: border-color 0.2s;">
+                    <option value="harian">Hari Ini</option>
+                    <option value="mingguan">Minggu Ini</option>
+                    <option value="bulanan" selected>Bulan Ini</option>
+                    <option value="semester">Semester Ini</option>
+                    <option value="tahunan">Tahun Ini</option>
+                </select>
+                <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6b7280;">
+                    <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="background-color: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.2s; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);">
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
+        </form>
     </div>
 
     <table class="data-table">
