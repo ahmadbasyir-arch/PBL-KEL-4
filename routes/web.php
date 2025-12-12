@@ -160,6 +160,19 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | SUPER ADMIN
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'role:super_admin'])->prefix('superadmin')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'admin'])
+            ->name('superadmin.dashboard'); // Reuse admin dashboard for now
+
+        Route::resource('/prodi', \App\Http\Controllers\SuperAdminProdiController::class)
+            ->names('superadmin.prodi');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | RUTE BERSAMA MAHASISWA & DOSEN
     |--------------------------------------------------------------------------
     */

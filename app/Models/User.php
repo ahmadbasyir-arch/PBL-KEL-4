@@ -25,6 +25,7 @@ protected $fillable = [
     'nim',
     'google_id',
     'telepon',
+    'prodi_id',
 ];
 
 
@@ -45,9 +46,13 @@ public function mahasiswa()
         return $this->hasMany(\App\Models\Peminjaman::class, 'idMahasiswa');
     }
 
-    // 🔹 Tambahkan accessor untuk uniformitas tampilan di blade
     public function getNameAttribute()
     {
         return $this->namaLengkap ?? $this->username ?? 'Tanpa Nama';
+    }
+
+    public function prodi()
+    {
+        return $this->belongsTo(\App\Models\Prodi::class, 'prodi_id');
     }
 }

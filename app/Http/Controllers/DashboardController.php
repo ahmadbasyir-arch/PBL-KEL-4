@@ -279,7 +279,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // ADMIN & STAFF
-        if (in_array($user->role, ['admin', 'staff'])) {
+        if (in_array($user->role, ['admin', 'staff', 'super_admin'])) {
             return redirect()->route('admin.dashboard');
         }
 

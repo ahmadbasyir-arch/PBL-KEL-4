@@ -271,7 +271,7 @@
 <ul class="sidebar-menu">
 
     {{-- === DASHBOARD === --}}
-    <li class="{{ Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') || Route::is('dosen.dashboard') ? 'active' : '' }}">
+    <li class="{{ Route::is('admin.dashboard') || Route::is('mahasiswa.dashboard') || Route::is('dosen.dashboard') || Route::is('superadmin.dashboard') ? 'active' : '' }}">
         <a href="
             @if(($user->role ?? '') === 'admin')
                 {{ route('admin.dashboard') }}
@@ -279,6 +279,8 @@
                 {{ route('mahasiswa.dashboard') }}
             @elseif(($user->role ?? '') === 'dosen')
                 {{ route('dosen.dashboard') }}
+            @elseif(($user->role ?? '') === 'super_admin')
+                {{ route('superadmin.dashboard') }}
             @else
                 #
             @endif
@@ -319,8 +321,14 @@
             </a>
         </li>
 
-    {{-- === Jika role Admin / Staff === --}}
-    @elseif(in_array($user->role ?? '', ['admin', 'staff']))
+    {{-- === Jika role Admin / Staff / Super Admin === --}}
+    @elseif(in_array($user->role ?? '', ['admin', 'staff', 'super_admin']))
+        
+        @if(($user->role ?? '') === 'super_admin')
+            <li class="{{ request()->is('superadmin/prodi*') ? 'active' : '' }}">
+                <a href="{{ route('superadmin.prodi.index') }}"><i class="fas fa-university"></i> Data Prodi</a>
+            </li>
+        @endif
         <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
             <a href="{{ route('admin.ruangan.index') }}"><i class="fas fa-door-open"></i> Data Ruangan</a>
         </li>

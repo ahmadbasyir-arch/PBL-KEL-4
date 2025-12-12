@@ -30,7 +30,13 @@
         <h2>Daftar Jadwal</h2>
         
     <div class="alert alert-info py-2 mb-0" style="font-size: 0.85rem;">
-        <i class="fas fa-info-circle"></i> Gunakan header: <b>mata_kuliah, dosen, kelas, hari, jam_mulai, jam_selesai, ruangan</b>
+        <i class="fas fa-info-circle"></i> <b>Format Didukung:</b>
+        <br>
+        <small>
+            &bull; <b>Mata Kuliah:</b> data_mata_kuliah, matkul, mk
+            &bull; <b>Waktu:</b> jam (contoh: "08:00 - 10:00"), atau jam_mulai & jam_selesai
+            &bull; <b>Lainnya:</b> dosen, kelas, hari, ruangan
+        </small>
     </div>
         
     {{-- Import Form Inline --}}
