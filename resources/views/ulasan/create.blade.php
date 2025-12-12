@@ -36,16 +36,16 @@
                         <div class="rating-container p-3 rounded" style="background-color: #f9fafb; border: 1px dashed #d1d5db; display: inline-block; min-width: 300px;">
                             <div class="rating-css">
                                 <div class="star-icon">
-                                    <input type="radio" value="1" name="rating" checked id="rating1">
-                                    <label for="rating1" class="fa fa-star" title="Sangat Buruk"></label>
-                                    <input type="radio" value="2" name="rating" id="rating2">
-                                    <label for="rating2" class="fa fa-star" title="Buruk"></label>
-                                    <input type="radio" value="3" name="rating" id="rating3">
-                                    <label for="rating3" class="fa fa-star" title="Cukup"></label>
-                                    <input type="radio" value="4" name="rating" id="rating4">
-                                    <label for="rating4" class="fa fa-star" title="Baik"></label>
                                     <input type="radio" value="5" name="rating" id="rating5">
                                     <label for="rating5" class="fa fa-star" title="Sangat Baik"></label>
+                                    <input type="radio" value="4" name="rating" id="rating4">
+                                    <label for="rating4" class="fa fa-star" title="Baik"></label>
+                                    <input type="radio" value="3" name="rating" id="rating3">
+                                    <label for="rating3" class="fa fa-star" title="Cukup"></label>
+                                    <input type="radio" value="2" name="rating" id="rating2">
+                                    <label for="rating2" class="fa fa-star" title="Buruk"></label>
+                                    <input type="radio" value="1" name="rating" checked id="rating1">
+                                    <label for="rating1" class="fa fa-star" title="Sangat Buruk"></label>
                                 </div>
                             </div>
                         </div>

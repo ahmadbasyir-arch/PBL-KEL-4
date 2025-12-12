@@ -52,8 +52,7 @@ class CheckPeminjamanExpiry extends Command
 
             // Cek jika waktu tersisa <= 30 menit DAN belum lewat waktu selesai
             if ($endTime->greaterThan($now) && $endTime->diffInMinutes($now) <= 30) {
-                // Cek apakah sudah dinotifikasi sebelumnya agar tidak spam?
-                // Cara simpel: Cek notifikasi database terakhir
+                // ... (logic existing notification) ...
                 $alreadyNotified = $peminjaman->mahasiswa->notifications()
                     ->where('type', \App\Notifications\PeminjamanAkanBerakhir::class)
                     ->get()
@@ -66,6 +65,26 @@ class CheckPeminjamanExpiry extends Command
                     $peminjaman->mahasiswa->notify(new \App\Notifications\PeminjamanAkanBerakhir($peminjaman));
                     $this->info("Notified user {$peminjaman->mahasiswa->name} for peminjaman ID {$peminjaman->id}");
                 }
+            }
+        }
+
+        // ==========================================
+        // FITUR BARU: AUTO-CANCEL PENDING > 24 JAM
+        // ==========================================
+        $expiredPending = \App\Models\Peminjaman::where('status', 'pending')
+            ->where('created_at', '<', $now->subDay()) // Lebih dari 24 jam yang lalu
+            ->with('mahasiswa')
+            ->get();
+
+        foreach ($expiredPending as $expired) {
+            $expired->status = 'ditolak'; // Alias expired/kadaluwarsa
+            $expired->save();
+
+            // Notify User
+            if ($expired->mahasiswa) {
+                 // Gunakan notifikasi status updated (DITOLAK) dengan pesan khusus jika bisa, atau default saja
+                 $expired->mahasiswa->notify(new \App\Notifications\PeminjamanStatusUpdated($expired, 'ditolak'));
+                 $this->info("Expired pending request ID {$expired->id}");
             }
         }
     }

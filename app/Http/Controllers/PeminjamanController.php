@@ -60,25 +60,57 @@ class PeminjamanController extends Controller
 
         $user = Auth::user();
 
-        foreach ($validated['items'] as $item) {
-            $peminjaman = Peminjaman::create([
-                'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
-                'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
-                'tanggalPinjam' => $validated['tanggalPinjam'],
-                'jamMulai'      => $validated['jamMulai'],
-                'jamSelesai'    => $validated['jamSelesai'],
-                'keperluan'     => $validated['keperluan'],
-                'status'        => 'pending',
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $user, $jenis) {
+                foreach ($validated['items'] as $item) {
+                    
+                    // 🔒 CONCURRENCY CHECK (Pencegahan Double Booking)
+                    // Cek lagi apakah di detik yang sama sudah ada yang booking
+                    $isBooked = Peminjaman::where('tanggalPinjam', $validated['tanggalPinjam'])
+                        ->where(function($query) use ($validated) {
+                            $query->whereBetween('jamMulai', [$validated['jamMulai'], $validated['jamSelesai']])
+                                ->orWhereBetween('jamSelesai', [$validated['jamMulai'], $validated['jamSelesai']])
+                                ->orWhere(function($q) use ($validated) {
+                                    $q->where('jamMulai', '<=', $validated['jamMulai'])
+                                      ->where('jamSelesai', '>=', $validated['jamSelesai']);
+                                });
+                        })
+                        ->whereIn('status', ['pending', 'disetujui', 'digunakan', 'sedang digunakan', 'menyelesaikan', 'menunggu_validasi'])
+                        ->where(function($q) use ($jenis, $item) {
+                            if ($jenis === 'ruangan') {
+                                $q->where('idRuangan', $item['id']);
+                            } else {
+                                $q->where('idUnit', $item['id']);
+                            }
+                        })
+                        ->lockForUpdate() // 🔒 Lock row untuk mencegah race condition
+                        ->exists();
 
-                // SOLUSI UTAMA — dosen & mahasiswa disimpan di kolom sama
-                'idMahasiswa'   => $user->id,
-            ]);
+                    if ($isBooked) {
+                        throw new \Exception("Maaf, salah satu item yang dipilih baru saja dipesan oleh orang lain. Silakan pilih waktu atau item lain.");
+                    }
 
-            // Kirim Notifikasi (Web & WA)
-            $user->notify(new \App\Notifications\PeminjamanDiajukan($peminjaman));
+                    $peminjaman = Peminjaman::create([
+                        'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
+                        'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
+                        'tanggalPinjam' => $validated['tanggalPinjam'],
+                        'jamMulai'      => $validated['jamMulai'],
+                        'jamSelesai'    => $validated['jamSelesai'],
+                        'keperluan'     => $validated['keperluan'],
+                        'status'        => 'pending',
+                        'idMahasiswa'   => $user->id,
+                    ]);
+
+                    // Kirim Notifikasi (Web & WA)
+                    $user->notify(new \App\Notifications\PeminjamanDiajukan($peminjaman));
+                }
+            });
+
+            return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
-
-        return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim!');
     }
 
     /**

@@ -139,6 +139,7 @@ class AuthController extends Controller
     {
         switch ($user->role) {
             case 'admin':
+            case 'super_admin': // Super admin uses admin dashboard for now
                 return redirect()->route('admin.dashboard');
             case 'mahasiswa':
                 return redirect()->route('mahasiswa.dashboard');

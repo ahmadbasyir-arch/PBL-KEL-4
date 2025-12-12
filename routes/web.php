@@ -28,13 +28,6 @@ Route::middleware('guest')->group(function () {
 
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
-
-    Route::get('/login/free', function () {
-        return redirect()->route('freeuser.home');
-    })->name('free.login');
-
-    Route::get('/free', [\App\Http\Controllers\FreeUserController::class, 'index'])
-        ->name('freeuser.home');
 });
 
 /*
@@ -221,5 +214,15 @@ Route::middleware('auth')->group(function () {
 */
 Route::get('/daftar-peminjaman', [PeminjamanController::class, 'index'])
     ->name('peminjaman.index');
+
+Route::get('/login/free', function () {
+    return redirect()->route('freeuser.home');
+})->name('free.login');
+
+Route::get('/free', [\App\Http\Controllers\FreeUserController::class, 'index'])
+    ->name('freeuser.home');
+
+Route::get('/free/events', [\App\Http\Controllers\FreeUserController::class, 'getEvents'])
+    ->name('freeuser.events');
 
 Route::get('/test-wa', [FonnteController::class, 'test']);

@@ -263,7 +263,7 @@
                 </div>
                 <div class="user-info">
                     <h3 title="{{ $nama }}">{{ $nama }}</h3>
-                    <p>{{ ucfirst($user->role ?? 'user') }}</p>
+                    <p>{{ ($user->role === 'admin') ? 'Staf Prodi' : ucfirst($user->role ?? 'user') }}</p>
                 </div>
             </div>
 

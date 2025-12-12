@@ -40,6 +40,10 @@
         <label for="keperluan">Keperluan</label>
         <select id="keperluan" name="keperluan" class="form-control" required>
             <option value="">-- Pilih Keperluan --</option>
+            <option>Kuliah Pengganti</option>
+            <option>Seminar PKL</option>
+            <option>Seminar TA</option>
+            <option>Seminar PBL</option>
             <option>Uji Kompetensi</option>
             <option>Sidang Tugas Akhir</option>
             <option>Acara Institusi</option>

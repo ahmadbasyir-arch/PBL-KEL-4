@@ -88,7 +88,7 @@ class PeminjamanStatusUpdated extends Notification
             $emoji = "❌";
         } elseif ($this->status == 'selesai') {
             $header = "PEMINJAMAN SELESAI";
-            $body = "Peminjaman Anda telah ditandai *SELESAI*. Terima kasih telah menggunakan fasilitas kami.";
+            $body = "Peminjaman Anda telah ditandai *SELESAI*. Harap segera mengisi **feedback/ulasan** kondisi ruangan melalui dashboard/riwayat untuk menyelesaikan proses administrasi.";
             $emoji = "🏁";
         } elseif ($this->status == 'menyelesaikan') {
             $header = "PENGAJUAN PENGEMBALIAN";

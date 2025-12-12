@@ -4,14 +4,9 @@
 
 @section('content')
 
-@php
-    $ruangan = $ruangan ?? [];
-    $proyektor = $proyektor ?? [];
-@endphp
-
 <div class="welcome-banner">
     <h2>Selamat Datang, Tamu! 👋</h2>
-    <p>Berikut adalah informasi terkini mengenai penggunaan fasilitas ruangan dan proyektor di Jurusan Teknologi Informasi.</p>
+    <p>Pantau penggunaan ruangan dan proyektor secara real-time melalui kalender interaktif di bawah ini.</p>
 </div>
 
 {{-- ==== Statistik ==== --}}
@@ -37,11 +32,11 @@
     </div>
 </div>
 
-<div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-    <span style="font-weight: 600; color: #374151;">Filter Status:</span>
-    <button type="button" class="btn-filter active" data-filter="all">Semua</button>
-    <button type="button" class="btn-filter" data-filter="tersedia">Tersedia</button>
-    <button type="button" class="btn-filter" data-filter="dipakai">Sedang Digunakan</button>
+<div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <span style="font-weight: 600; color: #374151;">Filter Tabel:</span>
+    <button type="button" class="btn-filter-table active" data-filter="all">Semua</button>
+    <button type="button" class="btn-filter-table" data-filter="tersedia">Tersedia</button>
+    <button type="button" class="btn-filter-table" data-filter="dipakai">Sedang Digunakan</button>
 </div>
 
 <div class="content-grid">
@@ -138,6 +133,26 @@
     </div>
 </div>
 
+<div class="section-divider" style="margin: 40px 0; border-top: 1px dashed #cbd5e1;"></div>
+
+<div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <span style="font-weight: 600; color: #374151;">Filter Kalender:</span>
+    <button type="button" class="btn-filter active" data-filter="all">Semua</button>
+    <button type="button" class="btn-filter" data-filter="ruangan">
+        <i class="fas fa-door-open"></i> Ruangan
+    </button>
+    <button type="button" class="btn-filter" data-filter="unit">
+        <i class="fas fa-video"></i> Proyektor
+    </button>
+</div>
+
+<div class="calendar-container">
+    <div id="calendar"></div>
+</div>
+
+{{-- FullCalendar CSS & JS via CDN --}}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
 <style>
     /* Welcome Banner */
     .welcome-banner {
@@ -221,6 +236,16 @@
         font-weight: 800;
         color: #111827;
         line-height: 1.2;
+    }
+
+    /* Calendar Container */
+    .calendar-container {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0,0,0,0.03);
+        min-height: 600px;
     }
 
     /* Content Grid */
@@ -319,23 +344,12 @@
         margin: 0;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .welcome-banner {
-            padding: 20px;
-        }
-        
-        .welcome-banner h2 {
-            font-size: 1.5rem;
-        }
+    /* Filters */
+    .filter-section {
+        margin-top: 10px;
     }
 
-    /* Filter Buttons */
-    .btn-filter {
+    .btn-filter, .btn-filter-table {
         padding: 8px 16px;
         border: 1px solid #e5e7eb;
         background: white;
@@ -345,35 +359,141 @@
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .btn-filter:hover {
+    .btn-filter:hover, .btn-filter-table:hover {
         background: #f9fafb;
         border-color: #d1d5db;
     }
 
-    .btn-filter.active {
+    .btn-filter.active, .btn-filter-table.active {
         background: #4f46e5;
         color: white;
         border-color: #4f46e5;
+    }
+
+    /* FullCalendar Customization */
+    .fc-event {
+        cursor: pointer;
+        border: none !important;
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-size: 0.85em;
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.5em !important;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .fc-button {
+        background-color: #4f46e5 !important;
+        border-color: #4f46e5 !important;
+        font-weight: 500 !important;
+    }
+
+    .fc-button:hover {
+        background-color: #4338ca !important;
+        border-color: #4338ca !important;
+    }
+
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        .calendar-container {
+            padding: 10px;
+        }
+        .fc-header-toolbar {
+            flex-direction: column;
+            gap: 10px;
+        }
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.btn-filter');
-    const rows = document.querySelectorAll('.item-row');
+    // --- 1. CALENDAR LOGIC ---
+    var calendarEl = document.getElementById('calendar');
+    var currentFilter = 'all'; // 'all', 'ruangan', 'unit'
 
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        locale: 'id', // Bahasa Indonesia
+        height: 'auto',
+        navLinks: true, // can click day/week names to navigate views
+        dayMaxEvents: true, // allow "more" link when too many events
+        events: '{{ route("freeuser.events") }}', // Load events JSON
+        
+        eventDidMount: function(info) {
+            // Filter logic
+            if (currentFilter !== 'all' && info.event.extendedProps.type !== currentFilter) {
+                info.el.style.display = 'none';
+            }
+        },
+
+        eventClick: function(info) {
+            var props = info.event.extendedProps;
+            var timeStart = info.event.start.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            var timeEnd = info.event.end ? info.event.end.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : '-';
+            
+            // Handle null peminjam explicitly just in case
+            var peminjam = props.peminjam ? props.peminjam : 'Tidak Diketahui';
+
+            alert(
+                'Detail Peminjaman:\n' +
+                '------------------\n' +
+                'Fasilitas: ' + info.event.title + '\n' +
+                'Waktu: ' + timeStart + ' - ' + timeEnd + '\n' +
+                'Peminjam: ' + peminjam + '\n' +
+                'Status: ' + props.status.toUpperCase()
+            );
+        }
+    });
+
+    calendar.render();
+
+    // Polling System (Refresh Events every 60 seconds)
+    setInterval(function() {
+        calendar.refetchEvents();
+    }, 60000); 
+
+    // Calendar Filter Button Logic
+    const filterButtons = document.querySelectorAll('.btn-filter');
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active class from all buttons
+            // UI
             filterButtons.forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
+            btn.classList.add('active');
+
+            // Logic
+            currentFilter = btn.getAttribute('data-filter');
+            calendar.render(); // Re-render to apply eventDidMount filtering
+        });
+    });
+
+    // --- 2. TABLE FILTER LOGIC ---
+    const tableFilterButtons = document.querySelectorAll('.btn-filter-table');
+    const tableRows = document.querySelectorAll('.item-row');
+
+    tableFilterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // UI
+            tableFilterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
             const filterValue = btn.getAttribute('data-filter');
 
-            rows.forEach(row => {
+            tableRows.forEach(row => {
                 const status = row.getAttribute('data-status');
                 if (filterValue === 'all' || status === filterValue) {
                     row.style.display = '';
