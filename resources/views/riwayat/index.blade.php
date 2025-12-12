@@ -130,16 +130,7 @@
 
                             <td>
                                 @if($item->status == 'selesai')
-                                    @if($item->feedback)
-                                        <button class="btn btn-action btn-outline-secondary" disabled style="opacity: 0.7;">
-                                            <i class="fas fa-check-circle"></i> Dinilai
-                                        </button>
-                                    @else
-                                        <button class="btn btn-action btn-outline-primary" 
-                                            onclick="openFeedbackModal('{{ route('peminjaman.feedback', $item->id) }}')">
-                                            <i class="far fa-star"></i> Beri Nilai
-                                        </button>
-                                    @endif
+                                    <span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Selesai</span>
                                 @else
                                     <span class="text-muted small" style="opacity: 0.5;"><i class="fas fa-minus"></i></span>
                                 @endif
@@ -158,47 +149,7 @@
                 </table>
             </div>
 
-            {{-- FEEDBACK MODAL --}}
-            <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <form id="feedbackForm" method="POST" class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-                        @csrf
-                        <div class="modal-header border-0 bg-primary text-white" style="border-radius: 15px 15px 0 0;">
-                            <h5 class="modal-title"><i class="fas fa-star text-warning me-2"></i>Beri Ulasan</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body p-4">
-                            <div class="mb-4 text-center">
-                                <label class="form-label fw-bold text-secondary mb-2">Seberapa puas Anda?</label>
-                                <div class="rating-select">
-                                    <select name="rating" class="form-select form-select-lg text-center fw-bold text-warning" style="border-radius: 50px;" required>
-                                        <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
-                                        <option value="4">⭐⭐⭐⭐ Puas</option>
-                                        <option value="3">⭐⭐⭐ Cukup</option>
-                                        <option value="2">⭐⭐ Kurang</option>
-                                        <option value="1">⭐ Buruk</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label fw-bold text-secondary">Komentar & Saran</label>
-                                <textarea name="komentar" class="form-control bg-light" rows="4" style="border-radius: 10px; border: 1px solid #eee;" placeholder="Bagaimana pengalaman peminjaman Anda?"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer border-0 p-3 pt-0">
-                            <button type="button" class="btn btn-light text-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary rounded-pill px-4">Kirim Ulasan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
-            <script>
-                function openFeedbackModal(url) {
-                    document.getElementById('feedbackForm').action = url;
-                    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
-                }
-            </script>
             </div>
 
         </div>

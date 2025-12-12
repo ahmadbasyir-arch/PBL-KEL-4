@@ -321,6 +321,12 @@
             </a>
         </li>
 
+        <li class="{{ request()->is('ulasan*') ? 'active' : '' }}">
+            <a href="{{ route('ulasan.create') }}">
+                <i class="fas fa-comment-dots"></i> Kritik & Saran
+            </a>
+        </li>
+
     {{-- === Jika role Admin / Staff === --}}
     @elseif(in_array($user->role ?? '', ['admin', 'staff']))
         <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
@@ -340,6 +346,9 @@
         </li>
         <li class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
             <a href="{{ route('admin.laporan.index') }}"><i class="fas fa-file-alt"></i> Laporan</a>
+        </li>
+        <li class="{{ request()->is('admin/ulasan*') ? 'active' : '' }}">
+            <a href="{{ route('admin.ulasan.index') }}"><i class="fas fa-comments"></i> Ulasan Pengguna</a>
         </li>
 
     @endif

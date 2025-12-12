@@ -120,6 +120,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\AdminLaporanController::class, 'index'])->name('admin.laporan.index');
         Route::get('/laporan/print', [\App\Http\Controllers\AdminLaporanController::class, 'print'])->name('admin.laporan.print');
         Route::get('/laporan/pdf', [\App\Http\Controllers\AdminLaporanController::class, 'exportPdf'])->name('admin.laporan.pdf');
+    // ROUTE ULASAN (Admin)
+        Route::get('/ulasan', [\App\Http\Controllers\UlasanController::class, 'index'])->name('admin.ulasan.index');
+
     });
 
     /*
@@ -193,6 +196,10 @@ Route::middleware('auth')->group(function () {
         // FEEDBACK
         Route::post('/peminjaman/{id}/feedback', [PeminjamanController::class, 'storeFeedback'])
             ->name('peminjaman.feedback');
+
+        // ULASAN (General)
+        Route::get('/ulasan/tulis', [\App\Http\Controllers\UlasanController::class, 'create'])->name('ulasan.create');
+        Route::post('/ulasan', [\App\Http\Controllers\UlasanController::class, 'store'])->name('ulasan.store');
 
         // RIWAYAT
         Route::get('/riwayat', [RiwayatController::class, 'index'])
