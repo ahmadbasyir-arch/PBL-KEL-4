@@ -307,23 +307,15 @@
             </a>
         </li>
 
-        @if(($user->role ?? '') === 'dosen')
-        <li class="{{ request()->is('dosen/pengguna*') ? 'active' : '' }}">
-            <a href="{{ route('dosen.pengguna.index') }}">
-                <i class="fas fa-users"></i> Data Pengguna
+        <li class="{{ request()->is('ulasan*') ? 'active' : '' }}">
+            <a href="{{ route('ulasan.create') }}">
+                <i class="fas fa-comment-dots"></i> Kritik & Saran
             </a>
         </li>
-        @endif
 
         <li class="{{ request()->is('settings*') ? 'active' : '' }}">
             <a href="{{ route('profile.edit') }}">
                 <i class="fas fa-cog"></i> Pengaturan
-            </a>
-        </li>
-
-        <li class="{{ request()->is('ulasan*') ? 'active' : '' }}">
-            <a href="{{ route('ulasan.create') }}">
-                <i class="fas fa-comment-dots"></i> Kritik & Saran
             </a>
         </li>
 
