@@ -22,7 +22,7 @@
     <div class="form-group">
         <label for="tanggalPinjam">Tanggal Peminjaman</label>
         <input type="date" id="tanggalPinjam" name="tanggalPinjam" class="form-control"
-        value="{{ request('tanggal', now()->toDateString()) }}" required>
+        value="{{ request('tanggal', now()->toDateString()) }}" min="{{ date('Y-m-d') }}" required>
     </div>
 
     <div class="form-row">

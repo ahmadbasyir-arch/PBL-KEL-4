@@ -31,6 +31,7 @@
         <label for="tanggalPinjam">Tanggal Peminjaman</label>
         <input type="date" id="tanggalPinjam" name="tanggalPinjam"
             value="{{ $peminjaman->tanggalPinjam }}" 
+            min="{{ date('Y-m-d') }}"
             class="form-control" required>
     </div>
 
