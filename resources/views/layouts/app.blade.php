@@ -344,6 +344,9 @@
         <li class="{{ request()->is('admin/jadwal*') ? 'active' : '' }}">
             <a href="{{ route('admin.jadwal.index') }}"><i class="fas fa-calendar-alt"></i> Jadwal Perkuliahan</a>
         </li>
+        <li class="{{ request()->is('admin/matkul*') ? 'active' : '' }}">
+            <a href="{{ route('admin.matkul.index') }}"><i class="fas fa-book"></i> Data Mata Kuliah</a>
+        </li>
         <li class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
             <a href="{{ route('admin.laporan.index') }}"><i class="fas fa-file-alt"></i> Laporan</a>
         </li>

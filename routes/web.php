@@ -113,10 +113,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\AdminLaporanController::class, 'index'])->name('admin.laporan.index');
         Route::get('/laporan/print', [\App\Http\Controllers\AdminLaporanController::class, 'print'])->name('admin.laporan.print');
         Route::get('/laporan/pdf', [\App\Http\Controllers\AdminLaporanController::class, 'exportPdf'])->name('admin.laporan.pdf');
-    // ROUTE ULASAN (Admin)
+        // ROUTE ULASAN (Admin)
         Route::get('/ulasan/export', [\App\Http\Controllers\UlasanController::class, 'exportPdf'])->name('admin.ulasan.export');
         Route::get('/ulasan', [\App\Http\Controllers\UlasanController::class, 'index'])->name('admin.ulasan.index');
 
+        // ROUTE MASTER MATA KULIAH
+        Route::get('/matkul', [\App\Http\Controllers\AdminMataKuliahController::class, 'index'])->name('admin.matkul.index');
+        Route::post('/matkul/import', [\App\Http\Controllers\AdminMataKuliahController::class, 'import'])->name('admin.matkul.import');
 
     });
 
