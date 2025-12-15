@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Peminjaman; // Assuming Peminjaman model exists
+use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,98 +11,150 @@ class AdminRankingController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil filter role dari request, default 'all'
-        $roleFilter = $request->input('role', 'all');
-
-        $query = User::query();
-
-        if ($roleFilter === 'mahasiswa') {
-            $query->where('role', 'mahasiswa');
-        } elseif ($roleFilter === 'dosen') {
-            $query->where('role', 'dosen');
-        } else {
-            // Default: mahasiswa & dosen
-            $query->whereIn('role', ['mahasiswa', 'dosen']);
-        }
-
-        $rankings = $query->withCount(['peminjaman as total_minjam' => function ($query) {
-                $query->whereIn('status', ['selesai', 'disetujui']);
-            }])
-            ->orderByDesc('total_minjam')
-            ->get();
-
-        // Berikan ranking
-        $rank = 1;
-        $previousScore = null;
-        $realRank = 1;
-
-        foreach ($rankings as $index => $user) {
-            if ($previousScore !== $user->total_minjam) {
-                $rank = $realRank;
-            }
-            $user->rank = $rank;
-            $previousScore = $user->total_minjam;
-            $realRank++;
-        }
-
-        return view('admin.ranking.index', compact('rankings'));
+        $data = $this->calculateRankings($request->role);
+        return view('admin.ranking.index', $data);
     }
 
     public function exportPdf(Request $request)
     {
-        $periode = $request->input('periode', 'bulanan');
-        $roleFilter = $request->input('role', 'all');
+        $data = $this->calculateRankings($request->role);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.ranking.pdf', $data);
+        return $pdf->download('laporan-ranking-saw-' . date('Y-m-d') . '.pdf');
+    }
 
-        $query = User::query();
+    private function calculateRankings($role = null)
+    {
+        // 1. Ambil Data User & Peminjaman Selesai
+        $query = User::whereIn('role', ['mahasiswa', 'dosen']);
 
-        if ($roleFilter === 'mahasiswa') {
-            $query->where('role', 'mahasiswa');
-        } elseif ($roleFilter === 'dosen') {
-            $query->where('role', 'dosen');
-        } else {
-            $query->whereIn('role', ['mahasiswa', 'dosen']);
+        if ($role && in_array($role, ['mahasiswa', 'dosen'])) {
+            $query->where('role', $role);
         }
 
-        $dateFilter = function ($q) use ($periode) {
-            $q->whereIn('status', ['selesai', 'disetujui']);
-            $now = \Carbon\Carbon::now();
+        $users = $query->with(['peminjaman' => function($q) {
+                $q->where('status', 'selesai');
+            }])
+            ->get();
+
+        // 2. Kriteria & Bobot
+        $bobot = [
+            'C1' => 0.30, 
+            'C2' => 0.20, 
+            'C3' => 0.20, 
+            'C4' => 0.30
+        ];
+
+        // 3. Matriks Keputusan (X)
+        $matrix = [];
+        foreach ($users as $user) {
             
-            if ($periode == 'harian') {
-                $q->whereDate('tanggalPinjam', $now->format('Y-m-d'));
-            } elseif ($periode == 'mingguan') {
-                $q->whereBetween('tanggalPinjam', [$now->startOfWeek()->format('Y-m-d'), $now->endOfWeek()->format('Y-m-d')]);
-            } elseif ($periode == 'bulanan') {
-                $q->whereMonth('tanggalPinjam', $now->month)->whereYear('tanggalPinjam', $now->year);
-            } elseif ($periode == 'semester') {
-                if ($now->month >= 7) {
-                    $q->whereMonth('tanggalPinjam', '>=', 7);
-                } else {
-                    $q->whereMonth('tanggalPinjam', '<=', 6);
+            // Default Values untuk User tanpa Peminjaman
+            $c1 = 0; // Kepentingan (Benefit -> 0 nilai terburuk)
+            $c2 = 0; // Perencanaan (Benefit -> 0 nilai terburuk)
+            $c3 = 999999; // Durasi (Cost -> nilai tertinggi terburuk)
+            $c4 = 0; // Kondisi (Benefit -> 0 nilai terburuk)
+
+            if ($user->peminjaman->isNotEmpty()) {
+                // C1: Kepentingan
+                $totalKepentingan = 0;
+                foreach ($user->peminjaman as $p) {
+                    $totalKepentingan += $this->getKepentinganScore($p->keperluan);
                 }
-                $q->whereYear('tanggalPinjam', $now->year);
-            } elseif ($periode == 'tahunan') {
-                $q->whereYear('tanggalPinjam', $now->year);
+                $c1 = $totalKepentingan / $user->peminjaman->count();
+
+                // C2: Meminjam
+                $totalAdvance = 0;
+                foreach ($user->peminjaman as $p) {
+                    $created = \Carbon\Carbon::parse($p->created_at);
+                    $booking = \Carbon\Carbon::parse($p->tanggalPinjam);
+                    $diff = max(0, $created->diffInDays($booking));
+                    $totalAdvance += $diff;
+                }
+                $c2 = $totalAdvance / $user->peminjaman->count();
+
+                // C3: Durasi
+                $totalDurasi = 0;
+                foreach ($user->peminjaman as $p) {
+                    $start = \Carbon\Carbon::parse($p->jamMulai);
+                    $end   = \Carbon\Carbon::parse($p->jamSelesai);
+                    $totalDurasi += max(0, $end->diffInHours($start));
+                }
+                $c3 = $totalDurasi / $user->peminjaman->count();
+
+                // C4: Kondisi
+                $c4 = 100; 
             }
-        };
 
-        $rankings = $query->withCount(['peminjaman as total_minjam' => $dateFilter])
-            ->get()
-            ->sortByDesc('total_minjam')
-            ->values();
-
-        $rank = 1; $realRank = 1; $activeRank = 1; $prevScore = null;
-        foreach ($rankings as $user) {
-            if ($prevScore !== $user->total_minjam) { $activeRank = $rank; }
-            $user->rank = $activeRank;
-            $prevScore = $user->total_minjam;
-            $rank++;
+            $matrix[$user->id] = [
+                'user' => $user,
+                'C1' => $c1,
+                'C2' => $c2,
+                'C3' => $c3,
+                'C4' => $c4
+            ];
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.ranking.pdf', [
-            'rankings' => $rankings,
-            'periode' => ucfirst($periode)
-        ]);
+        // 4. Normalisasi Matriks (R)
+        $normalized = [];
+        
+        // Cari Max/Min tiap kolom
+        $maxC1 = 0; $maxC2 = 0; $minC3 = 999999; $maxC4 = 0;
+        
+        if (!empty($matrix)) {
+            $maxC1 = max(array_column($matrix, 'C1')) ?: 1;
+            $maxC2 = max(array_column($matrix, 'C2')) ?: 1;
+            $minC3 = min(array_column($matrix, 'C3')) ?: 1;
+            $maxC4 = max(array_column($matrix, 'C4')) ?: 1;
+        } else {
+            $maxC1 = $maxC2 = $minC3 = $maxC4 = 1;
+        }
 
-        return $pdf->download('Laporan_Ranking_' . $periode . '_' . date('Ymd') . '.pdf');
+        foreach ($matrix as $uid => $row) {
+            $normalized[$uid] = [
+                'user' => $row['user'],
+                'C1' => $row['C1'] / $maxC1,             // Benefit
+                'C2' => $row['C2'] / $maxC2,             // Benefit
+                'C3' => $minC3 / ($row['C3'] ?: 1),      // Cost (Min / Value)
+                'C4' => $row['C4'] / $maxC4              // Benefit
+            ];
+        }
+
+        // 5. Ranking (V)
+        $rankings = [];
+        foreach ($normalized as $uid => $row) {
+            $score = 
+                ($row['C1'] * $bobot['C1']) +
+                ($row['C2'] * $bobot['C2']) +
+                ($row['C3'] * $bobot['C3']) +
+                ($row['C4'] * $bobot['C4']);
+            
+            $rankings[] = (object) [
+                'user' => $row['user'],
+                'total_minjam' => $matrix[$uid]['user']->peminjaman->count(),
+                'saw_score' => number_format($score, 4),
+                'detail' => $row 
+            ];
+        }
+
+        // Urutan terbesar ke terkecil
+        usort($rankings, function($a, $b) {
+            return $b->saw_score <=> $a->saw_score;
+        });
+
+        // Rank
+        foreach ($rankings as $idx => $r) {
+            $r->rank = $idx + 1;
+        }
+
+        return compact('rankings', 'bobot');
+    }
+
+    private function getKepentinganScore($keperluan) {
+        $keperluan = strtolower($keperluan);
+        if (str_contains($keperluan, 'sidang') || str_contains($keperluan, 'kompetensi')) return 5;
+        if (str_contains($keperluan, 'seminar') || str_contains($keperluan, 'lomba')) return 4;
+        if (str_contains($keperluan, 'kuliah') || str_contains($keperluan, 'pelatihan')) return 3;
+        if (str_contains($keperluan, 'rapat') || str_contains($keperluan, 'kegiatan')) return 2;
+        return 1;
     }
 }

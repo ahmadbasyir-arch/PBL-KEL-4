@@ -59,14 +59,91 @@
             </form>
         </div>
 
+        {{-- INFO BOBOT SAW (Refined UI - Horizontal) --}}
+        <div class="card mb-4" style="border: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-radius: 12px; margin-bottom: 25px;">
+            <div class="card-body" style="padding: 20px 30px;">
+                
+                {{-- Header Section --}}
+                <div style="margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: #eff6ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calculator" style="color: #3b82f6; font-size: 1.2rem;"></i>
+                        </div>
+                        <div>
+                            <h5 style="margin: 0; font-weight: 700; color: #111827; font-size: 1.1rem;">Metode SAW (Simple Additive Weighting)</h5>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Pembobotan 4 kriteria untuk menentukan peringkat pengguna:</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Cards Grid - Flex Layout to Fill Width --}}
+                <div style="display: flex; gap: 15px; width: 100%;">
+                    
+                    {{-- C1 --}}
+                    <div style="flex: 1;">
+                        <div style="background: #fdfdfd; border: 1px solid #f3f4f6; padding: 15px; border-radius: 8px; height: 100%; position: relative;">
+                            <div style="margin-bottom: 8px; padding-right: 60px;"> {{-- Padding for badge --}}
+                                <h6 style="font-weight: 700; color: #374151; font-size: 0.95rem; margin:0; line-height: 1.2;">C1: Kepentingan</h6>
+                            </div>
+                            <span class="badge badge-success" style="position: absolute; top: 15px; right: 15px; background:#dcfce7; color:#166534; font-size: 0.75rem;">Benefit</span>
+                            
+                            <div style="font-size: 1.4rem; font-weight: 800; color: #3b82f6; margin-bottom: 5px;">{{ $bobot['C1']*100 }}%</div>
+                            <small class="text-muted" style="font-size: 0.8rem; line-height: 1.3; display: block;">Tingkat urgensi kegiatan (Sidang vs Rapat).</small>
+                        </div>
+                    </div>
+
+                    {{-- C2 --}}
+                    <div style="flex: 1;">
+                        <div style="background: #fdfdfd; border: 1px solid #f3f4f6; padding: 15px; border-radius: 8px; height: 100%; position: relative;">
+                            <div style="margin-bottom: 8px; padding-right: 60px;">
+                                <h6 style="font-weight: 700; color: #374151; font-size: 0.95rem; margin:0; line-height: 1.2;">C2: Perencanaan</h6>
+                            </div>
+                            <span class="badge badge-success" style="position: absolute; top: 15px; right: 15px; background:#dcfce7; color:#166534; font-size: 0.75rem;">Benefit</span>
+                            
+                            <div style="font-size: 1.4rem; font-weight: 800; color: #3b82f6; margin-bottom: 5px;">{{ $bobot['C2']*100 }}%</div>
+                            <small class="text-muted" style="font-size: 0.8rem; line-height: 1.3; display: block;">Jarak waktu pengajuan dari tanggal pakai.</small>
+                        </div>
+                    </div>
+
+                    {{-- C3 --}}
+                    <div style="flex: 1;">
+                        <div style="background: #fdfdfd; border: 1px solid #f3f4f6; padding: 15px; border-radius: 8px; height: 100%; position: relative;">
+                            <div style="margin-bottom: 8px; padding-right: 50px;">
+                                <h6 style="font-weight: 700; color: #374151; font-size: 0.95rem; margin:0; line-height: 1.2;">C3: Durasi</h6>
+                            </div>
+                            <span class="badge badge-warning" style="position: absolute; top: 15px; right: 15px; background:#fee2e2; color:#991b1b; font-size: 0.75rem;">Cost</span>
+                            
+                            <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444; margin-bottom: 5px;">{{ $bobot['C3']*100 }}%</div>
+                            <small class="text-muted" style="font-size: 0.8rem; line-height: 1.3; display: block;">Efisiensi waktu (makin singkat makin baik).</small>
+                        </div>
+                    </div>
+
+                    {{-- C4 --}}
+                    <div style="flex: 1;">
+                        <div style="background: #fdfdfd; border: 1px solid #f3f4f6; padding: 15px; border-radius: 8px; height: 100%; position: relative;">
+                            <div style="margin-bottom: 8px; padding-right: 60px;">
+                                <h6 style="font-weight: 700; color: #374151; font-size: 0.95rem; margin:0; line-height: 1.2;">C4: Kondisi</h6>
+                            </div>
+                            <span class="badge badge-success" style="position: absolute; top: 15px; right: 15px; background:#dcfce7; color:#166534; font-size: 0.75rem;">Benefit</span>
+                            
+                            <div style="font-size: 1.4rem; font-weight: 800; color: #3b82f6; margin-bottom: 5px;">{{ $bobot['C4']*100 }}%</div>
+                            <small class="text-muted" style="font-size: 0.8rem; line-height: 1.3; display: block;">Kepatuhan aturan & kondisi barang.</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <table class="data-table">
             <thead>
                 <tr>
                     <th style="width: 80px; text-align: center;">Rank</th>
                     <th>Nama Pengguna</th>
                     <th>Role</th>
-                    <th style="text-align: center;">Total Peminjaman (Disetujui/Selesai)</th>
-                    {{-- <th>Kriteria Lain (Opsional)</th> --}}
+                    <th style="text-align: center;">Total Pinjam</th>
+                    <th style="text-align: center;">Skor SAW (V)</th>
+                    <th style="text-align: right;">Detail Nilai (R)</th>
                 </tr>
             </thead>
             <tbody>
@@ -84,26 +161,34 @@
                             @endif
                         </td>
                         <td>
-                            <strong>{{ $user->name }}</strong>
-                            <div style="font-size: 0.85rem; color: #9ca3af;">{{ $user->email }}</div>
+                            <strong>{{ $user->user->name }}</strong>
+                            <div style="font-size: 0.85rem; color: #9ca3af;">{{ $user->user->email }}</div>
                         </td>
                         <td>
-                            @if($user->role == 'dosen')
+                            @if($user->user->role == 'dosen')
                                 <span class="status-badge" style="background: #e0f2fe; color: #075985;">Dosen</span>
                             @else
                                 <span class="status-badge" style="background: #fef3c7; color: #d97706;">Mahasiswa</span>
                             @endif
                         </td>
                         <td style="text-align: center;">
-                            <span style="font-size: 1.1rem; font-weight: bold; color: #10b981;">
-                                {{ $user->total_minjam }}
+                            {{ $user->total_minjam }}
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="font-size: 1.2rem; font-weight: bold; color: #10b981;">
+                                {{ $user->saw_score }}
                             </span>
-                            <span style="font-size: 0.8rem; color: #6b7280;">kali</span>
+                        </td>
+                        <td style="text-align: right; font-size: 0.85rem; color: #6b7280;">
+                            <div>R1: {{ number_format($user->detail['C1'], 2) }}</div>
+                            <div>R2: {{ number_format($user->detail['C2'], 2) }}</div>
+                            <div>R3: {{ number_format($user->detail['C3'], 2) }}</div>
+                            <div>R4: {{ number_format($user->detail['C4'], 2) }}</div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-3" style="text-align: center; padding: 20px; color: #6b7280;">Belum ada data peminjaman yang selesai/disetujui.</td>
+                        <td colspan="6" class="text-center text-muted py-3" style="text-align: center; padding: 20px; color: #6b7280;">Belum ada data peminjaman yang dapat dianalisis.</td>
                     </tr>
                 @endforelse
             </tbody>
