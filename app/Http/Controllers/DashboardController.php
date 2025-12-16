@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
 
@@ -16,12 +15,12 @@ class DashboardController extends Controller
     // ================================
     public function admin(Request $request)
     {
-        // Hitung statistik
+        // Statistik
         $totalPeminjaman = Peminjaman::count();
-        $totalPending = Peminjaman::where('status', 'pending')->count();
-        $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
-        $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
-        $totalRiwayat = Peminjaman::count(); // opsional
+        $totalPending    = Peminjaman::where('status', 'pending')->count();
+        $totalDisetujui  = Peminjaman::where('status', 'disetujui')->count();
+        $totalDitolak    = Peminjaman::where('status', 'ditolak')->count();
+        $totalRiwayat    = Peminjaman::count();
 
         // ------------- Data untuk charts (HANYA YANG SEDANG BERJALAN) -------------
         $activeStatuses = ['disetujui', 'digunakan', 'sedang digunakan', 'menunggu_validasi', 'menyelesaikan'];
@@ -34,6 +33,7 @@ class DashboardController extends Controller
             $sarprasLab = 0;
             $sarprasUnit = 0;
         }
+
         $chartSarpras = [
             'labels' => ['Ruangan/Lab', 'Unit/Proyektor'],
             'data' => [$sarprasLab, $sarprasUnit],
@@ -64,9 +64,7 @@ class DashboardController extends Controller
             'data' => [$totalMahasiswa, $totalDosen, $totalAdmin],
         ];
 
-
-
-        // Jika request AJAX (polling), return JSON
+        // AJAX
         if ($request->ajax()) {
             return response()->json([
                 'totalPeminjaman' => $totalPeminjaman,
@@ -79,12 +77,10 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Data peminjaman terbaru (untuk load awal)
-        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit', 'mahasiswa'])
+        $peminjamanTerkini = Peminjaman::with(['ruangan','unit','mahasiswa'])
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        // ------------- Kirim ke view -------------
         return view('admin.dashboard', compact(
             'totalPeminjaman',
             'totalPending',
@@ -97,27 +93,23 @@ class DashboardController extends Controller
         ));
     }
 
+    // ================================
+    // ROUTE INDEX
+    // ================================
     public function index()
     {
         $user = Auth::user();
 
-        // ADMIN & STAFF
-        if (in_array($user->role, ['admin', 'staff', 'super_admin'])) {
+        if (in_array($user->role, ['admin','staff','super_admin']))
             return redirect()->route('admin.dashboard');
-        }
 
-        // MAHASISWA
-        if ($user->role == 'mahasiswa') {
+        if ($user->role === 'mahasiswa')
             return redirect()->route('mahasiswa.dashboard');
-        }
 
-        // DOSEN
-        if ($user->role == 'dosen') {
+        if ($user->role === 'dosen')
             return redirect()->route('dosen.dashboard');
-        }
 
-        // Tidak dikenali
-        abort(403, 'Role tidak dikenali.');
+        abort(403);
     }
 
     // ================================
@@ -128,22 +120,17 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $stats = [
-            'totalAktif' => Peminjaman::where('idMahasiswa', $user->id)
-                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])
-                ->count(),
-            'totalPending' => Peminjaman::where('idMahasiswa', $user->id)
-                ->where('status', 'pending')->count(),
-            'totalDisetujui' => Peminjaman::where('idMahasiswa', $user->id)
-                ->where('status', 'disetujui')->count(),
-            'totalRiwayat' => Peminjaman::where('idMahasiswa', $user->id)->count(),
+            'totalAktif'     => Peminjaman::where('idMahasiswa',$user->id)->whereIn('status',['pending','disetujui'])->count(),
+            'totalPending'   => Peminjaman::where('idMahasiswa',$user->id)->where('status','pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa',$user->id)->where('status','disetujui')->count(),
+            'totalRiwayat'   => Peminjaman::where('idMahasiswa',$user->id)->count(),
         ];
 
-        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
-            ->where('idMahasiswa', $user->id)
-            ->orderByDesc('created_at')
+        $peminjamanTerkini = Peminjaman::with(['ruangan','unit'])
+            ->where('idMahasiswa',$user->id)
             ->paginate(10);
 
-        return view('mahasiswa.dashboard', compact('stats', 'peminjamanTerkini'));
+        return view('mahasiswa.dashboard', compact('stats','peminjamanTerkini'));
     }
 
     // ================================
@@ -154,21 +141,16 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $stats = [
-            'totalAktif' => Peminjaman::where('idMahasiswa', $user->id)
-                ->whereIn('status', ['pending', 'disetujui', 'menunggu_validasi'])
-                ->count(),
-            'totalPending' => Peminjaman::where('idMahasiswa', $user->id)
-                ->where('status', 'pending')->count(),
-            'totalDisetujui' => Peminjaman::where('idMahasiswa', $user->id)
-                ->where('status', 'disetujui')->count(),
-            'totalRiwayat' => Peminjaman::where('idMahasiswa', $user->id)->count(),
+            'totalAktif'     => Peminjaman::where('idMahasiswa',$user->id)->whereIn('status',['pending','disetujui'])->count(),
+            'totalPending'   => Peminjaman::where('idMahasiswa',$user->id)->where('status','pending')->count(),
+            'totalDisetujui' => Peminjaman::where('idMahasiswa',$user->id)->where('status','disetujui')->count(),
+            'totalRiwayat'   => Peminjaman::where('idMahasiswa',$user->id)->count(),
         ];
 
-        $peminjamanTerkini = Peminjaman::with(['ruangan', 'unit'])
-            ->where('idMahasiswa', $user->id)
-            ->orderByDesc('created_at')
+        $peminjamanTerkini = Peminjaman::with(['ruangan','unit'])
+            ->where('idMahasiswa',$user->id)
             ->paginate(10);
 
-        return view('dosen.dashboard', compact('stats', 'peminjamanTerkini'));
+        return view('dosen.dashboard', compact('stats','peminjamanTerkini'));
     }
 }
