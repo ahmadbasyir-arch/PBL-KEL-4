@@ -506,7 +506,7 @@
             @endif
             
             <div class="dashboard-content-area">
-                @if(session('success'))
+                @if(session('success') && !Route::is(['admin.dashboard', 'mahasiswa.dashboard', 'dosen.dashboard', 'superadmin.dashboard']))
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i> {{ session('success') }}
                     </div>

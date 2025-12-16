@@ -128,6 +128,7 @@ class DashboardController extends Controller
 
         $peminjamanTerkini = Peminjaman::with(['ruangan','unit'])
             ->where('idMahasiswa',$user->id)
+            ->orderByDesc('created_at')
             ->paginate(10);
 
         return view('mahasiswa.dashboard', compact('stats','peminjamanTerkini'));
@@ -149,6 +150,7 @@ class DashboardController extends Controller
 
         $peminjamanTerkini = Peminjaman::with(['ruangan','unit'])
             ->where('idMahasiswa',$user->id)
+            ->orderByDesc('created_at')
             ->paginate(10);
 
         return view('dosen.dashboard', compact('stats','peminjamanTerkini'));
