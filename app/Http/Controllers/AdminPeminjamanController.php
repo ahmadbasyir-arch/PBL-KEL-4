@@ -19,6 +19,12 @@ class AdminPeminjamanController extends Controller
         return view('admin.peminjaman.index', compact('peminjaman'));
     }
 
+    public function show($id)
+    {
+        $peminjaman = Peminjaman::with(['mahasiswa', 'ruangan', 'unit'])->findOrFail($id);
+        return view('admin.peminjaman.show', compact('peminjaman'));
+    }
+
     /**
      * -----------------------------
      * HANDLE SETUJU / TOLAK / COMPLETE
