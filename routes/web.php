@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/ranking', [\App\Http\Controllers\AdminRankingController::class, 'index'])->name('admin.ranking.index');
 
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
+        Route::get('/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.show'); // ADDED
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.approve');
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.reject');
         Route::post('/peminjaman/{id}/complete', [AdminPeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.complete');

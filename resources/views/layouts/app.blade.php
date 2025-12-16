@@ -339,7 +339,7 @@
             <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
         </li>
         <li class="{{ request()->is('admin/ranking*') ? 'active' : '' }}">
-            <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-trophy"></i> Ranking Peminjaman</a>
+            <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-clipboard-check"></i> Prioritas Approval</a>
         </li>
         <li class="{{ request()->is('admin/jadwal*') ? 'active' : '' }}">
             <a href="{{ route('admin.jadwal.index') }}"><i class="fas fa-calendar-alt"></i> Jadwal Perkuliahan</a>
