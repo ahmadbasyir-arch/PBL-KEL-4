@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Peminjaman;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +14,26 @@ class AdminRankingController extends Controller
     {
         $data = $this->calculateRankings($request->role);
         return view('admin.ranking.index', $data);
+    }
+
+    public function updateWeights(Request $request)
+    {
+        $request->validate([
+            'saw_c1' => 'required|numeric|min:0|max:1',
+            'saw_c2' => 'required|numeric|min:0|max:1',
+            'saw_c3' => 'required|numeric|min:0|max:1',
+            'saw_c4' => 'required|numeric|min:0|max:1',
+        ]);
+
+        $keys = ['saw_c1', 'saw_c2', 'saw_c3', 'saw_c4'];
+        foreach ($keys as $key) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $request->input($key)]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Bobot kriteria berhasil diperbarui!');
     }
 
     public function exportPdf(Request $request)
@@ -37,11 +58,13 @@ class AdminRankingController extends Controller
             ->get();
 
         // 2. Kriteria & Bobot
+        // 2. Kriteria & Bobot
+        $settings = Setting::whereIn('key', ['saw_c1', 'saw_c2', 'saw_c3', 'saw_c4'])->pluck('value', 'key');
         $bobot = [
-            'C1' => 0.30, 
-            'C2' => 0.20, 
-            'C3' => 0.20, 
-            'C4' => 0.30
+            'C1' => (float) ($settings['saw_c1'] ?? 0.30),
+            'C2' => (float) ($settings['saw_c2'] ?? 0.20),
+            'C3' => (float) ($settings['saw_c3'] ?? 0.20),
+            'C4' => (float) ($settings['saw_c4'] ?? 0.30)
         ];
 
         // 3. Matriks Keputusan (X)
@@ -131,7 +154,7 @@ class AdminRankingController extends Controller
             $rankings[] = (object) [
                 'user' => $row['user'],
                 'total_minjam' => $matrix[$uid]['user']->peminjaman->count(),
-                'saw_score' => number_format($score, 4),
+                'saw_score' => number_format($score * 100, 2),
                 'detail' => $row 
             ];
         }

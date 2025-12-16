@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
         ]);
 
         // ROUTE RANKING
+        Route::post('/ranking/weights', [\App\Http\Controllers\AdminRankingController::class, 'updateWeights'])->name('admin.ranking.updateWeights');
         Route::get('/ranking/export', [\App\Http\Controllers\AdminRankingController::class, 'exportPdf'])->name('admin.ranking.export');
         Route::get('/ranking', [\App\Http\Controllers\AdminRankingController::class, 'index'])->name('admin.ranking.index');
 
