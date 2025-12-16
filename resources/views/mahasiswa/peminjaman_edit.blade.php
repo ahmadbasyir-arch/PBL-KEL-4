@@ -12,18 +12,14 @@
     @csrf
     @method('PUT')
 
-    <input type="hidden" name="jenis_item" value="{{ $peminjaman->jenis_item }}">
+    <input type="hidden" name="jenis_item" value="{{ $jenis }}">
 
     {{-- ========================== --}}
     {{--   DYNAMIC ITEM SELECTION  --}}
     {{-- ========================== --}}
     <div class="form-group-dynamic">
-        <label>Nama {{ ucfirst($peminjaman->jenis_item) }}</label>
+        <label>Nama {{ ucfirst($jenis) }}</label>
         <div id="item-container"></div>
-
-        <button type="button" id="addItem" class="btn-tambah-item">
-            <i class="fas fa-plus"></i> Tambah {{ ucfirst($peminjaman->jenis_item) }}
-        </button>
     </div>
 
     {{-- TANGGAL --}}
@@ -55,9 +51,12 @@
     {{-- KEPERLUAN --}}
     <div class="form-group">
         <label for="keperluan">Keperluan</label>
-        <textarea id="keperluan" name="keperluan" class="form-control" rows="4" required>
-            {{ $peminjaman->keperluan }}
-        </textarea>
+        <select id="keperluan" name="keperluan" class="form-control" required>
+            <option value="">-- Pilih Keperluan --</option>
+            @foreach(['Kuliah Pengganti', 'Seminar PKL', 'Seminar TA', 'Seminar PBL', 'Uji Kompetensi', 'Sidang Tugas Akhir', 'Acara Institusi', 'Perkuliahan', 'Rapat Dosen', 'Kegiatan Sosial', 'Seminar', 'Evaluasi', 'Lomba', 'Bazar', 'Pelatihan Mahasiswa Baru', 'Rapat Panitia', 'Kegiatan Alumni', 'Pengabdian Masyarakat', 'Studi Banding'] as $option)
+                <option value="{{ $option }}" {{ $peminjaman->keperluan == $option ? 'selected' : '' }}>{{ $option }}</option>
+            @endforeach
+        </select>
     </div>
 
     {{-- BUTTON --}}
@@ -79,7 +78,7 @@
 {{-- DATA UNTUK DROPDOWN --}}
 <script>
     const availableItems = @json($listData);
-    const selectedItems = @json($peminjaman->items); 
+    const selectedItems = @json($items); 
 </script>
 
 <script>
@@ -134,8 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
         itemContainer.appendChild(row);
     }
 
-    addItemBtn.addEventListener('click', () => createRow());
-
     itemContainer.addEventListener('click', function(e) {
         if (e.target.closest('.removeItem')) {
             e.target.closest('.item-row').remove();
@@ -143,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // LOAD DATA LAMA
-    selectedItems.forEach(it => createRow(it.pivot.item_id));
+    selectedItems.forEach(it => createRow(it.id));
 });
 </script>
 @endsection

@@ -21,6 +21,7 @@
 <body>
     <div class="header">
         <h2>Laporan Perengkingan Peminjaman (Metode SAW)</h2>
+        <p>Jurusan Teknologi Informasi - Politeknik Negeri Tanah Laut</p>
         <p>Tanggal Cetak: {{ date('d F Y') }}</p>
     </div>
 
@@ -49,15 +50,21 @@
             @forelse ($rankings as $r)
                 <tr>
                     <td class="text-center">{{ $r->rank }}</td>
-                    <td>{{ $r->user->name }}</td>
-                    <td>{{ ucfirst($r->user->role ?? '-') }}</td>
-                    <td class="text-center">{{ $r->total_minjam }}</td>
+                    <td>
+                        {{ $r->data->user->name ?? $r->data->mahasiswa->name ?? '-' }}<br>
+                        <small class="text-muted">{{ $r->data->user->email ?? '' }}</small>
+                    </td>
+                    <td>{{ ucfirst($r->data->user->role ?? 'mahasiswa') }}</td>
+                    <td>
+                        {{ $r->data->ruangan->namaRuangan ?? ($r->data->unit->namaUnit ?? '-') }}<br>
+                        <small>{{ Str::limit($r->data->keperluan, 30) }}</small>
+                    </td>
                     <td class="text-center"><strong>{{ $r->saw_score }}</strong></td>
                     <td style="font-size: 10px;">
-                        R1: {{ number_format($r->detail['C1'], 2) }}<br>
-                        R2: {{ number_format($r->detail['C2'], 2) }}<br>
-                        R3: {{ number_format($r->detail['C3'], 2) }}<br>
-                        R4: {{ number_format($r->detail['C4'], 2) }}
+                        C1: {{ number_format($r->detail['C1'], 2) }} | 
+                        C2: {{ number_format($r->detail['C2'], 2) }}<br>
+                        C3: {{ number_format($r->detail['C3'], 2) }} |
+                        C4: {{ number_format($r->detail['C4'], 2) }}
                     </td>
                 </tr>
             @empty

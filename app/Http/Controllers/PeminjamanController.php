@@ -101,8 +101,22 @@ class PeminjamanController extends Controller
                         'idMahasiswa'   => $user->id,
                     ]);
 
-                    // Kirim Notifikasi (Web & WA)
+                    // Kirim Notifikasi (Web & WA) ke User
                     $user->notify(new \App\Notifications\PeminjamanDiajukan($peminjaman));
+
+                    // 🔔 NOTIFIKASI KE ADMIN
+                    $admins = \App\Models\User::where('role', 'admin')->get();
+                    $jenisText = $jenis === 'ruangan' ? 'Ruangan' : 'Unit';
+                    $namaItem = $jenis === 'ruangan' 
+                        ? (\App\Models\Ruangan::find($item['id'])->namaRuangan ?? 'Ruangan') 
+                        : (\App\Models\Unit::find($item['id'])->namaUnit ?? 'Unit');
+
+                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AdminNotification(
+                        'Peminjaman Baru',
+                        "{$user->name} mengajukan peminjaman $jenisText: $namaItem",
+                        route('admin.peminjaman.show', $peminjaman->id),
+                        'info'
+                    ));
                 }
             });
 
@@ -205,8 +219,10 @@ class PeminjamanController extends Controller
 
         $existing->delete();
 
+        $newPeminjamanId = null;
+
         foreach ($validated['items'] as $item) {
-            Peminjaman::create([
+            $newPeminjaman = Peminjaman::create([
                 'idRuangan'     => $jenis === 'ruangan' ? $item['id'] : null,
                 'idUnit'        => $jenis === 'unit' ? $item['id'] : null,
                 'tanggalPinjam' => $validated['tanggalPinjam'],
@@ -214,10 +230,38 @@ class PeminjamanController extends Controller
                 'jamSelesai'    => $validated['jamSelesai'],
                 'keperluan'     => $validated['keperluan'],
                 'status'        => $existing->status === 'pending' ? 'pending' : $existing->status,
-
-                // SOLUSI UTAMA
                 'idMahasiswa'   => $user->id,
             ]);
+            $newPeminjamanId = $newPeminjaman->id;
+        }
+
+        // 🔔 NOTIFIKASI KE ADMIN (UPDATE)
+        if ($newPeminjamanId) {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            $roleLabel = ucfirst($user->role); // Mahasiswa / Dosen
+            $jenisText = $jenis === 'ruangan' ? 'Ruangan' : 'Unit';
+            
+            // Ambil nama item dari item pertama
+            $firstItem = $validated['items'][0];
+            $namaItem = $jenis === 'ruangan' 
+                ? (\App\Models\Ruangan::find($firstItem['id'])->namaRuangan ?? 'Item') 
+                : (\App\Models\Unit::find($firstItem['id'])->namaUnit ?? 'Item');
+
+            // 1. Notifikasi ke ADMIN
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AdminNotification(
+                'Perubahan Peminjaman',
+                "$roleLabel {$user->name} telah mengubah detail peminjaman $jenisText: $namaItem.",
+                route('admin.peminjaman.show', $newPeminjamanId),
+                'info'
+            ));
+
+            // 2. Notifikasi ke USER (Mahasiswa/Dosen yg bersangkutan)
+            $user->notify(new \App\Notifications\AdminNotification(
+                'Peminjaman Diubah',
+                "Anda berhasil memperbarui data peminjaman $jenisText: $namaItem.",
+                route('peminjaman.show', $newPeminjamanId), // Arahkan ke detail peminjaman user
+                'success'
+            ));
         }
 
         return redirect()->route('dashboard')->with('success', 'Peminjaman berhasil diperbarui.');
@@ -239,8 +283,19 @@ class PeminjamanController extends Controller
             $peminjaman->status = 'menyelesaikan';
             $peminjaman->save();
 
-            // 🔔 Kirim Notifikasi (Web & WA)
+            // 🔔 Kirim Notifikasi (Web & WA) ke User
             $user->notify(new \App\Notifications\PeminjamanStatusUpdated($peminjaman, 'menyelesaikan'));
+
+            // 🔔 NOTIFIKASI KE ADMIN
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            $namaItem = $peminjaman->ruangan->namaRuangan ?? ($peminjaman->unit->namaUnit ?? 'Item');
+            
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AdminNotification(
+                'Pengajuan Pengembalian',
+                "{$user->name} mengajukan pengembalian untuk $namaItem.",
+                route('admin.peminjaman.show', $peminjaman->id),
+                'warning'
+            ));
 
             return back()->with('success', 'Pengajuan penyelesaian dikirim.');
         }
@@ -269,6 +324,17 @@ class PeminjamanController extends Controller
 
         // 🔔 Kirim Notifikasi (Web & WA)
         $user->notify(new \App\Notifications\PeminjamanStatusUpdated($peminjaman, 'menyelesaikan'));
+
+        // 🔔 NOTIFIKASI KE ADMIN
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        $namaItem = $peminjaman->ruangan->namaRuangan ?? ($peminjaman->unit->namaUnit ?? 'Item');
+        
+        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AdminNotification(
+            'Pengajuan Pengembalian',
+            "{$user->name} ingin mengembalikan $namaItem.",
+            route('admin.peminjaman.show', $peminjaman->id),
+            'warning'
+        ));
 
         return back()->with('success', 'Permintaan pengembalian dikirim.');
     }

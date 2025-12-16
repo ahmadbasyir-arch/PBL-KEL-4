@@ -35,13 +35,10 @@ class GoogleController extends Controller
 
         // [INI PENAMBAHANNYA]
         // [INI PENAMBAHANNYA]
-        // Validasi domain email (DITUTUP SEMENTARA UNTUK TESTING)
-        // if (
-        //     !str_ends_with($googleUser->getEmail(), '@politala.ac.id') &&
-        //     !str_ends_with($googleUser->getEmail(), '@mhs.politala.ac.id')
-        // ) {
-        //     return redirect('/login')->with('error', 'Login Google hanya diizinkan untuk email Politala.');
-        // }
+        // Validasi domain email
+        if (!str_ends_with($googleUser->getEmail(), '@mhs.politala.ac.id')) {
+            return redirect('/login')->with('error', 'Maaf, hanya email mahasiswa (@mhs.politala.ac.id) yang diperbolehkan login.');
+        }
 
         // 🔍 Cek apakah user sudah ada berdasarkan google_id atau email
         $existingUser = User::where('google_id', $googleUser->getId())

@@ -63,9 +63,14 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Profil berhasil diperbarui!');
     }
 
-    public function markNotificationsRead()
+    public function markNotificationsRead(Request $request)
     {
         Auth::user()->unreadNotifications->markAsRead();
+        
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back();
     }
 }

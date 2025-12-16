@@ -215,6 +215,28 @@
             .chart-card { min-height: 260px; }
         }
         /* =============================================================== */
+
+        /* Alerts */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .alert ul {
+            margin: 0;
+            padding-left: 20px;
+        }
     </style>
 <body>
     @php
@@ -261,8 +283,8 @@
                         <div class="avatar-placeholder">{{ $inisialNama }}</div>
                     @endif
                 </div>
-                <div class="user-info">
-                    <h3 title="{{ $nama }}">{{ $nama }}</h3>
+                <div class="user-info" style="min-width: 0; overflow: hidden;">
+                    <h3 title="{{ $nama }}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $nama }}</h3>
                     <p>{{ ($user->role === 'admin') ? 'Staf Prodi' : ucfirst($user->role ?? 'user') }}</p>
                 </div>
             </div>
@@ -292,7 +314,12 @@
     {{-- === Jika role Mahasiswa atau Dosen === --}}
     @if(in_array(($user->role ?? ''), ['mahasiswa', 'dosen']))
         <li class="has-submenu {{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'active open' : '' }}">
-            <a href="#"><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</a>
+            <a href="#">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <span><i class="fas fa-plus-circle"></i> Ajukan Peminjaman</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </div>
+            </a>
             <ul class="submenu" style="{{ Route::is('peminjaman.create') || request()->is('peminjaman/*') ? 'display:block;' : 'display:none;' }}">
                 <li class="{{ request()->is('peminjaman/create*') && request()->query('jenis') == 'ruangan' ? 'active' : '' }}">
                     <a href="{{ route('peminjaman.create', ['jenis' => 'ruangan']) }}">Ruangan</a>
@@ -329,23 +356,59 @@
                 <a href="{{ route('superadmin.prodi.index') }}"><i class="fas fa-university"></i> Data Prodi</a>
             </li>
         @endif
-        <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
-            <a href="{{ route('admin.ruangan.index') }}"><i class="fas fa-door-open"></i> Data Ruangan</a>
+        {{-- === DATA MASTER GROUP === --}}
+        <li class="has-submenu {{ request()->is('admin/ruangan*', 'admin/unit*', 'admin/pengguna*') ? 'active open' : '' }}">
+            <a href="#">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <span><i class="fas fa-database"></i> Data Master</span>
+                     <i class="fas fa-chevron-right arrow-icon"></i>
+                </div>
+            </a>
+            <ul class="submenu" style="{{ request()->is('admin/ruangan*', 'admin/unit*', 'admin/pengguna*') ? 'display:block;' : 'display:none;' }}">
+                <li class="{{ request()->is('admin/ruangan*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ruangan.index') }}"><i class="fas fa-door-open"></i> Data Ruangan</a>
+                </li>
+                <li class="{{ request()->is('admin/unit*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.unit.index') }}"><i class="fas fa-video"></i> Data Unit</a>
+                </li>
+                <li class="{{ request()->is('admin/pengguna*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
+                </li>
+            </ul>
         </li>
-        <li class="{{ request()->is('admin/unit*') ? 'active' : '' }}">
-            <a href="{{ route('admin.unit.index') }}"><i class="fas fa-video"></i> Data Unit</a>
+        {{-- === RANKING GROUP === --}}
+        <li class="has-submenu {{ request()->is('admin/ranking*') ? 'active open' : '' }}">
+            <a href="#">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <span><i class="fas fa-chart-line"></i> Ranking & Analisis</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </div>
+            </a>
+            <ul class="submenu" style="{{ request()->is('admin/ranking*') ? 'display:block;' : 'display:none;' }}">
+                <li class="{{ request()->is('admin/ranking') || (request()->is('admin/ranking*') && !request()->is('admin/ranking-user*')) ? 'active' : '' }}">
+                    <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-clipboard-check"></i> Prioritas Approval</a>
+                </li>
+                <li class="{{ request()->is('admin/ranking-user*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ranking.user.index') }}"><i class="fas fa-medal"></i> Ranking Peminjam</a>
+                </li>
+            </ul>
         </li>
-        <li class="{{ request()->is('admin/pengguna*') ? 'active' : '' }}">
-            <a href="{{ route('admin.pengguna.index') }}"><i class="fas fa-users"></i> Data Pengguna</a>
-        </li>
-        <li class="{{ request()->is('admin/ranking*') ? 'active' : '' }}">
-            <a href="{{ route('admin.ranking.index') }}"><i class="fas fa-clipboard-check"></i> Prioritas Approval</a>
-        </li>
-        <li class="{{ request()->is('admin/jadwal*') ? 'active' : '' }}">
-            <a href="{{ route('admin.jadwal.index') }}"><i class="fas fa-calendar-alt"></i> Jadwal Perkuliahan</a>
-        </li>
-        <li class="{{ request()->is('admin/matkul*') ? 'active' : '' }}">
-            <a href="{{ route('admin.matkul.index') }}"><i class="fas fa-book"></i> Data Mata Kuliah</a>
+        {{-- === AKADEMIK GROUP === --}}
+        <li class="has-submenu {{ request()->is('admin/jadwal*', 'admin/matkul*') ? 'active open' : '' }}">
+            <a href="#">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <span><i class="fas fa-graduation-cap"></i> Akademik</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </div>
+            </a>
+            <ul class="submenu" style="{{ request()->is('admin/jadwal*', 'admin/matkul*') ? 'display:block;' : 'display:none;' }}">
+                <li class="{{ request()->is('admin/jadwal*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.jadwal.index') }}"><i class="fas fa-calendar-alt"></i> Jadwal Perkuliahan</a>
+                </li>
+                <li class="{{ request()->is('admin/matkul*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.matkul.index') }}"><i class="fas fa-book"></i> Data Mata Kuliah</a>
+                </li>
+            </ul>
         </li>
         <li class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
             <a href="{{ route('admin.laporan.index') }}"><i class="fas fa-file-alt"></i> Laporan</a>
@@ -443,6 +506,28 @@
             @endif
             
             <div class="dashboard-content-area">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul style="margin-bottom: 0;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
                 @yield('content')
             </div>
         </div>
@@ -470,7 +555,35 @@
                     e.stopPropagation();
                     // Close profile dropdown if open
                     if (profileDropdown) profileDropdown.classList.remove('show');
+                    
+                    const isOpening = !notificationDropdown.classList.contains('show');
                     notificationDropdown.classList.toggle('show');
+
+                    // Jika membuka dropdown dan ada badge, tandai sudah dibaca
+                    const badge = notificationBell.querySelector('.notification-badge');
+                    if (isOpening && badge) {
+                        fetch('{{ route("notifications.markRead") }}', {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Hapus badge
+                                badge.remove();
+                                // Hapus tombol 'Tandai sudah dibaca' di header dropdown
+                                const markReadBtn = notificationDropdown.querySelector('.mark-read');
+                                if (markReadBtn) markReadBtn.remove();
+                                // Hapus highlight unread di item
+                                notificationDropdown.querySelectorAll('.notification-item.unread').forEach(item => {
+                                    item.classList.remove('unread');
+                                });
+                            }
+                        })
+                        .catch(err => console.error('Gagal menandai notifikasi dibaca', err));
+                    }
                 });
             }
 
@@ -507,6 +620,17 @@
         }
         /* ... rest of your CSS (omitted here for brevity in this message) ... */
         /* Note: In the file replacement above, the entire CSS block is included as provided earlier. */
+        .sidebar-menu li.has-submenu > a .arrow-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-menu li.has-submenu.open > a .arrow-icon {
+            transform: rotate(90deg);
+        }
+        .w-100 { width: 100%; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .d-flex { display: flex; }
     </style>
 <!-- tambahkan Chart.js (required oleh chart partial) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

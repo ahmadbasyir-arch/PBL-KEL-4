@@ -23,11 +23,13 @@ class DashboardController extends Controller
         $totalDitolak = Peminjaman::where('status', 'ditolak')->count();
         $totalRiwayat = Peminjaman::count(); // opsional
 
-        // ------------- Data untuk charts -------------
-        // Chart 1: distribusi jenis sarpras (ruangan vs unit)
+        // ------------- Data untuk charts (HANYA YANG SEDANG BERJALAN) -------------
+        $activeStatuses = ['disetujui', 'digunakan', 'sedang digunakan', 'menunggu_validasi', 'menyelesaikan'];
+
+        // Chart 1: distribusi jenis sarpras (ruangan vs unit) - AKTIF
         try {
-            $sarprasLab = Peminjaman::whereHas('ruangan')->count();
-            $sarprasUnit = Peminjaman::whereHas('unit')->count();
+            $sarprasLab = Peminjaman::whereIn('status', $activeStatuses)->whereHas('ruangan')->count();
+            $sarprasUnit = Peminjaman::whereIn('status', $activeStatuses)->whereHas('unit')->count();
         } catch (\Throwable $e) {
             $sarprasLab = 0;
             $sarprasUnit = 0;
@@ -37,20 +39,22 @@ class DashboardController extends Controller
             'data' => [$sarprasLab, $sarprasUnit],
         ];
 
-        // Chart 2: distribusi peminjam berdasarkan role (via relation mahasiswa -> user)
-        // REVISI: Hapus "Unknown" sesuai request, hanya 3 role utama
+        // Chart 2: distribusi peminjam berdasarkan role - AKTIF
         try {
-            $totalMahasiswa = Peminjaman::whereHas('mahasiswa', function($q){
-                $q->where('role', 'mahasiswa');
-            })->count();
+            $totalMahasiswa = Peminjaman::whereIn('status', $activeStatuses)
+                ->whereHas('mahasiswa', function($q){
+                    $q->where('role', 'mahasiswa');
+                })->count();
 
-            $totalDosen = Peminjaman::whereHas('mahasiswa', function($q){
-                $q->where('role', 'dosen');
-            })->count();
+            $totalDosen = Peminjaman::whereIn('status', $activeStatuses)
+                ->whereHas('mahasiswa', function($q){
+                    $q->where('role', 'dosen');
+                })->count();
 
-            $totalAdmin = Peminjaman::whereHas('mahasiswa', function($q){
-                $q->where('role', 'admin');
-            })->count();
+            $totalAdmin = Peminjaman::whereIn('status', $activeStatuses)
+                ->whereHas('mahasiswa', function($q){
+                    $q->where('role', 'admin');
+                })->count();
         } catch (\Throwable $e) {
             $totalMahasiswa = $totalDosen = $totalAdmin = 0;
         }
@@ -60,186 +64,7 @@ class DashboardController extends Controller
             'data' => [$totalMahasiswa, $totalDosen, $totalAdmin],
         ];
 
-        // Chart 3: distribusi durasi (dalam jam) -> lebih tahan banting
-        $durasiBuckets = [
-            '0-2' => 0,
-            '3-5' => 0,
-            '6-10' => 0,
-            '>10' => 0,
-        ];
 
-        // 1) Cek apakah ada kolom durasi secara eksplisit
-        $possibleDurasiCols = ['durasi', 'lama', 'lama_jam', 'durasi_jam', 'lama_peminjaman'];
-        $durasiCol = null;
-        foreach ($possibleDurasiCols as $c) {
-            if (Schema::hasColumn('peminjaman', $c)) {
-                $durasiCol = $c;
-                break;
-            }
-        }
-
-        // Helper untuk memasukkan jam ke bucket
-        $addToBucket = function(float $hours) use (&$durasiBuckets) {
-            if ($hours <= 2) $durasiBuckets['0-2']++;
-            elseif ($hours <= 5) $durasiBuckets['3-5']++;
-            elseif ($hours <= 10) $durasiBuckets['6-10']++;
-            else $durasiBuckets['>10']++;
-        };
-
-        if ($durasiCol) {
-            // ambil nilai durasi langsung
-            try {
-                $rows = DB::table('peminjaman')->select($durasiCol)->whereNotNull($durasiCol)->get();
-                foreach ($rows as $r) {
-                    $val = (float) ($r->$durasiCol ?? 0);
-                    $addToBucket($val);
-                }
-            } catch (\Throwable $e) {
-                // ignore, tetap nol
-            }
-        } else {
-            // 2) Coba hitung dari kombinasi tanggal + waktu
-            $possibleDateCols = [
-                ['tanggalPinjam', 'tanggalKembali'],
-                ['tanggal_pinjam', 'tanggal_kembali'],
-                ['start_datetime', 'end_datetime'],
-                ['start_at', 'end_at']
-            ];
-            $possibleTimePairs = [
-                ['tanggalPinjam', 'waktu_mulai', 'waktu_selesai'],
-                ['tanggalPinjam', 'jam_mulai', 'jam_selesai'],
-                ['tanggal_pinjam', 'jam_mulai', 'jam_selesai'],
-                ['tanggalPinjam', 'waktuMulai', 'waktuSelesai'],
-                ['tanggalPinjam', 'start_time', 'end_time'],
-                ['waktu_mulai', 'waktu_selesai'],
-                ['jam_mulai', 'jam_selesai'],
-            ];
-
-            $computedAny = false;
-
-            // First: try rows with explicit start/end datetime columns
-            foreach ($possibleDateCols as $pair) {
-                if (Schema::hasColumn('peminjaman', $pair[0]) && Schema::hasColumn('peminjaman', $pair[1])) {
-                    try {
-                        $rows = DB::table('peminjaman')
-                            ->select($pair[0] . ' as start', $pair[1] . ' as end')
-                            ->whereNotNull($pair[0])
-                            ->whereNotNull($pair[1])
-                            ->get();
-
-                        foreach ($rows as $r) {
-                            try {
-                                $start = Carbon::parse($r->start);
-                                $end = Carbon::parse($r->end);
-                                $hours = max(0, ($end->diffInMinutes($start) / 60.0));
-                                $addToBucket($hours);
-                                $computedAny = true;
-                            } catch (\Throwable $e) {
-                                // skip inaccurate row
-                            }
-                        }
-                    } catch (\Throwable $e) {
-                        // ignore
-                    }
-                }
-            }
-
-            // Second: try patterns where date + separate time columns exist
-            foreach ($possibleTimePairs as $pattern) {
-                if (count($pattern) === 3) {
-                    $dateCol = $pattern[0];
-                    $timeStartCol = $pattern[1];
-                    $timeEndCol = $pattern[2];
-                    if (Schema::hasColumn('peminjaman', $dateCol) && Schema::hasColumn('peminjaman', $timeStartCol) && Schema::hasColumn('peminjaman', $timeEndCol)) {
-                        try {
-                            $rows = DB::table('peminjaman')
-                                ->select($dateCol . ' as date', $timeStartCol . ' as start_time', $timeEndCol . ' as end_time')
-                                ->whereNotNull($dateCol)
-                                ->whereNotNull($timeStartCol)
-                                ->whereNotNull($timeEndCol)
-                                ->get();
-
-                            foreach ($rows as $r) {
-                                try {
-                                    $startStr = trim($r->date . ' ' . $r->start_time);
-                                    $endStr = trim($r->date . ' ' . $r->end_time);
-                                    $start = Carbon::parse($startStr);
-                                    $end = Carbon::parse($endStr);
-
-                                    if ($end->lessThan($start)) {
-                                        $end = $end->addDay();
-                                    }
-
-                                    $hours = max(0, ($end->diffInMinutes($start) / 60.0));
-                                    $addToBucket($hours);
-                                    $computedAny = true;
-                                } catch (\Throwable $e) {
-                                    // skip row
-                                }
-                            }
-                        } catch (\Throwable $e) {
-                            // ignore
-                        }
-                    }
-                } elseif (count($pattern) === 2) {
-                    $startCol = $pattern[0];
-                    $endCol = $pattern[1];
-                    if (Schema::hasColumn('peminjaman', $startCol) && Schema::hasColumn('peminjaman', $endCol) && Schema::hasColumn('peminjaman', 'tanggalPinjam')) {
-                        try {
-                            $rows = DB::table('peminjaman')
-                                ->select('tanggalPinjam as date', $startCol . ' as start_time', $endCol . ' as end_time')
-                                ->whereNotNull('tanggalPinjam')
-                                ->whereNotNull($startCol)
-                                ->whereNotNull($endCol)
-                                ->get();
-
-                            foreach ($rows as $r) {
-                                try {
-                                    $startStr = trim($r->date . ' ' . $r->start_time);
-                                    $endStr = trim($r->date . ' ' . $r->end_time);
-                                    $start = Carbon::parse($startStr);
-                                    $end = Carbon::parse($endStr);
-
-                                    if ($end->lessThan($start)) $end = $end->addDay();
-
-                                    $hours = max(0, ($end->diffInMinutes($start) / 60.0));
-                                    $addToBucket($hours);
-                                    $computedAny = true;
-                                } catch (\Throwable $e) {}
-                            }
-                        } catch (\Throwable $e) {}
-                    }
-                }
-            }
-
-            // Final fallback: created_at / updated_at
-            if (!$computedAny) {
-                try {
-                    $rows = DB::table('peminjaman')
-                        ->select('created_at', 'updated_at')
-                        ->whereNotNull('created_at')
-                        ->whereNotNull('updated_at')
-                        ->get();
-
-                    foreach ($rows as $r) {
-                        try {
-                            $start = Carbon::parse($r->created_at);
-                            $end = Carbon::parse($r->updated_at);
-                            if ($end->lessThan($start)) continue;
-                            $hours = max(0, ($end->diffInMinutes($start) / 60.0));
-                            $addToBucket($hours);
-                        } catch (\Throwable $e) {}
-                    }
-                } catch (\Throwable $e) {
-                    // ignore
-                }
-            }
-        }
-
-        $chartDurasi = [
-            'labels' => array_keys($durasiBuckets),
-            'data' => array_values($durasiBuckets),
-        ];
 
         // Jika request AJAX (polling), return JSON
         if ($request->ajax()) {
@@ -251,7 +76,6 @@ class DashboardController extends Controller
                 'totalRiwayat' => $totalRiwayat,
                 'chartSarpras' => $chartSarpras,
                 'chartUsers' => $chartUsers,
-                'chartDurasi' => $chartDurasi,
             ]);
         }
 
@@ -269,8 +93,7 @@ class DashboardController extends Controller
             'totalRiwayat',
             'peminjamanTerkini',
             'chartSarpras',
-            'chartUsers',
-            'chartDurasi'
+            'chartUsers'
         ));
     }
 

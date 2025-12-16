@@ -101,7 +101,7 @@
                         @php
                             $isDigunakan = in_array($p->status, ['digunakan','disetujui','sedang digunakan']);
                             $isMenyelesaikan = in_array($p->status,['menyelesaikan','menunggu_validasi']);
-                            $canEdit = in_array($p->status,['pending','disetujui','digunakan','sedang digunakan']);
+                            $canEdit = in_array($p->status,['pending']);
                         @endphp
 
                         {{-- STATUS PENDING --}}

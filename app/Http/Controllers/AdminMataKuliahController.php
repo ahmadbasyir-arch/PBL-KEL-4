@@ -28,4 +28,37 @@ class AdminMataKuliahController extends Controller
             return back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
     }
+
+    public function destroy($id)
+    {
+        MataKuliah::findOrFail($id)->delete();
+        return back()->with('success', 'Mata Kuliah berhasil dihapus!');
+    }
+
+    public function reset()
+    {
+        MataKuliah::truncate();
+        return back()->with('success', 'Semua data mata kuliah berhasil direset!');
+    }
+
+    public function edit($id)
+    {
+        $mk = MataKuliah::findOrFail($id);
+        return view('admin.matkul.edit', compact('mk'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'kode' => 'required|string|unique:mata_kuliahs,kode,' . $id,
+            'nama_matkul' => 'required|string',
+            'semester' => 'required|string',
+            'kurikulum' => 'required|string',
+        ]);
+
+        $mk = MataKuliah::findOrFail($id);
+        $mk->update($request->all());
+
+        return redirect()->route('admin.matkul.index')->with('success', 'Mata Kuliah berhasil diperbarui!');
+    }
 }

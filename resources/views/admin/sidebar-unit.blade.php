@@ -44,12 +44,7 @@
                         {{ $mode == 'show' ? 'readonly' : '' }}>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label style="font-weight: 600; color: #374151; margin-bottom: 5px; display: block;">Kategori</label>
-                    <input type="text" name="kategori" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;"
-                        value="{{ old('kategori', $unit->kategori ?? '') }}" 
-                        {{ $mode == 'show' ? 'readonly' : '' }}>
-                </div>
+
 
                 <div class="form-group mb-3">
                     <label style="font-weight: 600; color: #374151; margin-bottom: 5px; display: block;">Status</label>

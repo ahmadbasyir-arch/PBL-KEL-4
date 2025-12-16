@@ -16,7 +16,7 @@
 <body onload="window.print()">
     <div class="header">
         <h2>Laporan {{ ucfirst($type == 'peminjaman' ? 'Peminjaman Aktif' : ($type == 'riwayat' ? 'Riwayat Peminjaman' : 'Feedback Pengguna')) }}</h2>
-        <p>Jurusan Teknologi Informasi - Politeknik Negeri Padang</p>
+        <p>Jurusan Teknologi Informasi - Politeknik Negeri Tanah Laut</p>
     </div>
 
     <div class="meta">
@@ -55,9 +55,11 @@
                     <th>Tanggal Pinjam</th>
                     <th>Tanggal Kembali</th>
                     <th>Peminjam</th>
+                    <th>Role</th>
                     <th>Item</th>
                     <th>Status</th>
-                    <th>Kondisi</th>
+                    <th>Kondisi Unit</th>
+                    <th>Catatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,9 +69,11 @@
                     <td>{{ \Carbon\Carbon::parse($item->tanggalPinjam)->format('d-m-Y') }}</td>
                     <td>{{ $item->pengembalian ? \Carbon\Carbon::parse($item->pengembalian->tanggalKembali)->format('d-m-Y') : '-' }}</td>
                     <td>{{ $item->mahasiswa->username ?? '-' }}</td>
+                    <td>{{ ucfirst($item->mahasiswa->role ?? '-') }}</td>
                     <td>{{ $item->ruangan->namaRuangan ?? ($item->unit->namaUnit ?? '-') }}</td>
                     <td>{{ ucfirst($item->status) }}</td>
-                    <td>{{ $item->pengembalian->kondisi ?? '-' }}</td>
+                    <td>{{ $item->kondisi_pengembalian ?? $item->pengembalian->kondisi ?? '-' }}</td>
+                    <td>{{ $item->catatan_pengembalian ?? $item->pengembalian->catatan ?? '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -81,6 +85,7 @@
                     <th>No</th>
                     <th>Tanggal Pinjam</th>
                     <th>Peminjam</th>
+                    <th>Role</th>
                     <th>Item</th>
                     <th>Keperluan</th>
                     <th>Status</th>
@@ -92,6 +97,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggalPinjam)->format('d-m-Y') }}</td>
                     <td>{{ $item->mahasiswa->username ?? '-' }}</td>
+                    <td>{{ ucfirst($item->mahasiswa->role ?? '-') }}</td>
                     <td>{{ $item->ruangan->namaRuangan ?? ($item->unit->namaUnit ?? '-') }}</td>
                     <td>{{ $item->keperluan }}</td>
                     <td>{{ ucfirst($item->status) }}</td>

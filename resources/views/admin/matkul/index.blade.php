@@ -41,6 +41,14 @@
                     <i class="fas fa-upload"></i> Import
                 </button>
             </form>
+
+            <form action="{{ route('admin.matkul.reset') }}" method="POST" onsubmit="return confirm('Yakin hapus SEMUA data mata kuliah?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Reset
+                </button>
+            </form>
         </div>
     </div>
 
@@ -52,6 +60,7 @@
                 <th>Nama Mata Kuliah</th>
                 <th>Semester</th>
                 <th>Kurikulum</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -60,8 +69,18 @@
                     <td>{{ $loop->iteration }}</td>
                     <td class="fw-bold">{{ $mk->kode }}</td>
                     <td>{{ $mk->nama_matkul }}</td>
-                    <td><span class="badge bg-secondary">Sem {{ $mk->semester }}</span></td>
+                    <td>Semester {{ $mk->semester }}</td>
                     <td>{{ $mk->kurikulum }}</td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{{ route('admin.matkul.edit', $mk->id) }}" class="btn btn-warning btn-sm text-white"><i class="fas fa-edit"></i></a>
+                            <form action="{{ route('admin.matkul.destroy', $mk->id) }}" method="POST" onsubmit="return confirm('Hapus matkul ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
             @empty
                 <tr>

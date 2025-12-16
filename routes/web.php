@@ -99,6 +99,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/ranking/weights', [\App\Http\Controllers\AdminRankingController::class, 'updateWeights'])->name('admin.ranking.updateWeights');
         Route::get('/ranking/export', [\App\Http\Controllers\AdminRankingController::class, 'exportPdf'])->name('admin.ranking.export');
         Route::get('/ranking', [\App\Http\Controllers\AdminRankingController::class, 'index'])->name('admin.ranking.index');
+        // ROUTE RANKING USER (SAW TELADAN)
+        Route::get('/ranking-user/export', [\App\Http\Controllers\AdminRankingUserController::class, 'exportPdf'])->name('admin.ranking.user.export');
+        Route::get('/ranking-user', [\App\Http\Controllers\AdminRankingUserController::class, 'index'])->name('admin.ranking.user.index');
 
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman.index');
         Route::get('/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.show'); // ADDED
@@ -110,6 +113,10 @@ Route::middleware('auth')->group(function () {
         // ROUTE JADWAL
         Route::get('/jadwal', [\App\Http\Controllers\AdminJadwalController::class, 'index'])->name('admin.jadwal.index');
         Route::post('/jadwal/import', [\App\Http\Controllers\AdminJadwalController::class, 'import'])->name('admin.jadwal.import');
+        Route::delete('/jadwal/reset', [\App\Http\Controllers\AdminJadwalController::class, 'reset'])->name('admin.jadwal.reset');
+        Route::delete('/jadwal/{id}', [\App\Http\Controllers\AdminJadwalController::class, 'destroy'])->name('admin.jadwal.destroy');
+        Route::get('/jadwal/{id}/edit', [\App\Http\Controllers\AdminJadwalController::class, 'edit'])->name('admin.jadwal.edit');
+        Route::put('/jadwal/{id}', [\App\Http\Controllers\AdminJadwalController::class, 'update'])->name('admin.jadwal.update');
 
         // ROUTE LAPORAN
         Route::get('/laporan', [\App\Http\Controllers\AdminLaporanController::class, 'index'])->name('admin.laporan.index');
@@ -122,6 +129,10 @@ Route::middleware('auth')->group(function () {
         // ROUTE MASTER MATA KULIAH
         Route::get('/matkul', [\App\Http\Controllers\AdminMataKuliahController::class, 'index'])->name('admin.matkul.index');
         Route::post('/matkul/import', [\App\Http\Controllers\AdminMataKuliahController::class, 'import'])->name('admin.matkul.import');
+        Route::delete('/matkul/reset', [\App\Http\Controllers\AdminMataKuliahController::class, 'reset'])->name('admin.matkul.reset');
+        Route::delete('/matkul/{id}', [\App\Http\Controllers\AdminMataKuliahController::class, 'destroy'])->name('admin.matkul.destroy');
+        Route::get('/matkul/{id}/edit', [\App\Http\Controllers\AdminMataKuliahController::class, 'edit'])->name('admin.matkul.edit');
+        Route::put('/matkul/{id}', [\App\Http\Controllers\AdminMataKuliahController::class, 'update'])->name('admin.matkul.update');
 
     });
 

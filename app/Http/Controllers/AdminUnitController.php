@@ -34,8 +34,7 @@ class AdminUnitController extends Controller
 
     public function create()
     {
-        // tidak ubah logika, hanya pastikan route create berfungsi
-        return view('admin.unit.create');
+        return view('admin.sidebar-unit', ['mode' => 'create']);
     }
 
     public function store(Request $request)
@@ -43,23 +42,21 @@ class AdminUnitController extends Controller
         $request->validate([
             'kodeUnit' => 'required|string|max:20|unique:unit,kodeUnit',
             'namaUnit' => 'required|string|max:100|unique:unit,namaUnit',
-            'kategori' => 'nullable|string|max:100',
         ]);
 
         Unit::create([
             'kodeUnit' => $request->kodeUnit,
             'namaUnit' => $request->namaUnit,
-            'kategori' => $request->kategori,
             'status'   => 'tersedia', // Default status
         ]);
 
-        return redirect()->route('unit.index')->with('success', 'Unit berhasil ditambahkan!');
+        return redirect()->route('admin.unit.index')->with('success', 'Unit berhasil ditambahkan!');
     }
 
     public function edit($id)
     {
         $unit = Unit::findOrFail($id);
-        return view('admin.unit.edit', compact('unit'));
+        return view('admin.sidebar-unit', ['mode' => 'edit', 'unit' => $unit]);
     }
 
     public function update(Request $request, $id)
@@ -69,12 +66,11 @@ class AdminUnitController extends Controller
         $request->validate([
             'kodeUnit' => 'required|string|max:20|unique:unit,kodeUnit,' . $id,
             'namaUnit' => 'required|string|max:100|unique:unit,namaUnit,' . $id,
-            'kategori' => 'nullable|string|max:100',
         ]);
 
-        $unit->update($request->only(['kodeUnit', 'namaUnit', 'kategori']));
+        $unit->update($request->only(['kodeUnit', 'namaUnit']));
 
-        return redirect()->route('unit.index')->with('success', 'Data unit berhasil diperbarui!');
+        return redirect()->route('admin.unit.index')->with('success', 'Data unit berhasil diperbarui!');
     }
 
     public function destroy($id)
@@ -82,12 +78,12 @@ class AdminUnitController extends Controller
         $unit = Unit::findOrFail($id);
         $unit->delete();
 
-        return redirect()->route('unit.index')->with('success', 'Unit berhasil dihapus!');
+        return redirect()->route('admin.unit.index')->with('success', 'Unit berhasil dihapus!');
     }
 
     public function show($id)
     {
         $unit = Unit::findOrFail($id);
-        return view('admin.unit.show', compact('unit'));
+        return view('admin.sidebar-unit', ['mode' => 'show', 'unit' => $unit]);
     }
 }

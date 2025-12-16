@@ -28,4 +28,40 @@ class AdminJadwalController extends Controller
             return back()->with('error', 'Gagal import jadwal: ' . $e->getMessage());
         }
     }
+    public function destroy($id)
+    {
+        Jadwal::findOrFail($id)->delete();
+        return back()->with('success', 'Jadwal berhasil dihapus!');
+    }
+
+    public function reset()
+    {
+        Jadwal::truncate();
+        return back()->with('success', 'Semua data jadwal berhasil direset!');
+    }
+
+    public function edit($id)
+    {
+        $jadwal = Jadwal::findOrFail($id);
+        $ruangans = Ruangan::all();
+        return view('admin.jadwal.edit', compact('jadwal', 'ruangans'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'hari' => 'required|string',
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required',
+            'mata_kuliah' => 'required|string',
+            'dosen' => 'required|string',
+            'kelas' => 'required|string',
+            'ruangan_id' => 'nullable|exists:ruangan,id',
+        ]);
+
+        $jadwal = Jadwal::findOrFail($id);
+        $jadwal->update($request->all());
+
+        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil diperbarui!');
+    }
 }

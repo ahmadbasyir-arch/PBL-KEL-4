@@ -17,6 +17,7 @@
 <body>
     <div class="header">
         <h2>Laporan Ulasan Pengguna</h2>
+        <p>Jurusan Teknologi Informasi - Politeknik Negeri Tanah Laut</p>
         <p>Periode: {{ $periode }}</p>
         <p>Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }}</p>
     </div>

@@ -26,6 +26,15 @@ class UlasanController extends Controller
             'komentar' => $request->komentar,
         ]);
 
+        // 🔔 NOTIFIKASI KE ADMIN
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AdminNotification(
+            'Ulasan Baru',
+            "Ada ulasan baru dari " . Auth::user()->name,
+            route('admin.ulasan.index'),
+            'success'
+        ));
+
         return redirect()->back()->with('success', 'Terima kasih atas ulasan Anda!');
     }
 

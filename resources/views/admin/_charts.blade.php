@@ -2,13 +2,26 @@
 
 <style>
     /* ===== FIX PIE CHART MEMANJANG & NO-DATA ===== */
+    /* Container Centering */
+    .chart-grid {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        gap: 20px;
+        flex-wrap: wrap; /* Wrap on smaller screens */
+        margin-top: 20px;
+    }
+    
     .chart-card {
         background: #fff;
         border-radius: 16px;
         padding: 20px;
-        margin-top: 20px;
+        /* margin-top: 20px; -> Moved to container gap/margin */
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         border: 1px solid rgba(0,0,0,0.03);
+
+        /* Width Control for Centered Layout */
+        flex: 0 0 400px; /* Fixed basis, don't grow */
+        max-width: 100%;
 
         /* perbaikan utama */
         height: 260px;          /* tinggi chart card stabil */
@@ -16,54 +29,19 @@
         flex-direction: column;
         justify-content: flex-start;
     }
-
-    .chart-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 10px;
-    }
-
-    .chart-card canvas {
-        width: 100% !important;
-        height: 100% !important;
-        max-height: 220px !important; /* agar tidak panjang */
-        object-fit: contain;
-        /* beri ruang bawah supaya legend tidak menimpa */
-        margin-bottom: 6px;
-    }
-
-    .no-data-message {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6b7280;
-        font-weight: 600;
-        font-size: 0.98rem;
-    }
-
-    /* responsif: di layar sempit, kecilkan tinggi card */
-    @media (max-width: 640px) {
-        .chart-card { height: 300px; }
-    }
 </style>
 
+{{-- We don't need distinct IDs for the cards if we use flex centering, but keeping IDs is fine --}}
 <div class="chart-card" id="card-sarpras">
-    <div class="chart-title">Distribusi Jenis Sarpras</div>
+    <div class="chart-title">Distribusi Jenis Sarpras (Sedang Berjalan)</div>
     <canvas id="chartSarpras" aria-label="Grafik Distribusi Jenis Sarpras"></canvas>
 </div>
 
 <div class="chart-card" id="card-users">
-    <div class="chart-title">Distribusi Pengguna Peminjam</div>
+    <div class="chart-title">Distribusi Peminjam (Sedang Berjalan)</div>
     <canvas id="chartUsers" aria-label="Grafik Distribusi Pengguna"></canvas>
 </div>
 
-<div class="chart-card" id="card-durasi">
-    <div class="chart-title">Durasi Peminjaman (Rentang Jam)</div>
-    <canvas id="chartDurasi" aria-label="Grafik Durasi Peminjaman"></canvas>
-    {{-- element fallback untuk pesan "tidak ada data" akan dibuat oleh JS bila perlu --}}
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
@@ -71,7 +49,6 @@
     // Init Data from Server
     let dataSarpras = @json($chartSarpras ?? ['labels'=>[], 'data'=>[]]);
     let dataUsers   = @json($chartUsers ?? ['labels'=>[], 'data'=>[]]);
-    let dataDurasi  = @json($chartDurasi ?? ['labels'=>[], 'data'=>[]]);
 
     function buildPieChart(ctx, labels, data, optionsExtra = {}) {
         const bg = [
@@ -183,7 +160,7 @@
 
         renderOrFallback('chartSarpras', 'card-sarpras', dataSarpras.labels || [], dataSarpras.data || []);
         renderOrFallback('chartUsers', 'card-users', dataUsers.labels || [], dataUsers.data || []);
-        renderOrFallback('chartDurasi', 'card-durasi', dataDurasi.labels || [], dataDurasi.data || []);
+        renderOrFallback('chartUsers', 'card-users', dataUsers.labels || [], dataUsers.data || []);
     }
 
     // REAL-TIME / POLLING (5 detik)
@@ -215,10 +192,9 @@
                     dataUsers = data.chartUsers;
                     renderOrFallback('chartUsers', 'card-users', dataUsers.labels, dataUsers.data);
                 }
-                // Durasi
-                if (JSON.stringify(dataDurasi) !== JSON.stringify(data.chartDurasi)) {
-                    dataDurasi = data.chartDurasi;
-                    renderOrFallback('chartDurasi', 'card-durasi', dataDurasi.labels, dataDurasi.data);
+                if (JSON.stringify(dataUsers) !== JSON.stringify(data.chartUsers)) {
+                    dataUsers = data.chartUsers;
+                    renderOrFallback('chartUsers', 'card-users', dataUsers.labels, dataUsers.data);
                 }
             })
             .catch(err => console.error("Polling error:", err));

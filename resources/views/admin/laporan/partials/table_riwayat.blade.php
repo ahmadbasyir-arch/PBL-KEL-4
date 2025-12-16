@@ -5,9 +5,11 @@
             <th>Tanggal Pinjam</th>
             <th>Tanggal Kembali</th>
             <th>Peminjam</th>
+            <th>Role</th>
             <th>Item</th>
             <th>Status</th>
-            <th>Kondisi</th>
+            <th>Kondisi Unit</th>
+            <th>Catatan</th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +29,7 @@
                 {{ $item->pengembalian ? \Carbon\Carbon::parse($item->pengembalian->tanggalKembali)->format('d-m-Y') : '-' }}
             </td>
             <td>{{ $item->mahasiswa->namaLengkap ?? $item->mahasiswa->username ?? '-' }}</td>
+            <td><span class="badge bg-light text-dark border">{{ ucfirst($item->mahasiswa->role ?? '-') }}</span></td>
             <td>
                 @if($item->ruangan)
                     {{ $item->ruangan->namaRuangan }}
@@ -41,7 +44,8 @@
                     {{ ucfirst($status) }}
                 </span>
             </td>
-            <td>{{ $item->pengembalian->kondisi ?? '-' }}</td>
+            <td>{{ $item->kondisi_pengembalian ?? $item->pengembalian->kondisi ?? '-' }}</td>
+            <td>{{ $item->catatan_pengembalian ?? $item->pengembalian->catatan ?? '-' }}</td>
         </tr>
         @empty
         <tr><td colspan="7" class="text-center py-4 text-muted">Tidak ada data riwayat sesuai filter.</td></tr>

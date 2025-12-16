@@ -58,7 +58,7 @@ class AdminRankingController extends Controller
         ];
 
         $data = $this->calculatePriority($bobot, $request->role);
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.ranking.pdf', $data);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.ranking.pdf', array_merge($data, ['bobot' => $bobot]));
         return $pdf->download('laporan-prioritas-approval-' . date('Y-m-d') . '.pdf');
     }
 

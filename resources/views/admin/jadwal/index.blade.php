@@ -40,13 +40,23 @@
     </div>
         
     {{-- Import Form Inline --}}
-        <form action="{{ route('admin.jadwal.import') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
-            @csrf
-            <input type="file" name="file" class="form-control form-control-sm" accept=".csv, .xls, .xlsx" required style="max-width: 250px;">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fas fa-upload"></i> Import File
-            </button>
-        </form>
+        <div class="d-flex align-items-center gap-2">
+            <form action="{{ route('admin.jadwal.import') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                @csrf
+                <input type="file" name="file" class="form-control form-control-sm" accept=".csv, .xls, .xlsx" required style="max-width: 250px;">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-upload"></i> Import File
+                </button>
+            </form>
+            
+            <form action="{{ route('admin.jadwal.reset') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SEMUA data jadwal? Tindakan ini tidak dapat dibatalkan!');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash-alt"></i> Reset Data
+                </button>
+            </form>
+        </div>
     </div>
 
     <table class="data-table">
@@ -58,6 +68,7 @@
                 <th>Dosen</th>
                 <th>Kelas</th>
                 <th>Ruangan</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -86,6 +97,20 @@
                         @else
                             <span class="text-muted">-</span>
                         @endif
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{{ route('admin.jadwal.edit', $jadwal->id) }}" class="btn btn-warning btn-sm text-white" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ route('admin.jadwal.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
