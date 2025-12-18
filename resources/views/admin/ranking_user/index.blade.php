@@ -95,7 +95,7 @@
                         </td>
                         <td class="text-center">
                             <div class="score-box">
-                                {{ number_format($rank->saw_score, 3, ',', '.') }}
+                                {{ number_format($rank->saw_score, 2, ',', '.') }}
                             </div>
                         </td>
                     </tr>

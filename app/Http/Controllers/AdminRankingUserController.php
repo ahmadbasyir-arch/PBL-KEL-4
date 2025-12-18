@@ -136,7 +136,7 @@ class AdminRankingUserController extends Controller
                 $rankings[] = (object) [
                     'user' => $row['user'],
                     'total_pinjam' => $row['count'],
-                    'saw_score' => number_format($score, 4),
+                    'saw_score' => number_format($score * 100, 2),
                     'raw_metrics' => [
                         'C1' => number_format($row['C1'], 1),
                         'C2' => number_format($row['C2'], 1),
