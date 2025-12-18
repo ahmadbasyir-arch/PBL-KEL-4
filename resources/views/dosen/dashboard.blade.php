@@ -130,14 +130,7 @@
                                 </button>
                             </form>
 
-                            <form action="{{ route('peminjaman.ajukanSelesai', $p->id) }}"
-                                  method="POST" style="display:inline; margin-left:6px;"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin mengembalikan ruangan/unit ini?')">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-undo"></i> Kembalikan
-                                </button>
-                            </form>
+
 
                             @if ($canEdit)
                             <div style="display:inline-block; margin-left:6px;">
